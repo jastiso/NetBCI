@@ -35,9 +35,6 @@ for i = subjs
                 eval(['curr = behavior_updated.BCI.Perf.', sess, '.Trials.Result{i}(k,:);']);
                 eval(['idx = behavior_updated.BCI.Perf.', sess, '.Trials.TargetCode{i}(k,:);']);
                 curr = curr(idx == 2);
-                if numel(curr) > 16
-                    error('too big')
-                end
                 % get number of trials in each mvoing average thing
                 nTrials = numel(curr);
                 nToAvg = zeros(1,res);
@@ -49,10 +46,10 @@ for i = subjs
                     m_avg(cnt:(cnt+nToAvg(m)-1)) = mean(curr(cnt:(cnt+nToAvg(m)-1)));
                     cnt = cnt + nToAvg(m);
                 end
-                behavior_all{i} = [behavior_all{i}, m_avg*100];
+                behavior_all{i} = [behavior_all{i}, m_avg*100]
             catch
                 cnte = cnte + 1;
-                errors{cnte,1} = ['Subj', num2str(i), '_' sess, '_run', num2str(k)];
+                errors{cnte} = ['Subj', num2str(i), '_' sess];
             end
         end
     end
@@ -64,7 +61,7 @@ b_mat = [];
 figure(1); clf
 hold on
 for i = subjs
-    %b_mat = [b_mat; unique(behavior_all{i})];
+    b_mat = [b_mat; unique(behavior_all{i})];
     plot(behavior_all{i}, 'linewidth', 2)
     %hist(behavior_all{i})
 end
