@@ -67,7 +67,7 @@ save([top_dir, 'Behavior/behavior_all.mat'], 'behavior_all');
 %% Repeat for time shift
 
 cnte = 0;
-errors_ts = [];
+errors_pr = [];
 nTrial = 0;
 
 for e = 1:numel(elecs)
@@ -82,7 +82,7 @@ for e = 1:numel(elecs)
                     sess = sessions{j};
                     for k = 1:numel(condition)
                         cond = condition{k};
-                        load([top_dir, sess, '/', cond, '/', subj, '/FCmatrices/ts/NMF_', freq, '_', eType, '_gc.mat']);
+                        load([top_dir, sess, '/', cond, '/', subj, '/FCmatrices/NMF_', freq, '_', eType, '_pr.mat']);
                         
                         eval(['A = [A, gc_', num2str(eType), '];']);
                         eval(['nTrial(j,k) = size(gc_', num2str(eType), ',2);'])
@@ -95,14 +95,14 @@ for e = 1:numel(elecs)
                 behavior = interp_perf(behavior_updated, i, 6, nTrial);
                 behavior = behavior.*sf;
                 A = [A; behavior];
-                save([save_dir, 'ts_gc_', freq, '_', eType, '_', subj], 'A')
+                save([save_dir, 'pr_gc_', freq, '_', eType, '_', subj], 'A')
                 if any(any(isnan(A)))
                     display([num2str(i), ' ', num2str(f)])
                     warning('This matrix has NaNs')
                 end
             catch
                 cnte = cnte + 1;
-                errors_ts{cnte} = [top_dir, sess, '/', cond, '/', subj, '/FCmatrices/NMF_', freq, '_', eType, 'ts_gc.mat'];
+                errors_pr{cnte} = [top_dir, sess, '/', cond, '/', subj, '/FCmatrices/NMF_', freq, '_', eType, 'pr_gc.mat'];
             end
         end
     end
