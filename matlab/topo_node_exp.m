@@ -12,11 +12,12 @@ addpath('/Users/stiso/Documents/MATLAB/fieldtrip-20170830/')
 top_dir = '/Users/stiso/Documents/MATLAB/NetBCI/';
 data_dir = '/Users/stiso/Documents/Python/NetBCI/NMF/gc/';
 
-nSubj = 20;
+subjs = [1,2,6,7,9:20];
+nSubj = numel(subjs);
 nNode = 102;
 nEdge = (nNode^2-nNode)/2;
 freqs = [7,14;15,30;31,45;55,70];
-bands = [{'alpha'},{'beta'}];
+bands = [{'gamma'}];
 sensors = [{'grad'}];
 % threshold for edge visualization
 thr = 1;
@@ -24,7 +25,7 @@ consensus = zeros(nNode,nNode, nSubj-1, numel(bands));
 
 %% Loop through data
 
-for i = 1:nSubj
+for i = subjs
     subj = sprintf('%03d', i);
     for j = 1:numel(sensors)
         sens = sensors{j};
@@ -82,7 +83,7 @@ for i = 1:nSubj
             for n = 1:nSG
                 % get expressin into matrix
                 curr_SG = subset(n,1:end-1);
-                node_exp = get_sg_matrix(nSens, curr_sg);
+                node_exp = get_sg_matrix(nSens, curr_SG);
                 sg_deg = sum(node_exp)';
                 if n == bsg
                     consensus(:,:,i,k) = node_exp;

@@ -1,4 +1,4 @@
-function [ errors ] = wrapper_gc( session, condition, subjs, data_dir, raw_dir, top_dir, bands, freqs, bl_st, bl_en, dt, lag, t0, st, en, nNode )
+function [ errors ] = wrapper_pr_gc( session, condition, subjs, data_dir, raw_dir, top_dir, bands, freqs, bl_st, bl_en, dt, lag, t0, st, en, nNode )
 % helper function for paralelizing pipeline
 errors = {};
 cnte = 1;
@@ -58,17 +58,23 @@ for j = 1:numel(condition)
             cfg = [];
             cfg.viewmode = 'vertical';
             %ft_databrowser(cfg, data)
+                       
+            
+             % cut out trials that have NaN values at the end...namely subj
+            % 13
+            for m = 1:numel(data.trial)
+                if any(any(isnan(data.trial{m})))
+                   data.trial = data.trial([1:(m-1),(m+1):end]);
+                   data.time = data.time([1:(m-1),(m+1):end]);
+                   data.sampleinfo = data.sampleinfo([1:(m-1),(m+1):end],:);
+                end
+            end
             
             % grab some more variables
             trl_len = numel(data.trial{1}(1,:));
             srate = data.fsample;
             nTrial = numel(data.trial);
             
-            % check fft - will fix later if there is noise
-            figure(1); clf
-            spectopo(data.trial{1}, 0, round(data.fsample));
-            pause(.1)
-            saveas(gca, [img_dir, 'fft_before.png'], 'png')
             
             % separate into magnetometers and gradiometers
             data.senstype = 'neuromag306';
@@ -88,10 +94,17 @@ for j = 1:numel(condition)
                 data_mag.trial{m} = data_mag.trial{m}(mag_idx,:);
             end
             
+            % phase randomize
+            for t = 1:nTrial
+                data_mag.trial{t} = linsurr(data_mag.trial{t});
+                data_grad.trial{t} = linsurr(data_grad.trial{t});
+            end
+            
+            
             
             %% Make connectivity matrices
             
-            % get power in task and BL correct
+            % get power in task and BL
             % use multitapers for gamma, and single tapers for low
             % freq
             
@@ -172,7 +185,7 @@ for j = 1:numel(condition)
                 % plot
                 figure(1); clf
                 imagesc(squeeze(freq_grad.powspctrm(end,:,:))); colorbar
-                saveas(gca, [img_dir, bands{f}, 'pow.png'], 'png')
+                saveas(gca, [img_dir, bands{f}, 'pow_pr.png'], 'png')
                 
                 
                 % get cov based GC
@@ -187,11 +200,11 @@ for j = 1:numel(condition)
                     % plot
                     tmp(logical(tril(ones(nNode),-1))) = GC;
                     tmp = tmp + tmp';
-                    figure(5); clf
-                    imagesc(tmp); colorbar; pause(0.001)
-                    if t == nTrial
-                        saveas(gca, [img_dir, bands{f}, 'gc_mag.png'], 'png')
-                    end
+                    %figure(5); clf
+                    %imagesc(tmp); colorbar; pause(0.001)
+                    %if t == nTrial
+                    %    saveas(gca, [img_dir, bands{f}, 'pr_gc_mag.png'], 'png')
+                    %end
                     % save
                     gc_mag(:,t) = GC;
                     
@@ -206,13 +219,13 @@ for j = 1:numel(condition)
                     figure(5); clf
                     imagesc(tmp); colorbar; pause(0.001)
                     if t == nTrial
-                        saveas(gca, [img_dir, bands{f}, 'gc_grad.png'], 'png')
+                        saveas(gca, [img_dir, bands{f}, 'pr_gc_grad.png'], 'png')
                     end
                     % save
                     gc_grad(:,t) = GC;
                 end
-                save([save_dir, 'NMF_', curr_band, '_mag_gc.mat'], 'gc_mag')
-                save([save_dir, 'NMF_', curr_band, '_grad_gc.mat'], 'gc_grad')
+                save([save_dir, 'NMF_', curr_band, '_mag_pr.mat'], 'gc_mag')
+                save([save_dir, 'NMF_', curr_band, '_grad_pr.mat'], 'gc_grad')
             end
         catch
             errors{cnte,1} = [d.folder, '/', d.name];
