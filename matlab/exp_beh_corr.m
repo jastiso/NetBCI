@@ -19,11 +19,11 @@ if ~exist(save_dir, 'dir')
     mkdir(save_dir)
 end
 
-Subj = [1:18, 20];
+Subj = [1,2,6,7,9:20];
 nSubj = numel(Subj);
 freqs = [7,14;15,30;31,45;55,70];
 %bands = [{'alpha'},{'beta'},{'gamma'}{'low_gamma'}];
-bands = [{'alpha'},{'beta'}, {'low_gamma'}];
+bands = [{'gamma'}];
 
 sensors = [{'grad'}];
 % load behavior
@@ -99,8 +99,8 @@ for j = 1:numel(sensors)
     
     figure(1); clf
     corrplot([repmat(betas(Subj)',numel(bands),1), repmat(improvement(Subj)',numel(bands),1),  ...
-        reshape(max_exp,[],1), reshape(min_exp,[],1), reshape(sum_exp(:, :), [],1), reshape(sd_exp(:, :), [],1)], 'Var',...
-        {'Beta',  'Im', 'Max', 'Min', 'mean', 'sd'}, 'type', 'spearman','testr', 'on')
+        reshape(max_exp,[],1),reshape(sum_exp(:, :), [],1), reshape(sd_exp(:, :), [],1)], 'Var',...
+        {'Beta',  'Im', 'Max', 'mean', 'sd'}, 'type', 'spearman','testr', 'on')
     
     % save to R_dir
     save([R_dir, 'exp_beh_cor.mat'], 'betas',  'max_exp', 'min_exp', 'sum_exp', 'sd_exp');
