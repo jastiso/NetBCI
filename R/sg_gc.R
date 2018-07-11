@@ -11,8 +11,8 @@ library(R.matlab)
 library(RColorBrewer)
 library(wesanderson)
 setwd("/Users/stiso/Documents/R/NetBCI/")
-bands = c('alpha', 'beta', 'low_gamma')
-nSubj = 19
+bands = c('alpha', 'beta', 'low_gamma', 'gamma')
+nSubj = 17
 sens = 'grad'
 
 #############################################################################################

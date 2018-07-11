@@ -1,6 +1,9 @@
 function [ S_high, S_low, S_perf, S_other, S_exp_corr, band_order, subj_order ] = get_skew( subset, coeff, perf, s, b)
 % Get distribution of energy for all subjgraph categories,
-%   Detailed explanation goes here
+
+% Change Log
+% July 10 - updated this to run statistics for all but the highest...since
+% the highest tends to look exaclty like the behavior
 
 S_exp_corr = [];
 
@@ -25,11 +28,13 @@ cnt = 0;
 for n = 1:nSG-2
     cnt = cnt + 1;
     S = skewness(coeff(n,:));
-    S_exp_corr = [S_exp_corr; S, subset(n,end)];
     band_order(cnt,1) = b;
     subj_order(cnt,1) = s;
-    if n ~= bSG && n ~= nbSG
-        tmp_S = tmp_S + S;
+    if n ~= bSG
+        S_exp_corr = [S_exp_corr; S, subset(n,end)];
+        if n ~= nbSG
+            tmp_S = tmp_S + S;
+        end
     end
 end
 S_other = tmp_S/(nSG-2);
