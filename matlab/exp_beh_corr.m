@@ -19,11 +19,10 @@ if ~exist(save_dir, 'dir')
     mkdir(save_dir)
 end
 
-Subj = [1,2,6,7,9:20];
+Subj = [1:12, 14, 16:17, 19:20];
 nSubj = numel(Subj);
 freqs = [7,14;15,30;31,45;55,70];
-%bands = [{'alpha'},{'beta'},{'gamma'}{'low_gamma'}];
-bands = [{'gamma'}];
+bands = [{'alpha'},{'beta'},{'low_gamma'},{'gamma'}];
 
 sensors = [{'grad'}];
 % load behavior
@@ -93,7 +92,7 @@ for j = 1:numel(sensors)
     
     % plot realtionship between slope of learning and expression
     for i = 1:numel(bands)
-        corrplot([betas(Subj)', improvement(Subj)', max_exp(:,i), min_exp(:,i), sum_exp(:, i), sd_exp(:,i)], 'Var', {'Beta', 'Im', 'Max', 'Min', 'mean', 'sd'}, 'type', 'spearman','testr', 'on')
+        corrplot([betas(Subj)', improvement(Subj)', max_exp(:,i), sum_exp(:, i), sd_exp(:,i)], 'Var', {'Beta', 'Im', 'Max', 'mean', 'sd'}, 'type', 'spearman','testr', 'on')
         pause(0.001)
     end
     
@@ -103,7 +102,7 @@ for j = 1:numel(sensors)
         {'Beta',  'Im', 'Max', 'mean', 'sd'}, 'type', 'spearman','testr', 'on')
     
     % save to R_dir
-    save([R_dir, 'exp_beh_cor.mat'], 'betas',  'max_exp', 'min_exp', 'sum_exp', 'sd_exp');
+    save([R_dir, 'exp_beh_cor.mat'], 'betas',  'max_exp', 'sum_exp', 'sd_exp');
     
 end
 

@@ -7,6 +7,7 @@
 % June 20, 2018 - changed to baseline correct from intertrial interval and
 % added wraper function; switched from time shifted to phase randomized
 % null model
+% July 1- - changed baseline to be 0-1s
 
 
 %% Define Global Variables
@@ -26,8 +27,8 @@ freqs = [7,14;15,30;31,45;55,70];
 bands = [{'alpha'},{'beta'},{'low_gamma'}, {'gamma'}];
 st = 3;
 en = 6; % in seconds, the feedback period: 3-6s
-bl_st = 0.5; % half o fthe intertrial interval
-bl_en = 2;
+bl_st = 0.2; % half o fthe intertrial interval
+bl_en = 0.8;
 num_neg_grad = [];
 num_neg_mag = [];
 cnte = 1;

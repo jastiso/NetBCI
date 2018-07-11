@@ -11,8 +11,8 @@ library(R.matlab)
 library(RColorBrewer)
 library(wesanderson)
 setwd("/Users/stiso/Documents/R/NetBCI/")
-bands = c('alpha', 'beta', 'low_gamma')
-nSubj = 19
+bands = c('alpha', 'beta', 'low_gamma', 'gamma')
+nSubj = 17
 sens = 'grad'
 
 #############################################################################################
@@ -171,7 +171,7 @@ summary(statb1)
 stat1 = lmp(M ~ cond, data = plot_data)
 summary(stat1)
 # corr
-stat2 = lmp(M ~ log(BE), data = M_plot_data)
+stat2 = lmp(M ~ log(BE) + band, data = M_plot_data)
 summary(stat2)
 # beta only
 statb = lme4::lmer(M ~ log(BE) + (1|subj), data = M_beta)
@@ -258,7 +258,7 @@ summary(statb1)
 stat1 = lmp(E ~ cond, data = plot_data)
 summary(stat1)
 # corr
-stat2 = lmp(E ~ log(BE), data = E_plot_data)
+stat2 = lmp(E ~ log(BE) + band, data = E_plot_data)
 summary(stat2)
 # corr beta
 statb = lme4::lmer(E ~ log(BE) + (1|subj), data = E_beta)

@@ -1,6 +1,9 @@
 function [ H_high, H_low, H_perf, H_other, H_exp_corr, band_order, subj_order ] = get_entropy( subset, coeff, perf, s, b)
 % Get distribution of energy for all subjgraph categories,
-%   Detailed explanation goes here
+
+% Change Log
+% July 10 - updated this to run statistics for all but the highest...since
+% the highest tends to look exaclty like the behavior
 
 H_exp_corr = [];
 
@@ -25,11 +28,13 @@ cnt = 0;
 for n = 1:nSG-2
     cnt = cnt + 1;
     H = wentropy(coeff(n,:), 'shannon');
-    H_exp_corr = [H_exp_corr; H, subset(n,end)];
     band_order(cnt,1) = b;
     subj_order(cnt,1) = s;
-    if n ~= bSG && n ~= nbSG
-        tmp_H = tmp_H + H;
+    if n ~= bSG
+        H_exp_corr = [H_exp_corr; H, subset(n,end)];
+        if n ~= nbSG
+            tmp_H = tmp_H + H;
+        end
     end
 end
 H_other = tmp_H/(nSG-2);

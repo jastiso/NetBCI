@@ -1,6 +1,9 @@
 function [ E_high, E_low, E_perf, E_other, E_exp_corr, band_order, subj_order ] = get_energy( subset, coeff, perf, s, b)
 % Get distribution of energy for all subjgraph categories,
-%   Detailed explanation goes here
+
+% Change Log
+% July 10 - updated this to run statistics for all but the highest...since
+% the highest tends to look exaclty like the behavior
 
 E_exp_corr = [];
 
@@ -25,11 +28,13 @@ cnt = 0;
 for n = 1:nSG-2
     cnt = cnt + 1;
     E = sum(coeff(n,:).^2);
-    E_exp_corr = [E_exp_corr; E, subset(n,end)];
     band_order(cnt,1) = b;
     subj_order(cnt,1) = s;
-    if n ~= bSG && n ~= nbSG
-        tmp_E = tmp_E + E;
+    if n ~= bSG
+        E_exp_corr = [E_exp_corr; E, subset(n,end)];
+        if n ~= nbSG
+            tmp_E = tmp_E + E;
+        end
     end
 end
 E_other = tmp_E/(nSG-2);
