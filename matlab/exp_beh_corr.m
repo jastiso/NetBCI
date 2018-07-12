@@ -19,7 +19,7 @@ if ~exist(save_dir, 'dir')
     mkdir(save_dir)
 end
 
-Subj = [1:12, 14, 16:17, 19:20];
+Subj = [1:20];
 nSubj = numel(Subj);
 freqs = [7,14;15,30;31,45;55,70];
 bands = [{'alpha'},{'beta'},{'low_gamma'},{'gamma'}];
@@ -65,8 +65,10 @@ for j = 1:numel(sensors)
             min_exp(idx,k,j) = min_e;
             sum_exp(idx,k,j) = mean(subset(:,end));
             sd_exp(idx,k,j) = std(subset(:,end));
+            figure(1); clf
             hist(subset(:,end))
             pause(0.001)
+            saveas(gca, [save_dir, subj, '_', f, '_exp_hist.png'], 'png')
         end
     end
     
@@ -92,7 +94,7 @@ for j = 1:numel(sensors)
     
     % plot realtionship between slope of learning and expression
     for i = 1:numel(bands)
-        corrplot([betas(Subj)', improvement(Subj)', max_exp(:,i), sum_exp(:, i), sd_exp(:,i)], 'Var', {'Beta', 'Im', 'Max', 'mean', 'sd'}, 'type', 'spearman','testr', 'on')
+        corrplot([betas(Subj)', improvement(Subj)', max_exp(:,i), sum_exp(:, i), sd_exp(:,i)], 'Var', {'Beta', 'Im', 'Max', 'mean', 'sd'}, 'type', 'pearson','testr', 'on')
         pause(0.001)
     end
     

@@ -224,6 +224,9 @@ for j = 1:numel(condition)
                     % save
                     gc_grad(:,t) = GC;
                 end
+                 if any(any(isnan(gc_mag)))
+                    error('This matrix contains nans')
+                end
                 save([save_dir, 'NMF_', curr_band, '_mag_pr.mat'], 'gc_mag')
                 save([save_dir, 'NMF_', curr_band, '_grad_pr.mat'], 'gc_grad')
             end

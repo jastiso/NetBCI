@@ -6,12 +6,12 @@
 % CHange Log
 % June 19, 2018 - updated to do baseline correction from intertrial
 % interval, rather than from baseline contition
-% July 1 - changed baseline to be 0-1s
 
 %% Define Global Variables
 
 addpath('/Users/stiso/Documents/MATLAB/fieldtrip-20170830')
 addpath(genpath('/Users/stiso/Documents/MATLAB/eeglab_current'))
+addpath(genpath('/Users/stiso/Documents/Code/NetBCI/matlab/'))
 
 top_dir = '/Users/stiso/Documents/MATLAB/NetBCI/';
 data_dir = '/Users/stiso/Resilio Sync/NETBCI.RAW/DataBase/1_Signals/2_Segmentation/2_MEG/';
@@ -22,10 +22,10 @@ subjs = [1:20];
 nNode = 102;
 nChunks = 1; %number of sets to divide trials into
 freqs = [7,14;15,30;31,45;55,70];
-bands = [{'alpha'},{'beta'},{'low_gamma'}, {'gamma'}];
+bands = [{'alpha'}];
 st = 3;
 en = 6; % in seconds, the feedback period: 3-6s
-bl_st = 0.2; % half o fthe intertrial interval
+bl_st = 0.2; % baseline
 bl_en = 0.8;
 num_neg_grad = [];
 num_neg_mag = [];
@@ -43,9 +43,6 @@ parfor i = 1:numel(sessions)
     session = sessions{i};
    [ errors{i} ] = wrapper_gc( session, condition, subjs, data_dir, raw_dir, top_dir, bands, freqs, bl_st, bl_en, dt, lag, t0, st, en, nNode );
 end
-
-
-
 
 
 

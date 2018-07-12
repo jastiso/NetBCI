@@ -40,11 +40,11 @@ for e = 1:numel(elecs)
                         load([top_dir, sess, '/', cond, '/', subj, '/FCmatrices/NMF_', freq, '_', eType, '_gc.mat']);
                         eval(['A = [A, gc_', num2str(eType), '];']);
                         eval(['nTrial(j,k) = size(gc_', num2str(eType), ',2);'])
-                        if any(any(isnan(A)))
-                            display([num2str(i), ' ', num2str(f)])
-                            warning('This matrix has NaNs')
-                        end
                     end
+                end
+                if any(any(isnan(A)))
+                    display([num2str(i), ' ', num2str(f)])
+                    warning('This matrix has NaNs')
                 end
                 %scale perf
                 eval(['sf = mean(mean(gc_', num2str(eType), '(gc_', num2str(eType), '~=0)));']);
@@ -86,9 +86,15 @@ for e = 1:numel(elecs)
                         
                         eval(['A = [A, gc_', num2str(eType), '];']);
                         eval(['nTrial(j,k) = size(gc_', num2str(eType), ',2);'])
-                         
+                        
                     end
+                    
                 end
+                if any(any(isnan(A)))
+                    display([num2str(i), ' ', num2str(f)])
+                    warning('This matrix has NaNs')
+                end
+                
                 %scale perf
                 eval(['sf = mean(mean(gc_', num2str(eType), '(gc_', num2str(eType), '~=0)));']);
                 
@@ -96,10 +102,7 @@ for e = 1:numel(elecs)
                 behavior = behavior.*sf;
                 A = [A; behavior];
                 save([save_dir, 'pr_gc_', freq, '_', eType, '_', subj], 'A')
-                if any(any(isnan(A)))
-                    display([num2str(i), ' ', num2str(f)])
-                    warning('This matrix has NaNs')
-                end
+                
             catch
                 cnte = cnte + 1;
                 errors_pr{cnte} = [top_dir, sess, '/', cond, '/', subj, '/FCmatrices/NMF_', freq, '_', eType, 'pr_gc.mat'];

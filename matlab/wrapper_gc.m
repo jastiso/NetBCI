@@ -59,16 +59,28 @@ for j = 1:numel(condition)
             cfg.viewmode = 'vertical';
             %ft_databrowser(cfg, data)
             
-            % grab some more variables
-            trl_len = numel(data.trial{1}(1,:));
-            srate = data.fsample;
-            nTrial = numel(data.trial);
-            
+           
             % check fft - will fix later if there is noise
             figure(1); clf
             spectopo(data.trial{1}, 0, round(data.fsample));
             pause(.1)
             saveas(gca, [img_dir, 'fft_before.png'], 'png')
+            
+            % cut out trials that have NaN values at the end...namely subj
+            % 13
+            for m = 1:numel(data.trial)
+                if any(any(isnan(data.trial{m})))
+                   data.trial = data.trial([1:(m-1),(m+1):end]);
+                   data.time = data.time([1:(m-1),(m+1):end]);
+                   data.sampleinfo = data.sampleinfo([1:(m-1),(m+1):end],:);
+                end
+            end
+            
+             % grab some more variables
+            trl_len = numel(data.trial{1}(1,:));
+            srate = data.fsample;
+            nTrial = numel(data.trial);
+            
             
             % separate into magnetometers and gradiometers
             data.senstype = 'neuromag306';
@@ -183,6 +195,9 @@ for j = 1:numel(condition)
                     % magnetometers
                     curr = squeeze(freq_mag.powspctrm(t,:,:));
                     [GC, pairs] = cov_GC(curr,dt,lag,t0);
+                    if any(any(isnan(GC)))
+                        warning('There are Nans')
+                    end
                     GC = sum(GC,2);
                     % plot
                     tmp(logical(tril(ones(nNode),-1))) = GC;
@@ -199,6 +214,9 @@ for j = 1:numel(condition)
                     tmp = zeros(nNode);
                     curr = squeeze(freq_grad.powspctrm(t,:,:));
                     [GC, pairs] = cov_GC(curr,dt,lag,t0);
+                    if any(any(isnan(GC)))
+                        warning('There are Nans')
+                    end
                     GC = sum(GC,2);
                     % plot
                     tmp(logical(tril(ones(nNode),-1))) = GC;
@@ -210,6 +228,9 @@ for j = 1:numel(condition)
                     end
                     % save
                     gc_grad(:,t) = GC;
+                end
+                if any(any(isnan(gc_mag)))
+                    error('This matrix contains nans')
                 end
                 save([save_dir, 'NMF_', curr_band, '_mag_gc.mat'], 'gc_mag')
                 save([save_dir, 'NMF_', curr_band, '_grad_gc.mat'], 'gc_grad')
