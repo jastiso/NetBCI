@@ -31,10 +31,10 @@ if ~exist(R_dir, 'dir')
     mkdir(R_dir)
 end
 
-Subj = [1:18,20];
+Subj = [1:20];
 nSubj = numel(Subj);
 freqs = [7,14;15,30;31,45;55,70];
-bands = [{'alpha'}, {'beta'}, {'low_gamma'}];
+bands = [{'alpha'}, {'beta'}, {'low_gamma'}, {'gamma'}];
 sensors = [{'grad'}];
 
 nNode = 102;

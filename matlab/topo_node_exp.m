@@ -12,12 +12,12 @@ addpath('/Users/stiso/Documents/MATLAB/fieldtrip-20170830/')
 top_dir = '/Users/stiso/Documents/MATLAB/NetBCI/';
 data_dir = '/Users/stiso/Documents/Python/NetBCI/NMF/gc/';
 
-subjs = [1:12, 14, 17:20];
+subjs = [1:20];
 nSubj = numel(subjs);
 nNode = 102;
 nEdge = (nNode^2-nNode)/2;
 freqs = [7,14;15,30;31,45;55,70];
-bands = [{'alpha'},{'beta'},{'gamma'},{'delta'}];
+bands = [{'alpha'},{'beta'},{'low_gamma'},{'gamma'}];
 sensors = [{'grad'}];
 % threshold for edge visualization
 thr = 1;

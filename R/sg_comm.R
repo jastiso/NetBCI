@@ -1,4 +1,4 @@
-# Regional expression
+# Communication
 
 library(R.matlab)
 library(ggplot2)
@@ -17,22 +17,36 @@ bands = c('alpha', 'beta', 'low_gamma','gamma')
 nSubj = 20
 sens = 'grad'
 
-h = readMat(paste('data/gc/', sens, '/high_participation.mat', sep = ''))
-l = readMat(paste('data/gc/', sens, '/low_participation.mat', sep = ''))
+eff = readMat(paste('data/gc/', sens, '/eff.mat', sep = ''))
+G = readMat(paste('data/gc/', sens, '/G.mat', sep = ''))
 
-high = data.frame(subj = character(len = length(h$band.h)), band = character(len = length(h$band.h)), region = character(len = length(h$band.h)), part = numeric(length(h$band.h)), slope = numeric(length(h$band.h)))
-high$band = unlist(h$band.h)
-high$subj = unlist(h$subj.h)
-high$region = unlist(h$region.h)
-high$part = unlist(h$part.h)
-high$slope = unlist(h$slope)
-
-low = data.frame(subj = character(len = length(h$band.h)), band = character(len = length(h$band.h)), region = character(len = length(h$band.h)), part = numeric(length(h$band.h)), slope = numeric(length(h$band.h)))
-low$band = unlist(l$band.l)
-low$subj = unlist(l$subj.l)
-low$region = unlist(l$region.l)
-low$part = unlist(l$part.l)
-low$slope = unlist(l$slope)
+plot_data = data.frame(cond = character(length = 0), band = character(length = 0), eff = numeric(0), G = numeric(0), stringsAsFactors = FALSE)
+cnt = 1
+b_idx = 1;
+for (b in bands){
+  plot_data[cnt:(cnt+nSubj-1),1] = rep('high BC', times = nSubj)
+  plot_data[cnt:(cnt+nSubj-1),2] = rep(b, times = nSubj)
+  plot_data[cnt:(cnt+nSubj-1),3] = eff$E.high[,b_idx]
+  plot_data[cnt:(cnt+nSubj-1),4] = G$G.high[,b_idx]
+  cnt = cnt + nSubj
+  
+  plot_data[cnt:(cnt+nSubj-1),1] = rep('other BC', times = nSubj)
+  plot_data[cnt:(cnt+nSubj-1),2] = rep(b, times = nSubj)
+  plot_data[cnt:(cnt+nSubj-1),3] = eff$E.other[,b_idx]
+  plot_data[cnt:(cnt+nSubj-1),4] = G$G.other[,b_idx]
+  cnt = cnt + nSubj
+  
+  
+  plot_data[cnt:(cnt+nSubj-1),1] = rep('low BC', times = nSubj)
+  plot_data[cnt:(cnt+nSubj-1),2] = rep(b, times = nSubj)
+  plot_data[cnt:(cnt+nSubj-1),3] = eff$E.low[,b_idx]
+  plot_data[cnt:(cnt+nSubj-1),4] = G$G.low[,b_idx]
+  cnt = cnt + nSubj
+  
+  b_idx = b_idx + 1
+}
+plot_data$cond = factor(plot_data$cond, levels(factor(plot_data$cond))[1:3])
+plot_data$band = as.factor(plot_data$band)
 
 # plot
 plot = ggplot(high, aes(x = region, y = part, fill = band) )
@@ -53,7 +67,7 @@ ggsave(paste(sens, '_low_participation', '.png', sep = ''))
 
 #####################
 
-# Time Shift
+# Time Shift - NOT UPDATED YET
 
 ######################
 

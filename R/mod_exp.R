@@ -13,8 +13,8 @@ library(wesanderson)
 library(ez)
 library(plyr)
 setwd("/Users/stiso/Documents/R/NetBCI/")
-bands = c('alpha', 'beta', 'low_gamma')
-nSubj = 19
+bands = c('alpha', 'beta', 'low_gamma', 'gamma')
+nSubj = 20
 sens = 'grad'
 
 h = readMat(paste('data/gc/', sens, '/mod_exp_high.mat', sep = ''))
@@ -38,7 +38,7 @@ low$slope = unlist(l$slope)
 plot = ggplot(high, aes(x = region, y = log(exp), fill = band) )
 plot + geom_boxplot(notch = FALSE, lwd = 1) + 
   #geom_dotplot(binaxis='y', stackdir='center', dotsize=.5)
-  scale_fill_manual(values = rev(brewer.pal(3,'Blues'))) + 
+  scale_fill_manual(values = rev(brewer.pal(4,'Blues'))) + 
   labs(x = 'Region', y = 'Exp')  + theme_minimal()
 ggsave(paste(sens, '_high_exp', '.png', sep = ''))
 
@@ -46,7 +46,7 @@ ggsave(paste(sens, '_high_exp', '.png', sep = ''))
 plot = ggplot(low, aes(x = region, y = log(exp), fill = band) )
 plot + geom_boxplot(notch = FALSE, lwd = 1) + 
   #geom_dotplot(binaxis='y', stackdir='center', dotsize=.5)
-  scale_fill_manual(values = rev(brewer.pal(3,'Greens'))) + 
+  scale_fill_manual(values = rev(brewer.pal(4,'Greens'))) + 
   labs(x = 'Region', y = 'Exp')  + theme_minimal()
 ggsave(paste(sens, '_low_exp', '.png', sep = ''))
 
