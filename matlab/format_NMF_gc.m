@@ -46,6 +46,11 @@ for e = 1:numel(elecs)
                     display([num2str(i), ' ', num2str(f)])
                     warning('This matrix has NaNs')
                 end
+                if any(any(~isreal(A)))
+                    display([num2str(i), ' ', num2str(f)])
+                    warning('This matrix has complex numbers')
+                end
+                
                 %scale perf
                 eval(['sf = mean(mean(gc_', num2str(eType), '(gc_', num2str(eType), '~=0)));']);
                 
@@ -94,7 +99,10 @@ for e = 1:numel(elecs)
                     display([num2str(i), ' ', num2str(f)])
                     warning('This matrix has NaNs')
                 end
-                
+                if any(any(~isreal(A)))
+                    display([num2str(i), ' ', num2str(f)])
+                    warning('This matrix has complex numbers')
+                end
                 %scale perf
                 eval(['sf = mean(mean(gc_', num2str(eType), '(gc_', num2str(eType), '~=0)));']);
                 
