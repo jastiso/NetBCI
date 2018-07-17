@@ -33,6 +33,9 @@ function [GC, pairs] = covGC_time(X, dt, lag, t0)
 %
 % Copyright of Andrea Brovelli (Jan 2015)
 
+% Change Log
+% JStiso: added warning for returning complex numbers
+
 % Data parameters. Size = sources x time points
 [nSo, nTi] = size(X);
 
@@ -103,5 +106,8 @@ for np = 1:nPairs
     end
     count = count + 1;
     
+    if any(any(~isreal(GC)))
+        warning('Your GC has imaginary numbers. This might be due precision errors in calculating the determinant.')
+    end
 end
 
