@@ -52,7 +52,7 @@ for e = 1:numel(elecs)
                 end
                 
                 %scale perf
-                sf = mean(mean(A));
+                eval(['sf = mean(mean(gc_', num2str(eType), '));']);
                 
                 behavior = interp_perf(behavior_updated, i, 6, nTrial);
                 behavior_all{i} = behavior;
@@ -105,13 +105,12 @@ for e = 1:numel(elecs)
                     warning('This matrix has complex numbers')
                 end
                 %scale perf
-                sf = mean(mean(A));
+                eval(['sf = mean(mean(gc_', num2str(eType), '));']);
                 
                 behavior = interp_perf(behavior_updated, i, 6, nTrial);
-                behavior_all{i} = behavior;
-                behavior./mean(behavior);
                 behavior = behavior.*sf;
                 A = [A; behavior];
+                save([save_dir, 'pr_gc_', freq, '_', eType, '_', subj], 'A')
                 
             catch
                 cnte = cnte + 1;
@@ -158,13 +157,12 @@ for e = 1:numel(elecs)
                     warning('This matrix has complex numbers')
                 end
                 %scale perf
-                sf = mean(mean(A));
+                eval(['sf = mean(mean(gc_', num2str(eType), '));']);
                 
                 behavior = interp_perf(behavior_updated, i, 6, nTrial);
-                behavior_all{i} = behavior;
-                behavior./mean(behavior);
                 behavior = behavior.*sf;
                 A = [A; behavior];
+                save([save_dir, 'ind_gc_', freq, '_', eType, '_', subj], 'A')
                 
             catch
                 cnte = cnte + 1;
