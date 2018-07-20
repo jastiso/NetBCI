@@ -49,21 +49,22 @@ plot_data$cond = factor(plot_data$cond, levels(factor(plot_data$cond))[1:3])
 plot_data$band = as.factor(plot_data$band)
 
 # plot
-plot = ggplot(high, aes(x = region, y = part, fill = band) )
+# box plot
+plot = ggplot(plot_data, aes(x = band, y = eff, col = cond, fill = band) )
 plot + geom_boxplot(notch = FALSE, lwd = 1) + 
-  #geom_dotplot(binaxis='y', stackdir='center', dotsize=.5)
-  scale_fill_manual(values = rev(brewer.pal(4,'Blues'))) + 
-  labs(x = 'Region', y = 'Participation')  + theme_minimal()
-ggsave(paste(sens, '_high_participation', '.png', sep = ''))
+  scale_color_manual(values = c(rgb(0,0,0, alpha = 1), rgb(.3,.3,.3, alpha = 1), rgb(.6,.6,.6, alpha = 1))) + 
+  scale_fill_manual(values = rev(brewer.pal(4,"YlGnBu"))) + 
+  labs(x = 'Subgraph', y = 'Efficiency')  + theme_minimal()
+ggsave(paste(sens, '_Eff_gc', '.png', sep = ''))
 
 # plot
-plot = ggplot(low, aes(x = region, y = part, fill = band) )
+# box plot
+plot = ggplot(plot_data, aes(x = band, y = G, col = cond, fill = band) )
 plot + geom_boxplot(notch = FALSE, lwd = 1) + 
-  #geom_dotplot(binaxis='y', stackdir='center', dotsize=.5)
-  scale_fill_manual(values = rev(brewer.pal(4,'Greens'))) + 
-  labs(x = 'Region', y = 'Exp')  + theme_minimal()
-ggsave(paste(sens, '_low_participation', '.png', sep = ''))
-
+  scale_color_manual(values = c(rgb(0,0,0, alpha = 1), rgb(.3,.3,.3, alpha = 1), rgb(.6,.6,.6, alpha = 1))) + 
+  scale_fill_manual(values = rev(brewer.pal(4,"YlOrRd"))) + 
+  labs(x = 'Subgraph', y = 'G')  + theme_minimal()
+ggsave(paste(sens, '_G_gc', '.png', sep = ''))
 
 #####################
 

@@ -67,12 +67,12 @@ scatterplot + geom_point(size = 6) + labs(x = 'log(Behavioral Expression)', y = 
   geom_smooth(method="lm", color = 'black') + theme_minimal() + scale_color_manual(values = rev(brewer.pal(4,'RdPu')))
 ggsave(paste(sens, '_gc_dot', '_s', '.png', sep = ''))
 
-# beta only
-S_beta = filter(S_plot_data, band == '2') # beta is level 2
+# band only
+S_beta = filter(S_plot_data, band == '1') # beta is level 2
 scatterplot = ggplot(S_beta, aes(x = log(BE), y = S, color = band))
 scatterplot + geom_point(size = 6) + labs(x = 'log(Behavioral Expression)', y = 'Skew') + 
   geom_smooth(method="lm", color = 'black') + theme_minimal() + scale_color_manual(values = rev(brewer.pal(4,'RdPu')))
-ggsave(paste(sens, '_gc_beta', '_s', '.png', sep = ''))
+ggsave(paste(sens, '_gc_alpha', '_s', '.png', sep = ''))
 
 # stats
 # anova
@@ -149,11 +149,11 @@ scatterplot + geom_point(size = 6) + labs(x = 'log(Behavioral Expression)', y = 
   geom_smooth(method="lm", color = 'black') + theme_minimal() + scale_color_manual(values =  rev(brewer.pal(4,'Oranges')))
 ggsave(paste(sens, '_dot_m_gc', '.png', sep = ''))
 # beta only
-M_beta = filter(M_plot_data, band == '2') # beta is level 2
+M_beta = filter(M_plot_data, band == '1') # beta is level 2
 scatterplot = ggplot(M_beta, aes(x = log(BE), y = M, color = band))
 scatterplot + geom_point(size = 6) + labs(x = 'log(Behavioral Expression)', y = 'Mean') + 
   geom_smooth(method="lm", color = 'black') + theme_minimal() + scale_color_manual(values =  rev(brewer.pal(4,'Oranges')))
-ggsave(paste(sens, '_beta_m_gc', '.png', sep = ''))
+ggsave(paste(sens, '_alpha_m_gc', '.png', sep = ''))
 
 # stats
 # anova
@@ -234,11 +234,11 @@ scatterplot + geom_point(size = 6) + labs(x = 'log(Behavioral Expression)', y = 
 ggsave(paste(sens, '_dot', '_e_gc', '.png', sep = ''))
 
 #beta
-E_beta = filter(E_plot_data, band == '2') # beta is level 2
+E_beta = filter(E_plot_data, band == '1') # beta is level 2
 scatterplot = ggplot(E_beta, aes(x = log(BE), y = E, color = band))
 scatterplot + geom_point(size = 6) + labs(x = 'log(Behavioral Expression)', y = 'ENergy') + 
   geom_smooth(method="lm", color = 'black') + theme_minimal() + scale_color_manual(values =  rev(brewer.pal(4,'Purples')))
-ggsave(paste(sens, '_beta', '_e_gc', '.png', sep = ''))
+ggsave(paste(sens, '_alpha', '_e_gc', '.png', sep = ''))
 
 
 
@@ -318,7 +318,7 @@ ggsave(paste(sens, '_dot', '_h_gc', '.png', sep = ''))
 
 # beta
 H_beta = filter(H_plot_data, band == '2') # beta is level 2
-scatterplot = ggplot(H_beta, aes(x = log(BE), y = H, color = band))
+ßscatterplot = ggplot(H_beta, aes(x = log(BE), y = H, color = band))
 scatterplot + geom_point(size = 6) + labs(x = 'log(Behavioral Expression)', y = 'Shannon Entropy') + 
   geom_smooth(method="lm", color = 'black') + theme_minimal() + scale_color_manual(values = rev(brewer.pal(4,"Reds")))
 ggsave(paste(sens, '_beta', '_h_gc', '.png', sep = ''))
