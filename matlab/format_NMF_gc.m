@@ -56,7 +56,7 @@ for e = 1:numel(elecs)
                 
                 behavior = interp_perf(behavior_updated, i, 6, nTrial);
                 behavior_all{i} = behavior;
-                behavior./mean(behavior);
+                behavior = behavior./mean(behavior);
                 behavior = behavior.*sf;
                 A = [A; behavior];
                 save([save_dir, 'gc_', freq, '_', eType, '_', subj], 'A')
@@ -109,7 +109,7 @@ for e = 1:numel(elecs)
                 
                 behavior = interp_perf(behavior_updated, i, 6, nTrial);
                 behavior_all{i} = behavior;
-                behavior./mean(behavior);
+                behavior = behavior./mean(behavior);
                 behavior = behavior.*sf;
                 A = [A; behavior];
                 
@@ -162,7 +162,7 @@ for e = 1:numel(elecs)
                 
                 behavior = interp_perf(behavior_updated, i, 6, nTrial);
                 behavior_all{i} = behavior;
-                behavior./mean(behavior);
+                behavior = behavior./mean(behavior);
                 behavior = behavior.*sf;
                 A = [A; behavior];
                 

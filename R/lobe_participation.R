@@ -169,7 +169,7 @@ perm
 # Compare for Band
 
 ################################
-curr_band = 'beta'
+curr_band = 'alpha'
 dodge <- position_dodge(width = 0.4)
 
 beta_H = high
