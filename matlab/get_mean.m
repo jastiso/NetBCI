@@ -30,12 +30,10 @@ for n = 1:nSG-2
     S = mean(coeff(n,:));
     band_order(cnt,1) = b;
     subj_order(cnt,1) = s;
-    if n ~= bSG
         M_exp_corr = [M_exp_corr; S, subset(n,end)];
-        if n ~= nbSG
+        if n ~= nbSG  && n ~= bSG
             tmp_S = tmp_S + S;
         end
-    end
 end
 M_other = tmp_S/(nSG-2);
 end

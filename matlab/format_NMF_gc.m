@@ -52,7 +52,8 @@ for e = 1:numel(elecs)
                 end
                 
                 %scale perf
-                sf = mean(mean(A));
+                % the mean edge weight, graphs are fully weighted, so non-zeros gets rid of lower diagonal
+                sf = mean(mean((nonzeros(triu(A,1)))));
                 
                 behavior = interp_perf(behavior_updated, i, 6, nTrial);
                 behavior_all{i} = behavior;
@@ -105,7 +106,7 @@ for e = 1:numel(elecs)
                     warning('This matrix has complex numbers')
                 end
                 %scale perf
-                sf = mean(mean(A));
+                sf = mean(mean((nonzeros(triu(A,1)))));  
                 
                 behavior = interp_perf(behavior_updated, i, 6, nTrial);
                 behavior_all{i} = behavior;
@@ -158,7 +159,8 @@ for e = 1:numel(elecs)
                     warning('This matrix has complex numbers')
                 end
                 %scale perf
-                sf = mean(mean(A));
+                sf = mean(mean((nonzeros(triu(A,1)))));  
+                
                 
                 behavior = interp_perf(behavior_updated, i, 6, nTrial);
                 behavior_all{i} = behavior;

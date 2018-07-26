@@ -12,8 +12,8 @@ library(wesanderson)
 library(coin)
 library(perm)
 setwd("/Users/stiso/Documents/R/NetBCI/")
-bands = c( 'alpha', 'beta', 'low_gamma')
-nSubj = 19
+bands = c( 'alpha', 'beta', 'low_gamma', 'gamma')
+nSubj = 20
 sens = 'grad'
 
 # load data
