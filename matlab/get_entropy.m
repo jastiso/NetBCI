@@ -30,11 +30,9 @@ for n = 1:nSG-2
     H = wentropy(coeff(n,:), 'shannon');
     band_order(cnt,1) = b;
     subj_order(cnt,1) = s;
-    if n ~= bSG
-        H_exp_corr = [H_exp_corr; H, subset(n,end)];
-        if n ~= nbSG
-            tmp_H = tmp_H + H;
-        end
+    H_exp_corr = [H_exp_corr; H, subset(n,end)];
+    if n ~= nbSG  && n ~= bSG
+        tmp_H = tmp_H + H;
     end
 end
 H_other = tmp_H/(nSG-2);

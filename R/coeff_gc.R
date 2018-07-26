@@ -228,7 +228,7 @@ ggsave(paste(sens, '_E_gc', '.png', sep = ''))
 E_plot_data = data.frame(BE = E_corr$E.exp.corr[,2], E = E_corr$E.exp.corr[,1], band = E_corr$ebo, subj = E_corr$eso)
 E_plot_data$band = as.factor(E_plot_data$band)
 E_plot_data$subj = as.factor(E_plot_data$subj)
-scatterplot = ggplot(E_plot_data, aes(x = log(BE), y = E, color = band))
+scatterplot = ggplot(E_plot_data, aes(x = log(BE), y = log(E), color = band))
 scatterplot + geom_point(size = 6) + labs(x = 'log(Behavioral Expression)', y = 'ENergy') + 
   geom_smooth(method="lm", color = 'black') + theme_minimal() + scale_color_manual(values =  rev(brewer.pal(4,'Purples')))
 ggsave(paste(sens, '_dot', '_e_gc', '.png', sep = ''))

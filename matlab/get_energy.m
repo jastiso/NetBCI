@@ -30,11 +30,9 @@ for n = 1:nSG-2
     E = sum(coeff(n,:).^2);
     band_order(cnt,1) = b;
     subj_order(cnt,1) = s;
-    if n ~= bSG
-        E_exp_corr = [E_exp_corr; E, subset(n,end)];
-        if n ~= nbSG
-            tmp_E = tmp_E + E;
-        end
+    E_exp_corr = [E_exp_corr; E, subset(n,end)];
+    if n ~= nbSG  && n ~= bSG
+        tmp_E = tmp_E + E;
     end
 end
 E_other = tmp_E/(nSG-2);

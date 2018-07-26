@@ -30,12 +30,11 @@ for n = 1:nSG-2
     S = skewness(coeff(n,:));
     band_order(cnt,1) = b;
     subj_order(cnt,1) = s;
-    if n ~= bSG
-        S_exp_corr = [S_exp_corr; S, subset(n,end)];
-        if n ~= nbSG
-            tmp_S = tmp_S + S;
-        end
+    S_exp_corr = [S_exp_corr; S, subset(n,end)];
+    if n ~= nbSG && n ~= bSG
+        tmp_S = tmp_S + S;
     end
+    
 end
 S_other = tmp_S/(nSG-2);
 end
