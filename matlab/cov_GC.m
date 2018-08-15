@@ -109,5 +109,9 @@ for np = 1:nPairs
     if any(any(~isreal(GC)))
         warning('Your GC has imaginary numbers. This might be due precision errors in calculating the determinant.')
     end
+    
+    % set negative values to 0. negative values likely result from
+    % imprecision
+    GC(GC<0) = 0;
 end
 

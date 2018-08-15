@@ -108,18 +108,18 @@ for j = 1:numel(condition)
             % freq
             
             % magnetometers
-            [freq_mag_mt, freq_mag_st] = NetBCI_get_pow(data_mag, st, en, bl_st, bl_en);
+            %[freq_mag_mt, freq_mag_st] = NetBCI_get_pow(data_mag, st, en, bl_st, bl_en);
             %gradiometers
             [freq_grad_mt, freq_grad_st] = NetBCI_get_pow(data_grad, st, en, bl_st, bl_en);
             
             
             % plot
             figure(1); clf
-            imagesc(squeeze(freq_mag_mt.powspctrm(end,94,:,:)))
+            imagesc(squeeze(freq_grad_mt.powspctrm(end,94,:,:)))
             colorbar
             pause(0.01)
             figure(3); clf
-            imagesc(squeeze(freq_mag_st.powspctrm(end,94,:,:)))
+            imagesc(squeeze(freq_grad_st.powspctrm(end,94,:,:)))
             colorbar
             pause(0.01)
             
@@ -131,14 +131,14 @@ for j = 1:numel(condition)
                 if contains(curr_band, 'gamma')
                     % magnetometers
                     % initialize
-                    freq_mag = freq_mag_mt;
-                    % get freq range
-                    idx = freq_mag_mt.freq >= f_range(1) & freq_mag_mt.freq < f_range(end);
-                    % average
-                    pow = (freq_mag_mt.powspctrm(:,:,idx,:));
-                    pow = squeeze(nanmean(pow,3));
-                    freq_mag.powspctrm = pow;
-                    freq_mag.freq = squeeze(mean(freq_mag.freq(idx)));
+%                     freq_mag = freq_mag_mt;
+%                     % get freq range
+%                     idx = freq_mag_mt.freq >= f_range(1) & freq_mag_mt.freq < f_range(end);
+%                     % average
+%                     pow = (freq_mag_mt.powspctrm(:,:,idx,:));
+%                     pow = squeeze(nanmean(pow,3));
+%                     freq_mag.powspctrm = pow;
+%                     freq_mag.freq = squeeze(mean(freq_mag.freq(idx)));
                     
                     
                     % gradiometers
@@ -153,16 +153,16 @@ for j = 1:numel(condition)
                     freq_grad.freq = squeeze(mean(freq_grad.freq(idx)));
                     
                 else
-                    % magnetometers
-                    % initialize
-                    freq_mag = freq_mag_st;
-                    % get freq range
-                    idx = freq_mag_st.freq >= f_range(1) & freq_mag_st.freq < f_range(end);
-                    % average
-                    pow = (freq_mag_st.powspctrm(:,:,idx,:));
-                    pow = squeeze(nanmean(pow,3));
-                    freq_mag.powspctrm = pow;
-                    freq_mag.freq = squeeze(mean(freq_mag.freq(idx)));
+%                     % magnetometers
+%                     % initialize
+%                     freq_mag = freq_mag_st;
+%                     % get freq range
+%                     idx = freq_mag_st.freq >= f_range(1) & freq_mag_st.freq < f_range(end);
+%                     % average
+%                     pow = (freq_mag_st.powspctrm(:,:,idx,:));
+%                     pow = squeeze(nanmean(pow,3));
+%                     freq_mag.powspctrm = pow;
+%                     freq_mag.freq = squeeze(mean(freq_mag.freq(idx)));
                     
                     
                     % gradiometers
@@ -192,24 +192,24 @@ for j = 1:numel(condition)
                 gc_grad = zeros((nNode^2-nNode)/2, nTrial);
                 for t = 1:nTrial
                     tmp = zeros(nNode);
-                    % magnetometers
-                    curr = squeeze(freq_mag.powspctrm(t,:,:));
-                    [GC, pairs] = cov_GC(curr,dt,lag,t0);
-                    if any(any(isnan(GC)))
-                        warning('There are Nans')
-                    end
-                    GC = sum(GC,2);
-                    % plot
-                    tmp(logical(tril(ones(nNode),-1))) = GC;
-                    tmp = tmp + tmp';
-                    figure(5); clf
-                    imagesc(tmp); colorbar; pause(0.001)
-                    if t == nTrial
-                        saveas(gca, [img_dir, bands{f}, 'gc_mag.png'], 'png')
-                    end
-                    % save
-                    gc_mag(:,t) = GC;
-                    
+%                     % magnetometers
+%                     curr = squeeze(freq_mag.powspctrm(t,:,:));
+%                     [GC, pairs] = cov_GC(curr,dt,lag,t0);
+%                     if any(any(isnan(GC)))
+%                         warning('There are Nans')
+%                     end
+%                     GC = sum(GC,2);
+%                     % plot
+%                     tmp(logical(tril(ones(nNode),-1))) = GC;
+%                     tmp = tmp + tmp';
+%                     figure(5); clf
+%                     imagesc(tmp); colorbar; pause(0.001)
+%                     if t == nTrial
+%                         saveas(gca, [img_dir, bands{f}, 'gc_mag.png'], 'png')
+%                     end
+%                     % save
+%                     gc_mag(:,t) = GC;
+%                     
                     %gradiometers
                     tmp = zeros(nNode);
                     curr = squeeze(freq_grad.powspctrm(t,:,:));

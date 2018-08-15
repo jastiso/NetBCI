@@ -16,7 +16,7 @@ data_dir = '/Users/stiso/Resilio Sync/NETBCI.RAW/DataBase/1_Signals/2_Segmentati
 raw_dir = '/Users/stiso/Resilio Sync/NETBCI.RAW/DataBase/1_Signals/0_RawData/2_MEG/';
 sessions = [{'Session1'}, {'Session2'}, {'Session3'}, {'Session4'}];
 condition = [{'test01'}, {'test02'}, {'test03'}, {'test04'}, {'test05'}, {'test06'}]; % not including rest
-subjs = [1:20];
+subjs = [4];
 
 res = 2; % number of entries per run (15 or 16 trials)
 behavior_all = cell(numel(subjs),1);
@@ -38,7 +38,7 @@ for i = subjs
                 if numel(curr) > 16
                     error('too big')
                 end
-                % get number of trials in each mvoing average thing
+                % get number of trials in each
                 nTrials = numel(curr);
                 nToAvg = zeros(1,res);
                 nToAvg(1:(end-1)) = floor(nTrials/res);
