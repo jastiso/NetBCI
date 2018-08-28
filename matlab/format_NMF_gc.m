@@ -113,7 +113,7 @@ for e = 1:numel(elecs)
                 behavior = behavior./mean(behavior);
                 behavior = behavior.*sf;
                 A = [A; behavior];
-                
+                save([save_dir, 'pr_gc_', freq, '_', eType, '_', subj], 'A')
             catch
                 cnte = cnte + 1;
                 errors_pr{cnte} = [top_dir, sess, '/', cond, '/', subj, '/FCmatrices/NMF_', freq, '_', eType, 'pr_gc.mat'];
@@ -127,7 +127,7 @@ end
 %% Repeat for independent phase randomiztion
 
 cnte = 0;
-errors_pr = [];
+errors_ind = [];
 nTrial = 0;
 
 for e = 1:numel(elecs)
@@ -167,10 +167,10 @@ for e = 1:numel(elecs)
                 behavior = behavior./mean(behavior);
                 behavior = behavior.*sf;
                 A = [A; behavior];
-                
+                save([save_dir, 'ind_gc_', freq, '_', eType, '_', subj], 'A')
             catch
                 cnte = cnte + 1;
-                errors_pr{cnte} = [top_dir, sess, '/', cond, '/', subj, '/FCmatrices/NMF_', freq, '_', eType, 'ind_gc.mat'];
+                errors_ind{cnte} = [top_dir, sess, '/', cond, '/', subj, '/FCmatrices/NMF_', freq, '_', eType, 'ind_gc.mat'];
             end
         end
     end

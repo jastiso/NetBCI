@@ -1,4 +1,5 @@
 %% run temporal expression statistics for gc
+% independent null
 
 % Change Log
 % July 10 - updated this to run statistics for all but the highest...since
@@ -29,7 +30,7 @@ end
 Subj = [1:20];
 nSubj = numel(Subj);
 freqs = [7,14;15,30;31,45;55,70];
-bands = [{'alpha'}, {'beta'}, {'low_gamma'}, {'gamma'}];
+bands = [{'alpha'}, {'beta'}];
 sensors = [{'grad'}];
 
 nNode = 102;
@@ -75,8 +76,8 @@ for j = 1:numel(sensors)
             f = bands{k};
             
             % get subgraph data
-            subset = readNPY([data_dir, subj, '/', sens, '/gc_', f, '_subset.npy']);
-            coeff = readNPY([data_dir, subj, '/',sens, '/gc_', f, '_coeff.npy']);
+            subset = readNPY([data_dir, subj, '/', sens, '/ind_gc_', f, '_subset.npy']);
+            coeff = readNPY([data_dir, subj, '/',sens, '/ind_gc_', f, '_coeff.npy']);
             b_exp = coeff(:,end);
             [~,bSG] = max(b_exp);
             [~,nbSG] = min(b_exp);
@@ -90,12 +91,12 @@ for j = 1:numel(sensors)
             E_exp_corr = [E_exp_corr; exp_corr];
             clear high low e_perf other exp_corr
             
-            % entropy
-            %[ high, low, h_perf, other, exp_corr, ~, ~ ] = ...
-            %    get_entropy(subset, coeff, perf, i, k);
-            %H_high(s_idx,k) = high; H_low(s_idx,k) = low; H_other(s_idx,k) = other;
-            %H_perf(s_idx,k) = h_perf; H_exp_corr = [H_exp_corr; exp_corr];
-            %clear high low h_perf other exp_corr
+%             % entropy
+%             [ high, low, h_perf, other, exp_corr, ~, ~ ] = ...
+%                 get_entropy(subset, coeff, perf, i, k);
+%             H_high(s_idx,k) = high; H_low(s_idx,k) = low; H_other(s_idx,k) = other;
+%             H_perf(s_idx,k) = h_perf; H_exp_corr = [H_exp_corr; exp_corr];
+%             clear high low h_perf other exp_corr
             
             % mean
             [ high, low, m_perf, other, exp_corr, ~, ~ ] = ...
@@ -122,7 +123,7 @@ for j = 1:numel(sensors)
     for i = 1:numel(bands)
         figure(1); clf
         boxplot([E_high(:,i), E_low(:,i), E_perf(:,i), E_other(:,i)], [{'High'}, {'Low'}, {'Behavior'}, {'Other'}])
-        saveas(gca, [save_dir, bands{i}, '_energy.png'], 'png')
+        pause(0.01)
     end
     idx = E_exp_corr(:,2)~=0;
     E_exp_corr = E_exp_corr(idx,:);
@@ -130,47 +131,47 @@ for j = 1:numel(sensors)
     eso = subj_order(idx);
     %figure(2)
     %corrplot(E_exp_corr, 'Var', {'E', 'BE'}, 'type', 'Spearman', 'testR', 'on')
-    %saveas(gca, [save_dir, 'E_BE_corr_all.png'], 'png')
+    %pause(0.01)
     
     
     % save data
-    save([R_dir_s, 'E.mat'], 'E_high', 'E_low', 'E_other');
-    save([R_dir_s, 'E_corr.mat'], 'E_exp_corr', 'ebo', 'eso');
+    save([R_dir_s, 'ind_E.mat'], 'E_high', 'E_low', 'E_other');
+    save([R_dir_s, 'ind_E_corr.mat'], 'E_exp_corr', 'ebo', 'eso');
     
     
-    % entropy
+%     % entropy
 %     for n = 1:numel(bands)
 %         figure(1); clf
 %         boxplot([H_high(:,n), H_low(:,n), H_perf(:,n), H_other(:,n)], [{'High'}, {'Low'}, {'Behavior'}, {'Other'}])
-%         saveas(gca, [save_dir, bands{n}, '_entropy.png'], 'png')
+%         pause(0.01)
 %     end
 %     figure(2)
 %     H_exp_corr = H_exp_corr(idx,:);
 %     hbo = band_order(idx);
 %     hso = subj_order(idx);
 %     corrplot(H_exp_corr, 'Var', {'H', 'BE'}, 'type', 'Spearman', 'testR', 'on')
-%     saveas(gca, [save_dir, 'H_BE_corr_all.png'], 'png')
+%     pause(0.01)
 %     
-    % save data
-    %save([R_dir_s, 'H.mat'], 'H_high', 'H_low', 'H_other');
-    %save([R_dir_s, 'H_corr.mat'], 'H_exp_corr', 'hbo', 'hso');
+%     % save data
+%     save([R_dir_s, 'ind_H.mat'], 'H_high', 'H_low', 'H_other');
+%     save([R_dir_s, 'ind_H_corr.mat'], 'H_exp_corr', 'hbo', 'hso');
     
     % mean
     for n = 1:numel(bands)
         figure(1); clf
         boxplot([M_high(:,n), M_low(:,n), M_other(:,n)], [{'High'}, {'Low'},  {'Other'}])
-        saveas(gca, [save_dir, bands{n}, 'mean.png'], 'png')
+        pause(0.01)
     end
     figure(2)
     M_exp_corr = M_exp_corr(idx,:);
     mbo = band_order(idx);
     mso = subj_order(idx);
     %corrplot(M_exp_corr, 'Var', {'H', 'BE'}, 'type', 'Spearman', 'testR', 'on')
-    %saveas(gca, [save_dir, 'M_BE_corr_all.png'], 'png')
+    %pause(0.01)
     
     % save data
-    save([R_dir_s, 'M.mat'], 'M_high', 'M_low', 'M_other');
-    save([R_dir_s, 'M_corr.mat'], 'M_exp_corr', 'mbo', 'mso');
+    save([R_dir_s, 'ind_M.mat'], 'M_high', 'M_low', 'M_other');
+    save([R_dir_s, 'ind_M_corr.mat'], 'M_exp_corr', 'mbo', 'mso');
     
     
     
@@ -178,17 +179,17 @@ for j = 1:numel(sensors)
     for n = 1:numel(bands)
         figure(1); clf
         boxplot([S_high(:,n), S_low(:,n), S_other(:,n)], [{'High'}, {'Low'}, {'Other'}])
-        saveas(gca, [save_dir, bands{n}, '_skew.png'], 'png')
+        pause(0.01)
     end
     S_exp_corr = S_exp_corr(idx,:);
     sbo = band_order(idx);
     sso = subj_order(idx);
     %figure(2)
     %corrplot(S_exp_corr, 'Var', {'S', 'BE'}, 'type', 'Spearman', 'testR', 'on')
-    %saveas(gca, [save_dir, 'S_BE_corr_all.png'], 'png')
+    %pause(0.01)
     % save data
-    save([R_dir_s, 'S.mat'], 'S_high', 'S_low', 'S_other');
-    save([R_dir_s, 'S_corr.mat'], 'S_exp_corr', 'sbo', 'sso');
+    save([R_dir_s, 'ind_S.mat'], 'S_high', 'S_low', 'S_other');
+    save([R_dir_s, 'ind_S_corr.mat'], 'S_exp_corr', 'sbo', 'sso');
     
 end
 % %% Repeat for Baseline

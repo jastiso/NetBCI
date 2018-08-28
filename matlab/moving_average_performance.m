@@ -16,7 +16,7 @@ data_dir = '/Users/stiso/Resilio Sync/NETBCI.RAW/DataBase/1_Signals/2_Segmentati
 raw_dir = '/Users/stiso/Resilio Sync/NETBCI.RAW/DataBase/1_Signals/0_RawData/2_MEG/';
 sessions = [{'Session1'}, {'Session2'}, {'Session3'}, {'Session4'}];
 condition = [{'test01'}, {'test02'}, {'test03'}, {'test04'}, {'test05'}, {'test06'}]; % not including rest
-subjs = [4];
+subjs = [1:20];
 
 res = 2; % number of entries per run (15 or 16 trials)
 behavior_all = cell(numel(subjs),1);

@@ -13,10 +13,10 @@ if ~exist(save_dir, 'dir')
     mkdir(save_dir)
 end
 
-Subj = [1:12, 14:20];
+Subj = [1:20];
 nSubj = numel(Subj);
 freqs = [7,14;15,30;31,45;55,70];
-bands = [{'alpha'}, {'beta'}];
+bands = [{'alpha'}, {'beta'}, {'low_gamma'}, {'gamma'}];
 sensors = [{'grad'}];
 
 nNode = 102;
