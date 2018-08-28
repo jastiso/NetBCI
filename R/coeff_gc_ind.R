@@ -11,7 +11,7 @@ library(R.matlab)
 library(RColorBrewer)
 library(wesanderson)
 setwd("/Users/stiso/Documents/R/NetBCI/")
-bands = c('alpha', 'beta', 'low_gamma', 'gamma')
+bands = c('alpha', 'beta')
 nSubj = 20
 sens = 'grad'
 
@@ -20,8 +20,8 @@ sens = 'grad'
 # Skew
 
 #############################################################################################
-S = readMat(paste('data/gc/', sens, '/S.mat', sep = ''))
-S_corr = readMat(paste('data/gc/', sens, '/S_corr.mat', sep = ''))
+S = readMat(paste('data/gc/', sens, '/ind_S.mat', sep = ''))
+S_corr = readMat(paste('data/gc/', sens, '/ind_S_corr.mat', sep = ''))
 plot_data = data.frame(cond = character(length = 0), band = character(length = 0), S = numeric(0), stringsAsFactors = FALSE)
 cnt = 1
 b_idx = 1;
@@ -53,9 +53,9 @@ mypallette = colorRampPalette(brewer.pal(4, 'Blues'))
 plot = ggplot(plot_data, aes(x = band, y = S, col = cond, fill = band) )
 plot + geom_boxplot(notch = FALSE, lwd = 1) + 
   scale_color_manual(values = c(rgb(0,0,0, alpha = 1), rgb(.3,.3,.3, alpha = 1), rgb(.6,.6,.6, alpha = 1))) + 
-  scale_fill_manual(values = rev(brewer.pal(4,'RdPu'))) + 
+  scale_fill_manual(values = (brewer.pal(4,'Greys'))) + 
   labs(x = 'Subgraph', y = 'Skew')  + theme_minimal()
-ggsave(paste(sens, '_S_gc', '.png', sep = ''))
+ggsave(paste(sens, '_ind_S_gc', '.png', sep = ''))
 
 
 # scatter plot
@@ -63,16 +63,16 @@ S_plot_data = data.frame(BE = S_corr$S.exp.corr[,2], S = S_corr$S.exp.corr[,1], 
 S_plot_data$band = as.factor(S_plot_data$band)
 S_plot_data$subj = as.factor(S_plot_data$subj)
 scatterplot = ggplot(S_plot_data, aes(x = log(BE), y = S, color = band))
-scatterplot + geom_point(size = 6) + labs(x = 'log(Behavioral Expression)', y = 'Skew') + 
+scatterplot + geom_point(size = 6) + labs(x = 'log(Behavioral Exindession)', y = 'Skew') + 
   geom_smooth(method="lm", color = 'black') + theme_minimal() + scale_color_manual(values = rev(brewer.pal(4,'RdPu')))
-ggsave(paste(sens, '_gc_dot', '_s', '.png', sep = ''))
+ggsave(paste(sens, '_ind_gc_dot', '_s', '.png', sep = ''))
 
 # band only
 S_beta = filter(S_plot_data, band == '2') # beta is level 2
-scatterplot = ggplot(S_beta, aes(x = (BE), y = S, color = band))
-scatterplot + geom_point(size = 6) + labs(x = 'log(Behavioral Expression)', y = 'Skew') + 
-  geom_smooth(method="lm", color = 'black') + theme_minimal() + scale_color_manual(values = rev(brewer.pal(4,'RdPu')))
-ggsave(paste(sens, '_gc_beta', '_s', '.png', sep = ''))
+scatterplot = ggplot(S_beta, aes(x = log(BE), y = S, color = band))
+scatterplot + geom_point(size = 6) + labs(x = 'log(Behavioral Exindession)', y = 'Skew') + 
+  geom_smooth(method="lm", color = 'black') + theme_minimal() + scale_color_manual(values = rev(brewer.pal(4,'Greys')))
+ggsave(paste(sens, '_ind_gc_beta', '_s', '.png', sep = ''))
 
 # stats
 # anova
@@ -137,7 +137,7 @@ plot + geom_boxplot(notch = FALSE, lwd = 1) +
   scale_color_manual(values = c(rgb(0,0,0, alpha = 1), rgb(.3,.3,.3, alpha = 1), rgb(.6,.6,.6, alpha = 1))) + 
   scale_fill_manual(values =  rev(brewer.pal(4,'Oranges'))) + 
   labs(x = 'Subgraph', y = 'Energy')  + theme_minimal()
-ggsave(paste(sens, '_M_gc', '.png', sep = ''))
+ggsave(paste(sens, '_ind_M_gc', '.png', sep = ''))
 
 
 # scatter plot
@@ -145,15 +145,15 @@ M_plot_data = data.frame(BE = M_corr$M.exp.corr[,2], M = M_corr$M.exp.corr[,1], 
 M_plot_data$band = as.factor(M_plot_data$band)
 M_plot_data$subj = as.factor(M_plot_data$subj)
 scatterplot = ggplot(M_plot_data, aes(x = log(BE), y = M, color = band))
-scatterplot + geom_point(size = 6) + labs(x = 'log(Behavioral Expression)', y = 'Mean') + 
+scatterplot + geom_point(size = 6) + labs(x = 'log(Behavioral Exindession)', y = 'Mean') + 
   geom_smooth(method="lm", color = 'black') + theme_minimal() + scale_color_manual(values =  rev(brewer.pal(4,'Oranges')))
-ggsave(paste(sens, '_dot_m_gc', '.png', sep = ''))
+ggsave(paste(sens, '_ind_dot_m_gc', '.png', sep = ''))
 # beta only
 M_beta = filter(M_plot_data, band == '1') # beta is level 2
 scatterplot = ggplot(M_beta, aes(x = log(BE), y = M, color = band))
-scatterplot + geom_point(size = 6) + labs(x = 'log(Behavioral Expression)', y = 'Mean') + 
+scatterplot + geom_point(size = 6) + labs(x = 'log(Behavioral Exindession)', y = 'Mean') + 
   geom_smooth(method="lm", color = 'black') + theme_minimal() + scale_color_manual(values =  rev(brewer.pal(4,'Oranges')))
-ggsave(paste(sens, '_alpha_m_gc', '.png', sep = ''))
+ggsave(paste(sens, '_ind_alpha_m_gc', '.png', sep = ''))
 
 # stats
 # anova
@@ -187,8 +187,8 @@ Anova(statb)
 #############################################################################################
 
 # load data
-E = readMat(paste('data/gc/', sens, '/E.mat', sep = ''))
-E_corr = readMat(paste('data/gc/', sens, '/E_corr.mat', sep = ''))
+E = readMat(paste('data/gc/', sens, '/ind_E.mat', sep = ''))
+E_corr = readMat(paste('data/gc/', sens, '/ind_E_corr.mat', sep = ''))
 plot_data = data.frame(cond = character(length = 0), band = character(length = 0), E = numeric(0), stringsAsFactors = FALSE)
 cnt = 1
 b_idx = 1;
@@ -219,9 +219,9 @@ plot_data$band = as.factor(plot_data$band)
 plot = ggplot(plot_data, aes(x = band, y = log(E), col = cond, fill = band) )
 plot + geom_boxplot(notch = FALSE, lwd = 1) + 
   scale_color_manual(values = c(rgb(0,0,0, alpha = 1), rgb(.3,.3,.3, alpha = 1), rgb(.6,.6,.6, alpha = 1))) + 
-  scale_fill_manual(values =  rev(brewer.pal(4,'Reds'))) + 
+  scale_fill_manual(values =  rev(brewer.pal(4,'Greys'))) + 
   labs(x = 'Subgraph', y = 'log(Energy)')  + theme_minimal()
-ggsave(paste(sens, '_E_gc', '.png', sep = ''))
+ggsave(paste(sens, '_ind_E_gc', '.png', sep = ''))
 
 
 # scatter plot
@@ -229,16 +229,16 @@ E_plot_data = data.frame(BE = E_corr$E.exp.corr[,2], E = E_corr$E.exp.corr[,1], 
 E_plot_data$band = as.factor(E_plot_data$band)
 E_plot_data$subj = as.factor(E_plot_data$subj)
 scatterplot = ggplot(E_plot_data, aes(x = log(BE), y = log(E), color = band))
-scatterplot + geom_point(size = 6) + labs(x = 'log(Behavioral Expression)', y = 'ENergy') + 
+scatterplot + geom_point(size = 6) + labs(x = 'log(Behavioral Exindession)', y = 'ENergy') + 
   geom_smooth(method="lm", color = 'black') + theme_minimal() + scale_color_manual(values =  rev(brewer.pal(4,'Purples')))
-ggsave(paste(sens, '_dot', '_e_gc', '.png', sep = ''))
+ggsave(paste(sens, '_ind_dot', '_e_gc', '.png', sep = ''))
 
 #beta
-E_beta = filter(E_plot_data, band == '2') # beta is level 2
+E_beta = filter(E_plot_data, band == '1') # beta is level 2
 scatterplot = ggplot(E_beta, aes(x = (BE), y = log(E), color = band))
-scatterplot + geom_point(size = 6) + labs(x = 'log(Behavioral Expression)', y = 'ENergy') + 
-  geom_smooth(method="lm", color = 'black') + theme_minimal() + scale_color_manual(values =  rev(brewer.pal(4,'Reds')))
-ggsave(paste(sens, '_beta', '_e_gc', '.png', sep = ''))
+scatterplot + geom_point(size = 6) + labs(x = '(Behavioral Exindession)', y = 'log(Energy)') + 
+  geom_smooth(method="lm", color = 'black') + theme_minimal() + scale_color_manual(values =  rev(brewer.pal(4,'Greys')))
+ggsave(paste(sens, '_ind_alpha', '_e_gc', '.png', sep = ''))
 
 
 
@@ -270,8 +270,8 @@ Anova(statb)
 
 #############################################################################################
 # load data
-H = readMat(paste('data/gc/', sens, '/H.mat', sep = ''))
-H_corr = readMat(paste('data/gc/', sens, '/H_corr.mat', sep = ''))
+H = readMat(paste('data/gc/', sens, '/ind_H.mat', sep = ''))
+H_corr = readMat(paste('data/gc/', sens, '/ind_H_corr.mat', sep = ''))
 plot_data = data.frame(cond = character(length = 0), band = character(length = 0), H = numeric(0), stringsAsFactors = FALSE)
 cnt = 1
 b_idx = 1;
@@ -304,7 +304,7 @@ plot + geom_boxplot(notch = FALSE, lwd = 1) +
   scale_color_manual(values = c(rgb(0,0,0, alpha = 1), rgb(.3,.3,.3, alpha = 1), rgb(.6,.6,.6, alpha = 1))) + 
   scale_fill_manual(values = rev(brewer.pal(4,"Reds"))) + 
   labs(x = 'Subgraph', y = 'Shannon Entropy')  + theme_minimal()
-ggsave(paste(sens, '_H_gc', '.png', sep = ''))
+ggsave(paste(sens, '_ind_H_gc', '.png', sep = ''))
 
 
 # scatter plot
@@ -312,16 +312,16 @@ H_plot_data = data.frame(BE = H_corr$H.exp.corr[,2], H = H_corr$H.exp.corr[,1], 
 H_plot_data$band = as.factor(H_plot_data$band)
 H_plot_data$subj = as.factor(H_plot_data$subj)
 scatterplot = ggplot(H_plot_data, aes(x = log(BE), y = H, color = band))
-scatterplot + geom_point(size = 6) + labs(x = 'log(Behavioral Expression)', y = 'Shannon Entropy') + 
+scatterplot + geom_point(size = 6) + labs(x = 'log(Behavioral Exindession)', y = 'Shannon Entropy') + 
   geom_smooth(method="lm", color = 'black') + theme_minimal() + scale_color_manual(values = rev(brewer.pal(4,"Reds")))
-ggsave(paste(sens, '_dot', '_h_gc', '.png', sep = ''))
+ggsave(paste(sens, '_ind_dot', '_h_gc', '.png', sep = ''))
 
 # beta
 H_beta = filter(H_plot_data, band == '2') # beta is level 2
 ßscatterplot = ggplot(H_beta, aes(x = log(BE), y = H, color = band))
-scatterplot + geom_point(size = 6) + labs(x = 'log(Behavioral Expression)', y = 'Shannon Entropy') + 
+scatterplot + geom_point(size = 6) + labs(x = 'log(Behavioral Exindession)', y = 'Shannon Entropy') + 
   geom_smooth(method="lm", color = 'black') + theme_minimal() + scale_color_manual(values = rev(brewer.pal(4,"Reds")))
-ggsave(paste(sens, '_beta', '_h_gc', '.png', sep = ''))
+ggsave(paste(sens, '_ind_beta', '_h_gc', '.png', sep = ''))
 
 # stats
 # anova

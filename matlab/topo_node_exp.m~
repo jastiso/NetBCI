@@ -154,11 +154,11 @@ for k = 1:numel(thrs)
             avg_consensus = mean(thrsh_mats(:,:,:,m),3);
             avg_consensus(~logical(G)) = 0;
             % make BNV file
-            dlmwrite([save_dir, bands{m}, '_consensus.edge'], avg_consensus.*1000, '\t')
+            dlmwrite([save_dir, bands{m}, '_consensus.edge'], node_exp, '\t')
             fid = fopen([top_dir, 'layouts/neuromag306cmb.txt'], 'r');
             bv_label = textscan(fid, '%d %10f %10f %d %d %s', 'Delimiter', '\n');
             fclose(fid);
-            write_bv_node([save_dir, bands{m}, '_consensus.node'], bv_label{:,2},bv_label{:,3},double(bv_label{:,4}), 1, sum(avg_consensus)');
+            write_bv_node([save_dir, bands{m}, '_consensus.node'], bv_label{:,2},bv_label{:,3},double(bv_label{:,4}), 1, sg_deg);
             
             % plot
             plot_data.powspctrm = sum(avg_consensus)';

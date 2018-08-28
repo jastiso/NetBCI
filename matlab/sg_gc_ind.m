@@ -1,5 +1,5 @@
 %% run sub graph statistics for gc
-
+% independent random model
 
 
 addpath(genpath('/Users/stiso/Documents/MATLAB/npy-matlab-master/'))
@@ -26,7 +26,7 @@ end
 Subj = [1:20];
 nSubj = numel(Subj);
 freqs = [7,14;15,30;31,45;55,70];
-bands = [{'alpha'}, {'beta'}, {'low_gamma'}, {'gamma'}];
+bands = [{'alpha'}, {'beta'}];
 sensors = [{'grad'}];
 
 nNode = 102;
@@ -60,8 +60,8 @@ for j = 1:numel(sensors)
             f = bands{k};
             
             % get subgraph data
-            subset = readNPY([data_dir, subj, '/', sens, '/gc_', f, '_subset.npy']);
-            coeff = readNPY([data_dir, subj, '/',sens, '/gc_', f, '_coeff.npy']);
+            subset = readNPY([data_dir, subj, '/', sens, '/ind_gc_', f, '_subset.npy']);
+            coeff = readNPY([data_dir, subj, '/',sens, '/ind_gc_', f, '_coeff.npy']);
             b_exp = coeff(:,end);
             [~,bSG] = max(b_exp);
             [~,nbSG] = min(b_exp);
@@ -82,25 +82,25 @@ for j = 1:numel(sensors)
     
     
     % plot
-    % strength
+    % energy
     for i = 1:numel(bands)
         figure(1); clf
         boxplot([St_high(:,i), St_low(:,i), St_other(:,i)], [{'High'}, {'Behavior'}, {'Other'}])
-        saveas(gca, [save_dir, bands{i}, '_sparsity.png'], 'png')
+        pause(0.01)
     end
     
     % save data
-    save([R_dir_s, 'St.mat'], 'St_high', 'St_low', 'St_other');
+    save([R_dir_s, 'St_ind.mat'], 'St_high', 'St_low', 'St_other');
    
     
     % skew
     for n = 1:numel(bands)
         figure(1); clf
         boxplot([S_high(:,n), S_low(:,n), S_other(:,n)], [{'High'}, {'Low'}, {'Other'}])
-        saveas(gca, [save_dir, bands{n}, '_skew_sg.png'], 'png')
+        pause(0.01)
     end
 
     % save data
-    save([R_dir_s, 'Ssg.mat'], 'S_high', 'S_low', 'S_other');
+    save([R_dir_s, 'Ssg_ind.mat'], 'S_high', 'S_low', 'S_other');
     
 end

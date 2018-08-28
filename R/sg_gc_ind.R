@@ -1,4 +1,4 @@
-## Get SG data for AC
+## Get SG data for GC ind
 library(R.matlab)
 library(ggplot2)
 library(dplyr)
@@ -11,7 +11,7 @@ library(R.matlab)
 library(RColorBrewer)
 library(wesanderson)
 setwd("/Users/stiso/Documents/R/NetBCI/")
-bands = c('alpha', 'beta', 'low_gamma', 'gamma')
+bands = c('alpha', 'beta')
 nSubj = 20
 sens = 'grad'
 
@@ -20,7 +20,7 @@ sens = 'grad'
 # Skew
 
 #############################################################################################
-S = readMat(paste('data/gc/', sens, '/Ssg.mat', sep = ''))
+S = readMat(paste('data/gc/', sens, '/Ssg_ind.mat', sep = ''))
 plot_data = data.frame(cond = character(length = 0), band = character(length = 0), S = numeric(0), stringsAsFactors = FALSE)
 cnt = 1
 b_idx = 1;
@@ -52,9 +52,9 @@ mypallette = colorRampPalette(brewer.pal(4, 'Blues'))
 plot = ggplot(plot_data, aes(x = band, y = S, col = cond, fill = band) )
 plot + geom_boxplot(notch = FALSE, lwd = 1) + 
   scale_color_manual(values = c(rgb(0,0,0, alpha = 1), rgb(.3,.3,.3, alpha = 1), rgb(.6,.6,.6, alpha = 1))) + 
-  scale_fill_manual(values = rev(brewer.pal(4,'Blues'))) + 
+  scale_fill_manual(values = rev(brewer.pal(4,'Greys'))) + 
   labs(x = 'Subgraph', y = 'Skew')  + theme_minimal()
-ggsave(paste(sens, '_Ssg_gc', '.png', sep = ''))
+ggsave(paste(sens, '_Ssg_gc_ind', '.png', sep = ''))
 
 
 
@@ -82,7 +82,7 @@ summary(stat1)
 
 #############################################################################################
 # load data
-St = readMat(paste('data/gc/', sens, '/St.mat', sep = ''))
+St = readMat(paste('data/gc/', sens, '/St_ind.mat', sep = ''))
 plot_data = data.frame(cond = character(length = 0), band = character(length = 0), Med = numeric(0), stringsAsFactors = FALSE)
 cnt = 1
 b_idx = 1;
@@ -113,26 +113,26 @@ plot_data$band = as.factor(plot_data$band)
 plot = ggplot(plot_data, aes(x = band, y = Med, col = cond, fill = band) )
 plot + geom_boxplot(notch = FALSE, lwd = 1) + 
   scale_color_manual(values = c(rgb(0,0,0, alpha = 1), rgb(.3,.3,.3, alpha = 1), rgb(.6,.6,.6, alpha = 1))) + 
-  scale_fill_manual(values = rev(brewer.pal(4,"Greens"))) + 
+  scale_fill_manual(values = rev(brewer.pal(4,"Greys"))) + 
   labs(x = 'Subgraph', y = 'Median')  + theme_minimal()
-ggsave(paste(sens, '_Med_gc', '.png', sep = ''))
+ggsave(paste(sens, '_med_gc_ind', '.png', sep = ''))
 
 
 
 
 # stats
 # anova
-fit1 = lm(Med ~ cond + band, data=  plot_data)
+fit1 = lm(St ~ cond + band, data=  plot_data)
 summary(fit1)
 Anova(fit1)
-fit2 = lm(Med ~ band*cond, data = plot_data)
+fit2 = lm(St ~ band*cond, data = plot_data)
 summary(fit2)
 Anova(fit2)
 # anova beta
 tmp = filter(plot_data, band == 'beta')
-Medatb1 = lmp(Med ~ cond, data = tmp)
-summary(Medatb1)
+statb1 = lmp(St ~ cond, data = tmp)
+summary(statb1)
 # post hoc
-stat1 = lmp(Med ~ cond, data = plot_data)
+stat1 = lmp(St ~ cond, data = plot_data)
 summary(stat1)
 

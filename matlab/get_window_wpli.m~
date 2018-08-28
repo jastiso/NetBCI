@@ -1,4 +1,4 @@
-function [ wpli ] = get_window_wpli( data, srate, st, en, freqs )
+function [ wpli, f ] = get_window_wpli( data, srate, st, en, freqs )
 %% Get wpli
 
 % wpli for single trials
@@ -14,7 +14,7 @@ function [ wpli ] = get_window_wpli( data, srate, st, en, freqs )
 % get time windows, using 5 windows, as discussed below
 ovlp = .5;
 nWin = 5;
-samples = data.time{1}((st*srate):(en*srate));
+samples = data.time{1}(st:en);
 winLength = floor(numel(samples)/(nWin - ovlp));
 
 %% Fourier spectra with welch's method
@@ -48,16 +48,15 @@ winLength = floor(numel(samples)/(nWin - ovlp));
 %[psd,f] = pwelch(x,winLength,ovlp,nfft,srate);
 
 %% combine gradiometers
-% not sure what step this should happen in....
 
 %psd_cmb = combine_gradiometers(psd,0); % 0 flags this as PSD
 
 %% get cross spectral density
 % The product of the Fourier transform of one signal with the conjugate of the Fourier Transform of the signal gives the Cross-Spectral density (CSD). 
 
-x = data.trial{1}(:,(st*srate):(en*srate))'; % channels should be columns, opposite of what is normally done
+x = data.trial{1}(:,st:en)'; % channels should be columns, opposite of what is normally done
 nSens = size(x,2);
-%nfft = 2^nextpow2(size(x,1));
+nfft = 2^nextpow2(size(x,1));
 csd = cell(nSens,nSens);
 for i = 1:nSens
     for j = i:nSens
@@ -70,13 +69,7 @@ end
 %% Get wPLI
 
 wpli = zeros(nSens,nSens);
-for i = 1:nSens
-    for j = (i+1):nSens
-        curr = csd{i,j};
-        wpli(i,j) = abs(nanmean(imag(curr)))/nanmean(abs(imag(curr)));
-    end
-end
-wpli = wpli + wpli';
+wpli = abs(mean(csd))/mean(abs(csd));
 
 
 end
