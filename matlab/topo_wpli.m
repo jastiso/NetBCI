@@ -10,7 +10,7 @@ addpath(genpath('/Users/stiso/Documents/MATLAB/npy-matlab-master/'))
 addpath('/Users/stiso/Documents/MATLAB/fieldtrip-20170830/')
 
 top_dir = '/Users/stiso/Documents/MATLAB/NetBCI/';
-data_dir = '/Users/stiso/Documents/Python/NetBCI/NMF/gc/';
+data_dir = '/Users/stiso/Documents/Python/NetBCI/NMF/';
 
 subjs = [1:20];
 nSubj = numel(subjs);
@@ -37,16 +37,16 @@ for i = subjs
             if ~exist(img_dir, 'dir')
                 mkdir(img_dir)
             end
-            save_dir = [top_dir, 'NMF/', subj, '/', sens, '/analysis/'];
+            save_dir = [top_dir, 'NMF/', subj, '/', sens, '/analysis/wpli/'];
             % make directories
             if ~exist(save_dir, 'dir')
                 mkdir(save_dir)
             end
             
             % get subgraph data
-            coeff = readNPY([data_dir, subj,  '/', sens, '/gc_', f, '_coeff.npy']);
-            subset = readNPY([data_dir, subj,  '/', sens, '/gc_', f, '_subset.npy']);
-            err = readNPY([data_dir, subj,  '/', sens, '/gc_', f, '_err.npy']);
+            coeff = readNPY([data_dir, subj,  '/', sens, '/wpli_', f, '_coeff.npy']);
+            subset = readNPY([data_dir, subj,  '/', sens, '/wpli_', f, '_subset.npy']);
+            err = readNPY([data_dir, subj,  '/', sens, '/wpli_', f, '_err.npy']);
             % get mag index
             labels = [];
             try
@@ -121,7 +121,7 @@ for i = subjs
                 % sidebar - make node file
                 bv_label = textscan(fid, '%d %10f %10f %d %d %s', 'Delimiter', '\n');
                 fclose(fid);
-                write_bv_node([save_dir, f, '_graph_', num2str(n), '.node'], bv_label{:,2},bv_label{:,3},double(bv_label{:,4}), 1, sg_deg);
+                write_bv_node([save_dir, f, '_graph_', num2str(n), '_wpli.node'], bv_label{:,2},bv_label{:,3},double(bv_label{:,4}), 1, sg_deg);
             end
             
         end
@@ -130,6 +130,11 @@ end
 
 
 %% plot consensus - consistency (but without distance)
+
+if ~exist(['/Users/stiso/Documents/MATLAB/NetBCI/GroupAvg/wpli/images/'], 'dir')
+    mkdir(['/Users/stiso/Documents/MATLAB/NetBCI/GroupAvg/wpli/images/'])
+end
+
 thrs = linspace(0.01, 1, 100);
 nE_thr = zeros(numel(thrs),numel(bands));
 consistent_edges = zeros(numel(thrs), numel(bands));
@@ -154,11 +159,11 @@ for k = 1:numel(thrs)
             avg_consensus = mean(thrsh_mats(:,:,:,m),3);
             avg_consensus(~logical(G)) = 0;
             % make BNV file
-            dlmwrite([save_dir, bands{m}, '_consensus.edge'], node_exp, '\t')
+            dlmwrite([save_dir, bands{m}, '_consensus.edge'], avg_consensus.*1000, '\t')
             fid = fopen([top_dir, 'layouts/neuromag306cmb.txt'], 'r');
             bv_label = textscan(fid, '%d %10f %10f %d %d %s', 'Delimiter', '\n');
             fclose(fid);
-            write_bv_node([save_dir, bands{m}, '_consensus.node'], bv_label{:,2},bv_label{:,3},double(bv_label{:,4}), 1, sg_deg);
+            write_bv_node([save_dir, bands{m}, '_consensus.node'], bv_label{:,2},bv_label{:,3},double(bv_label{:,4}), 1, sum(avg_consensus)');
             
             % plot
             plot_data.powspctrm = sum(avg_consensus)';
@@ -169,7 +174,7 @@ for k = 1:numel(thrs)
             figure(1); clf
             ft_topoplotER(cfg,plot_data); colorbar
             pause(0.01)
-            saveas(gca, ['/Users/stiso/Documents/MATLAB/NetBCI/GroupAvg/gc/images/', bands{m}, '_consensus_topo.png'], 'png')
+            saveas(gca, ['/Users/stiso/Documents/MATLAB/NetBCI/GroupAvg/wpli/images/', bands{m}, '_consensus_topo.png'], 'png')
         end
     end
 end
