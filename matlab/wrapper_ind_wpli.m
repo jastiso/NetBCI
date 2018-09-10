@@ -1,12 +1,13 @@
-function [ errors ] = wrapper_wpli_lowres( session, condition, subjs, data_dir, raw_dir, top_dir, bands, freqs, st, en, nNode )
+function [ errors ] = wrapper_ind_wpli( sessions, condition, subj, data_dir, raw_dir, top_dir, bands, freqs, st, en, nNode)
 % helper function for paralelizing pipeline
 errors = {};
 cnte = 1;
 
-for j = 1:numel(condition)
-    cond = condition{j};
-    for k = subjs
-        subj = k;
+for i = 1:numel(sessions)
+    session = sessions{i};
+    for j = 1:numel(condition)
+        cond = condition{j};
+        
         ext = sprintf('%03d',subj);
         % load data
         d = dir([data_dir, session, '/*', cond, '*', '/Seg_MEG_Subj', ext, '_Ses', session(end), '_', cond, '.mat']);
@@ -100,6 +101,11 @@ for j = 1:numel(condition)
                 data_mag.trial{m} = data_mag.trial{m}(mag_idx,:);
             end
             
+            % phase randomize
+            for t = 1:nTrial
+                data_mag.trial{t} = linsurr_ind(data_mag.trial{t});
+                data_grad.trial{t} = linsurr_ind(data_grad.trial{t});
+            end
             
             %% Make connectivity matrices
             
@@ -117,12 +123,13 @@ for j = 1:numel(condition)
             end
             
             for f = 1:numel(bands)
-                f_range = [freqs(f,1),freqs(f,2)];
+                f_range = freqs(f,1):freqs(f,2);
                 curr_band = bands{f};
                 
                 % get wPLI
                 %wpli_mag = zeros((nNode^2-nNode)/2, nTrial);
                 wpli_grad = zeros((nNode^2-nNode)/2, nTrial);
+                for t = 1:nTrial
                     %                    tmp = zeros(nNode);
                     %                     % magnetometers
                     %                     curr = squeeze(freq_mag.powspctrm(t,:,:));
@@ -143,22 +150,22 @@ for j = 1:numel(condition)
                     %                     wpli_mag(:,t) = GC;
                     %
                     %gradiometers
-                    
-                    [wpli] = get_wpli( data_grad, st, en, f_range);
+                    wpli = get_window_wpli( data_grad, srate, st, en, f_range, t);
                     % plot
-                    figure(5); clf
+                    figure(3); clf
                     imagesc(wpli); colorbar; pause(0.001)
-                    saveas(gca, [img_dir, bands{f}, '_wpli_lowres_grad.png'], 'png')
-                    
+                    if t == nTrial
+                        saveas(gca, [img_dir, bands{f}, '_wpli_ind_grad.png'], 'png')
+                    end
                     % save
                     v_wpli = reshape(wpli(logical(triu(ones(nNode),1))),1,[]);
                     wpli_grad(:,t) = v_wpli;
+                end
                 if any(any(isnan(wpli_grad)))
                     error('This matrix contains nans')
                 end
-                display(var)
-                %save([save_dir, 'NMF_', curr_band, '_mag_wpli.mat'], 'wpli_mag')
-                save([save_dir, 'NMF_', curr_band, '_grad_wpli_lowres.mat'], 'wpli_lowres_grad')
+                %save([save_dir, 'NMF_', curr_band, '_mag_wpli_ind.mat'], 'wpli_mag')
+                save([save_dir, 'NMF_', curr_band, '_grad_wpli_ind.mat'], 'wpli_grad')
             end
         catch
             errors{cnte,1} = [d.folder, '/', d.name];
