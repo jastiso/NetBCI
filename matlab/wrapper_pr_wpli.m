@@ -110,17 +110,10 @@ for i = 1:numel(sessions)
             %% Make connectivity matrices
             
             % combine gradiometers
-            % until I figure out how to do this, we are just selecting
-            % one
-            idx = zeros(size(data_grad.label));
-            for i = 1:numel(data_grad.label)
-                idx(i) = data_grad.label{i}(end) == '2';
-            end
-            idx = logical(idx);
-            data_grad.label = data_grad.label(idx);
-            for m = 1:numel(data_grad.trial)
-                data_grad.trial{m} = data_grad.trial{m}(idx,:);
-            end
+            cfg = [];
+            cfg.method = 'sum';
+            data_grad = ft_combineplanar(cfg,data_grad);
+            
             
             for f = 1:numel(bands)
                 f_range = freqs(f,1):freqs(f,2);

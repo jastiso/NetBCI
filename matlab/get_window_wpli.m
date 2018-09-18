@@ -1,4 +1,4 @@
-function [ wpli ] = get_window_wpli( data, srate, st, en, freqs, t)
+function [ wpli ] = get_window_wpli( data, srate, st, en, freqs, t, grad)
 %% Get wpli
 
 % wpli for single trials
