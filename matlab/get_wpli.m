@@ -8,6 +8,7 @@ function [ wpli ] = get_wpli( data, st, en, freqs )
 % Change Log
 % August 28th, 2018 - created script
 
+
 %% Get only relevant time
 
 cfg = [];

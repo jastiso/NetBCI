@@ -1,12 +1,12 @@
-function [ errors ] = wrapper_wpli( session, condition, subjs, data_dir, raw_dir, top_dir, bands, freqs, st, en, nNode)
+function [ errors ] = wrapper_wpli( sessions, condition, subj, data_dir, raw_dir, top_dir, bands, freqs, st, en, nNode)
 % helper function for paralelizing pipeline
 errors = {};
 cnte = 1;
 
-for j = 1:numel(condition)
-    cond = condition{j};
-    for k = subjs
-        subj = k;
+for i = 1:numel(sessions)
+    session = sessions{i};
+    for j = 1:numel(condition)
+        cond = condition{j};
         ext = sprintf('%03d',subj);
         % load data
         d = dir([data_dir, session, '/*', cond, '*', '/Seg_MEG_Subj', ext, '_Ses', session(end), '_', cond, '.mat']);
@@ -104,17 +104,10 @@ for j = 1:numel(condition)
             %% Make connectivity matrices
             
             % combine gradiometers
-            % until I figure out how to do this, we are just selecting
-            % one
-            idx = zeros(size(data_grad.label));
-            for i = 1:numel(data_grad.label)
-                idx(i) = data_grad.label{i}(end) == '2';
-            end
-            idx = logical(idx);
-            data_grad.label = data_grad.label(idx);
-            for m = 1:numel(data_grad.trial)
-                data_grad.trial{m} = data_grad.trial{m}(idx,:);
-            end
+            cfg = [];
+            cfg.method = 'sum';
+            data_grad = ft_combineplanar(cfg,data_grad);
+            
             
             for f = 1:numel(bands)
                 f_range = freqs(f,1):freqs(f,2);
