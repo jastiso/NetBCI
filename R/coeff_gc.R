@@ -1,4 +1,4 @@
-## Get SG data for AC
+## Get temp_exp data for AC
 library(R.matlab)
 library(ggplot2)
 library(dplyr)
