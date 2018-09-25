@@ -4,10 +4,10 @@
 addpath(genpath('/Users/stiso/Documents/MATLAB/npy-matlab-master/'))
 addpath(genpath('/Users/stiso/Documents/MATLAB/mult_comp_perm_corr/'))
 addpath('/Users/stiso/Documents/MATLAB/fieldtrip-20170830/')
-R_dir_o = '/Users/stiso/Documents/R/NetBCI/data/gc/';
+R_dir_o = '/Users/stiso/Documents/R/NetBCI/data/wpli/';
 
 top_dir = '/Users/stiso/Documents/MATLAB/NetBCI/';
-data_dir = '/Users/stiso/Documents/Python/NetBCI/NMF/gc/';
+data_dir = '/Users/stiso/Documents/Python/NetBCI/NMF/';
 save_dir = [top_dir, 'GroupAvg/analysis/'];
 img_dir = [top_dir, 'GroupAvg/images/'];
 % make directories
@@ -51,8 +51,8 @@ for j = 1:numel(sensors)
             f = bands{k};
             
             % get subgraph data
-            subset = readNPY([data_dir, subj,  '/', sens, '/gc_', f, '_subset.npy']);
-            coeff = readNPY([data_dir, subj,  '/', sens, '/gc_', f, '_coeff.npy']);
+            subset = readNPY([data_dir, subj,  '/', sens, '/wpli_', f, '_subset.npy']);
+            coeff = readNPY([data_dir, subj,  '/', sens, '/wpli_', f, '_coeff.npy']);
             
             %get subgraph with highest expression
             [max_e,bsg] = max(subset(:,end));
@@ -104,7 +104,7 @@ for j = 1:numel(sensors)
         %{'Beta',  'Im', 'Max', 'mean', 'sd'}, 'type', 'spearman','testr', 'on')
     
     % save to R_dir
-    save([R_dir, 'exp_beh_cor.mat'], 'betas',  'max_exp', 'sum_exp', 'sd_exp');
+    save([R_dir, 'exp_beh_cor.mat'], 'betas', 'improvement',  'max_exp', 'sum_exp', 'sd_exp');
     
 end
 
@@ -182,8 +182,8 @@ for j = 1:numel(sensors)
             f = bands{k};
             
             % get subgraph data
-            subset = readNPY([data_dir, subj,  '/', sens, '/pr_gc_', f, '_subset.npy']);
-            coeff = readNPY([data_dir, subj,  '/', sens, '/pr_gc_', f, '_coeff.npy']);
+            subset = readNPY([data_dir, subj,  '/', sens, '/pr_wpli_', f, '_subset.npy']);
+            coeff = readNPY([data_dir, subj,  '/', sens, '/pr_wpli_', f, '_coeff.npy']);
             
             %get subgraph with highest expression
             [max_e,bsg] = max(subset(:,end));
@@ -276,8 +276,8 @@ for j = 1:numel(sensors)
             f = bands{k};
             
             % get subgraph data
-            subset = readNPY([data_dir, subj,  '/', sens, '/ind_gc_', f, '_subset.npy']);
-            coeff = readNPY([data_dir, subj,  '/', sens, '/ind_gc_', f, '_coeff.npy']);
+            subset = readNPY([data_dir, subj,  '/', sens, '/ind_wpli_', f, '_subset.npy']);
+            coeff = readNPY([data_dir, subj,  '/', sens, '/ind_wpli_', f, '_coeff.npy']);
             
             %get subgraph with highest expression
             [max_e,bsg] = max(subset(:,end));
