@@ -58,8 +58,8 @@ for j = 1:numel(sensors)
             nSG = size(subset,1);
             color_sf = 1/(nSG);
             
-            % for every band, plot dist of each graph, ranked by BE,
-            % highest to lowest - highest exp is red, lowest is blue in
+            % for every band, plot dist of each graph, ranked by BC,
+            % highest to lowest - highest coef is blue, lowest is red in
             % plots
             [~, idx] = sort(subset(:,end), 'descend');
             for n = 1:nSG

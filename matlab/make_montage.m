@@ -28,14 +28,17 @@ for i = 1:2:numel(grad_label)
 end
 
 % get vector for every montage
-for i = 6%1:numel(regions)
+for i = 1:numel(regions)
    load([mon_dir, 'montage_', regions{i}, '_MEG.mat'])
    tmp_idx = false(size(cmb_label,1),2);
    for j = i:numel(Montages.ChanNames)
        curr = Montages.ChanNames{j};
-       tmp_idx(:,1) = tmp_idx(:,1) | sum(curr((end-3):end) == char(cmb_label(:,(end-3):end)),2) == 4 ;
-       tmp_idx(:,2) = tmp_idx(:,2) | sum(curr((end-3):end) == char(cmb_label(:,4:7)),2) == 4 ;
+       % if both of the gradiometers are in the lobe, it goes in the index
+       tmp_idx(:,1) = tmp_idx(:,1) | (sum(curr((end-3):end) == char(cmb_label(:,(end-3):end)),2) == 4);
+       tmp_idx(:,2) = tmp_idx(:,2) | (sum(curr((end-3):end) == char(cmb_label(:,4:7)),2) == 4);
    end
-   idx = tmp_idx(:,1) | tmp_idx(:,2);
+   % for a couple montages, this gave the same answer with or or and. For
+   % some, its off but only by a little
+   idx = tmp_idx(:,1) & tmp_idx(:,2);
    save([mon_dir, regions{i}, '_idx.mat'], 'idx')
 end

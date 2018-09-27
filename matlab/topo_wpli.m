@@ -74,6 +74,7 @@ for i = subjs
             
             % get subgraph with highest expresssion in behavior
             [~,bsg] = max(subset(:,end));
+            [~,nbsg] = min(subset(:,end));
             
             % sizes
             nTime = size(coeff,2);
@@ -116,7 +117,13 @@ for i = subjs
                 plot_data.cfg = [];
                 figure(1); clf
                 ft_topoplotER(cfg,plot_data); colorbar
-                saveas(gca, [img_dir, f, '_', num2str(n), '.png'], 'png')
+                if n == bsg
+                    saveas(gca, [img_dir, f, '_high.png'], 'png')
+                elseif n == nbsg
+                    saveas(gca, [img_dir, f, '_low.png'], 'png')
+                else
+                    saveas(gca, [img_dir, f, '_', num2str(n), '.png'], 'png')
+                end
                 
                 % sidebar - make node file
                 bv_label = textscan(fid, '%d %10f %10f %d %d %s', 'Delimiter', '\n');
