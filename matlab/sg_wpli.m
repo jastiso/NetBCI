@@ -34,6 +34,7 @@ nEdges = (nNode^2-nNode)/2;
 edge_similarity = zeros(nEdges, nSubj-1, numel(bands), numel(sensors));
 % load behavior
 load([top_dir, 'Behavior/perf'])
+load([save_dir, 'noise_sg.mat']);
 
 %% Loop through data
 for j = 1:numel(sensors)
@@ -62,6 +63,12 @@ for j = 1:numel(sensors)
             % get subgraph data
             subset = readNPY([data_dir, subj, '/', sens, '/wpli_', f, '_subset.npy']);
             coeff = readNPY([data_dir, subj, '/',sens, '/wpli_', f, '_coeff.npy']);
+            
+            % remove noise SG
+            idx = noise_sg{k,i};
+            coeff = coeff(~idx,:);
+            subset = subset(~idx,:);
+            
             b_exp = coeff(:,end);
             [~,bSG] = max(b_exp);
             [~,nbSG] = min(b_exp);

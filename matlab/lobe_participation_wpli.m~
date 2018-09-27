@@ -44,7 +44,6 @@ high_participation = cell(nSubj*numel(bands)*numel(regions), 4);
 low_participation = cell(nSubj*numel(bands)*numel(regions), 4);
 % load behavior
 load([top_dir, 'Behavior/stats'])
-load([save_dir, 'noise_sg.mat']);
 
 %% Loop through data
 for j = 1:numel(sensors)
@@ -63,12 +62,6 @@ for j = 1:numel(sensors)
             % get subgraph data
             subset = readNPY([data_dir, subj, '/', sens, '/wpli_', f, '_subset.npy']);
             coeff = readNPY([data_dir, subj, '/',sens, '/wpli_', f, '_coeff.npy']);
-            
-            % remove noise SG
-            idx = noise_sg{k,i};
-            coeff = coeff(~idx,:);
-            subset = subset(~idx,:);
-            
             b_exp = subset(:,end);
             [~,bSG] = max(b_exp);
             [~,nbSG] = min(b_exp);
@@ -83,9 +76,7 @@ for j = 1:numel(sensors)
                         cnth = cnth + 1;
                         load([top_dir, 'montages/', regions{m}, '_idx.mat'])
                         curr_exp = node_exp(idx,:);
-                        % get the mean edge between a lobes (total edges/number of edges), divided by
-                        % the total edges
-                        p = (sum(sum(node_exp(idx,~idx)))/((sum(~idx)*sum(idx))))/sum(sum(node_exp));
+                        p = (sum(sum(node_exp(idx,~idx)))/sum(idx))/sum(sum(node_exp));
                         high_participation{cnth,1} = subj;
                         high_participation{cnth,2} = f;
                         high_participation{cnth,3} = regions{m};
@@ -98,7 +89,7 @@ for j = 1:numel(sensors)
                         load([top_dir, 'montages/', regions{m}, '_idx.mat'])
                         curr_exp = node_exp(idx,:);
                         %p = (sum(sum(curr_exp(:,idx),2)) - sum(sum(curr_exp(idx,~idx),2)))/(sum(sum(curr_exp(:,idx),2)) + sum(sum(curr_exp(:,~idx),2)));
-                        p = (sum(sum(node_exp(idx,~idx)))/((sum(~idx)*sum(idx))))/sum(sum(node_exp));
+                        
                         low_participation{cntl,1} = subj;
                         low_participation{cntl,2} = f;
                         low_participation{cntl,3} = regions{m};

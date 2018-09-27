@@ -37,6 +37,7 @@ mod_exp_high = cell(nSubj*numel(bands)*numel(regions), 4);
 mod_exp_low = cell(nSubj*numel(bands)*numel(regions), 4);
 % load behavior
 load([top_dir, 'Behavior/stats'])
+load([save_dir, 'noise_sg.mat']);
 
 %% Loop through data
 for j = 1:numel(sensors)
@@ -55,6 +56,13 @@ for j = 1:numel(sensors)
             % get subgraph data
             subset = readNPY([data_dir, subj, '/', sens, '/wpli_', f, '_subset.npy']);
             coeff = readNPY([data_dir, subj, '/',sens, '/wpli_', f, '_coeff.npy']);
+            
+            % remove noise SG
+            idx = noise_sg{k,i};
+            coeff = coeff(~idx,:);
+            subset = subset(~idx,:);
+            
+            
             b_exp = subset(:,end);
             [~,bSG] = max(b_exp);
             [~,nbSG] = min(b_exp);
@@ -68,7 +76,9 @@ for j = 1:numel(sensors)
                     for m = 1:numel(regions)
                         cnth = cnth + 1;
                         load([top_dir, 'montages/', regions{m}, '_idx.mat'])
-                        curr_exp = sum(sum(node_exp(idx,idx)))/numel(nonzeros(idx))^2;
+                        % get the mean edge within a lobe (total edges/number of edges), divided by
+                        % the total edges
+                        curr_exp = (sum(sum(node_exp(idx,idx)))/(sum(idx)^2))/sum(sum(node_exp));
                         mod_exp_high{cnth,1} = subj;
                         mod_exp_high{cnth,2} = f;
                         mod_exp_high{cnth,3} = regions{m};
@@ -80,7 +90,7 @@ for j = 1:numel(sensors)
                     for m = 1:numel(regions)
                         cntl = cntl + 1;
                         load([top_dir, 'montages/', regions{m}, '_idx.mat'])
-                        curr_exp = sum(sum(node_exp(idx,idx)))/numel(nonzeros(idx))^2;
+                        curr_exp = (sum(sum(node_exp(idx,idx)))/(sum(idx)^2))/sum(sum(node_exp));
                         mod_exp_low{cntl,1} = subj;
                         mod_exp_low{cntl,2} = f;
                         mod_exp_low{cntl,3} = regions{m};
