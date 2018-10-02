@@ -22,44 +22,33 @@ function [ wpli ] = get_window_wpli( data, srate, st, en, freqs, t, grad)
 % defining constants
 
 cfg = [];
-cfg.method     = 'wavelet';                
-cfg.width      = 6; 
-cfg.output     = 'powandcsd';	
-cfg.foi        = freqs;	                
+cfg.method     = 'wavelet';
+cfg.width      = 6;
+cfg.output     = 'powandcsd';
+cfg.foi        = freqs;
 cfg.toi        = st:1/srate:en;
 cfg.pad        = 'nextpow2';
 cfg.trials     = t;
 wave = ft_freqanalysis(cfg, data);
 
-% % get time windows, using 5 windows, as discussed below
-% % changed to 3 because we have so little data
-% csd_ovlp = .5;
-% csd_nWin = 3;
-% csd_winLength = floor(winLength*convert/(csd_nWin - ovlp));
-% 
+% housekeeping for formatting things later (basically to move between matrix and vector representations). There might be a better way to
+% do this
 nSens = size(data.trial{1},1);
 nEdge = (nSens^2 - nSens)/2;
-% csd = zeros(nWin, nEdge, numel(freqs));
 cnt = 0;
 label = zeros(nEdge,2);
 for i = 1:nSens
     for j = (i+1):nSens
         cnt = cnt +1;
-        %for k = 1:nWin
-            % channels should be columns, opposite of what is normally done
-            % with brain data. this also matters more for pwelch than cpsd
-            label(cnt,:) = [i,j];
-            %[curr] = cpsd(squeeze(x(k,i,:))',squeeze(x(k,j,:))',csd_winLength,csd_ovlp,freqs,srate);
-            %csd(k,cnt,:) = curr;
-        %end
-     end
- end
+        label(cnt,:) = [i,j];
+    end
+end
 
 
 
 %% Get wPLI
 % this is code for getting the debiased wPLI - but with 750 timepoints I
-% dont think we need to debias it
+% dont think we need to debias it (confirmed this with Javi)
 % with the exception of the abs at the end, this is the same as the
 % fieldtrip function
 % The debiased WPLI-square estimator is computed by (i) computing the
@@ -91,6 +80,7 @@ wpli_v = abs(nanmean(X,3))./nanmean(abs(X),3);
 %average over freqs
 wpli_v = abs(mean(wpli_v,2));
 
+% put back into matrix
 wpli = zeros(nSens);
 for i = 1:nSens
     for j = (i+1):nSens
@@ -106,10 +96,10 @@ wpli = wpli+wpli';
 %% Testing some wavelets
 
 % cfg = [];
-% cfg.method     = 'wavelet';                
-% cfg.width      = 6; 
-% cfg.output     = 'powandcsd';	
-% cfg.foi        = 7:1:14;	                
+% cfg.method     = 'wavelet';
+% cfg.width      = 6;
+% cfg.output     = 'powandcsd';
+% cfg.foi        = 7:1:14;
 % cfg.toi        = 3:1/srate:6;
 % wave = ft_freqanalysis(cfg, data_grad);
 

@@ -42,6 +42,9 @@ noise_idx = noise_sg;
 sg_n = [];
 noise_sg = [];
 bc = [];
+slope = [];
+imp = [];
+diff = [];
 temp_energy = [];
 coeff_med = [];
 coeff_skew = [];
@@ -105,6 +108,9 @@ for j = 1:numel(sensors)
                 % record behavioral coefficient, subject, and band
                 bc = [bc; subset(n,end)];
                 subjects = [subjects; {subj}];
+                slope = [slope; betas(i)];
+                imp = [imp; improvement(i)];
+                diff = [diff; difference(i)];
                 band = [band; {f}];
                 sg_n = [sg_n; n];
                 if n == bSG
@@ -157,7 +163,8 @@ for j = 1:numel(sensors)
     end
 end
 
-save([R_dir, 'subgraph_stats.mat'], 'noise_sg', 'sg_n', 'subjects', 'band', 'cond', 'bc', 'temp_energy', 'coeff_med', 'coeff_skew', 'coeff_min', 'coeff_autocorr', 'coeff_quant', 'Left_frontal_wi', 'Left_occipital_wi',...
+save([R_dir, 'subgraph_stats.mat'], 'slope', 'imp', 'diff', 'noise_sg', 'sg_n', 'subjects', 'band', 'cond', 'bc', 'temp_energy', ...
+    'coeff_med', 'coeff_skew', 'coeff_min', 'coeff_autocorr', 'coeff_quant', 'Left_frontal_wi', 'Left_occipital_wi',...
     'Left_parietal_wi', 'Left_temporal_wi', 'Right_frontal_wi', 'Right_occipital_wi', 'Right_parietal_wi', 'Right_temporal_wi', 'Vertex_wi', ...
     'Left_frontal_bw', 'Left_occipital_bw','Left_parietal_bw', 'Left_temporal_bw', 'Right_frontal_bw', 'Right_occipital_bw', 'Right_parietal_bw',...
     'Right_temporal_bw', 'Vertex_bw', 'rfv', 'lfv', 'exp_max')
