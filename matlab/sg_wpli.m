@@ -34,9 +34,13 @@ nEdges = (nNode^2-nNode)/2;
 edge_similarity = zeros(nEdges, nSubj-1, numel(bands), numel(sensors));
 % load behavior
 load([top_dir, 'Behavior/perf'])
-load([save_dir, 'noise_sg.mat']);
+
 
 %% Loop through data
+
+% load noise/mean sg index
+load([save_dir, 'noise_sg.mat']);
+
 for j = 1:numel(sensors)
     sens = sensors{j};
     R_dir_s = [R_dir, sens, '/'];
