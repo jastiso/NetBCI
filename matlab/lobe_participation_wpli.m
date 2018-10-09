@@ -116,3 +116,78 @@ for j = 1:numel(sensors)
     save([R_dir_s, 'low_participation.mat'], 'subj_l', 'band_l', 'region_l', 'part_l', 'slope')
 
 end
+
+
+%% Loop through data - uniform pr
+
+load([save_dir, 'pr_noise_sg.mat']);
+
+for j = 1:numel(sensors)
+    sens = sensors{j};
+    R_dir_s = [R_dir, sens, '/'];
+    
+    cnth = 0;
+    cntl = 0;
+    for i = Subj
+        s_idx = find(i == Subj);
+        subj = sprintf('%03d', i);
+        
+        for k = 1:numel(bands)
+            f = bands{k};
+            
+            % get subgraph data
+            subset = readNPY([data_dir, subj, '/', sens, '/wpli_pr_', f, '_subset.npy']);
+            coeff = readNPY([data_dir, subj, '/',sens, '/wpli_pr_', f, '_coeff.npy']);
+            
+            % remove noise SG
+            idx = noise_sg{k,i};
+            coeff = coeff(~idx,:);
+            subset = subset(~idx,:);
+            
+            b_exp = subset(:,end);
+            [~,bSG] = max(b_exp);
+            [~,nbSG] = min(b_exp);
+            nSG = size(subset,1);
+             
+            for n = 1:nSG
+                % get expressin into matrix
+                curr_SG = subset(n,1:end-1);
+                node_exp = get_sg_matrix(nNode, curr_SG);
+                if n == bSG
+                    for m = 1:numel(regions)
+                        cnth = cnth + 1;
+                        load([top_dir, 'montages/', regions{m}, '_idx.mat'])
+                        curr_exp = node_exp(idx,:);
+                        % get the mean edge between a lobes (total edges/number of edges), divided by
+                        % the total edges
+                        p = (sum(sum(node_exp(idx,~idx)))/((sum(~idx)*sum(idx))))/sum(sum(node_exp));
+                        high_participation{cnth,1} = subj;
+                        high_participation{cnth,2} = f;
+                        high_participation{cnth,3} = regions{m};
+                        high_participation{cnth,4} = p;
+                        high_participation{cnth,5} = betas(i);
+                    end
+                elseif n == nbSG
+                    for m = 1:numel(regions)
+                        cntl = cntl + 1;
+                        load([top_dir, 'montages/', regions{m}, '_idx.mat'])
+                        curr_exp = node_exp(idx,:);
+                        %p = (sum(sum(curr_exp(:,idx),2)) - sum(sum(curr_exp(idx,~idx),2)))/(sum(sum(curr_exp(:,idx),2)) + sum(sum(curr_exp(:,~idx),2)));
+                        p = (sum(sum(node_exp(idx,~idx)))/((sum(~idx)*sum(idx))))/sum(sum(node_exp));
+                        low_participation{cntl,1} = subj;
+                        low_participation{cntl,2} = f;
+                        low_participation{cntl,3} = regions{m};
+                        low_participation{cntl,4} = p;
+                    end
+                end
+            end
+        end
+    end
+    subj_h = high_participation(:,1); band_h = high_participation(:,2); region_h = high_participation(:,3);
+    part_h = high_participation(:,4); slope = high_participation(:,5);
+    subj_l = low_participation(:,1); band_l = low_participation(:,2); region_l = low_participation(:,3);
+    part_l = low_participation(:,4);
+    save([R_dir_s, 'high_participation_pr.mat'], 'subj_h', 'band_h', 'region_h', 'part_h', 'slope')
+    save([R_dir_s, 'low_participation_pr.mat'], 'subj_l', 'band_l', 'region_l', 'part_l', 'slope')
+
+end

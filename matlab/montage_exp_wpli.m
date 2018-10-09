@@ -109,4 +109,80 @@ for j = 1:numel(sensors)
     save([R_dir_s, 'mod_exp_low.mat'], 'subj_l', 'band_l', 'region_l', 'exp_l', 'slope')
 
 end
+  
+
+%% Loop through data - uniform pr
+
+% mean sg
+load([save_dir, 'pr_noise_sg.mat']);
+
+for j = 1:numel(sensors)
+    sens = sensors{j};
+    R_dir_s = [R_dir, sens, '/'];
+    
+    cnth = 0;
+    cntl = 0;
+    for i = Subj
+        s_idx = find(i == Subj);
+        subj = sprintf('%03d', i);
+        
+        for k = 1:numel(bands)
+            f = bands{k};
+            
+            % get subgraph data
+            subset = readNPY([data_dir, subj, '/', sens, '/wpli_pr_', f, '_subset.npy']);
+            coeff = readNPY([data_dir, subj, '/',sens, '/wpli_pr_', f, '_coeff.npy']);
+            
+            % remove noise SG
+            idx = noise_sg{k,i};
+            coeff = coeff(~idx,:);
+            subset = subset(~idx,:);
+            
+            
+            b_exp = subset(:,end);
+            [~,bSG] = max(b_exp);
+            [~,nbSG] = min(b_exp);
+            nSG = size(subset,1);
+             
+            for n = 1:nSG
+                % get expressin into matrix
+                curr_SG = subset(n,1:end-1);
+                node_exp = get_sg_matrix(nNode, curr_SG);
+                if n == bSG
+                    for m = 1:numel(regions)
+                        cnth = cnth + 1;
+                        load([top_dir, 'montages/', regions{m}, '_idx.mat'])
+                        % get the mean edge within a lobe (total edges/number of edges), divided by
+                        % the total edges
+                        curr_exp = (sum(sum(node_exp(idx,idx)))/(sum(idx)^2))/sum(sum(node_exp));
+                        mod_exp_high{cnth,1} = subj;
+                        mod_exp_high{cnth,2} = f;
+                        mod_exp_high{cnth,3} = regions{m};
+                        mod_exp_high{cnth,4} = curr_exp;
+                        mod_exp_high{cnth,5} = betas(i);
+
+                    end
+                elseif n == nbSG
+                    for m = 1:numel(regions)
+                        cntl = cntl + 1;
+                        load([top_dir, 'montages/', regions{m}, '_idx.mat'])
+                        curr_exp = (sum(sum(node_exp(idx,idx)))/(sum(idx)^2))/sum(sum(node_exp));
+                        mod_exp_low{cntl,1} = subj;
+                        mod_exp_low{cntl,2} = f;
+                        mod_exp_low{cntl,3} = regions{m};
+                        mod_exp_low{cntl,4} = curr_exp;
+                    end
+                end
+            end
+
+        end
+    end
+    subj_h = mod_exp_high(:,1); band_h = mod_exp_high(:,2); region_h = mod_exp_high(:,3);
+    exp_h = mod_exp_high(:,4); slope = mod_exp_high(:,5);
+    subj_l = mod_exp_low(:,1); band_l = mod_exp_low(:,2); region_l = mod_exp_low(:,3);
+    exp_l = mod_exp_low(:,4);
+    save([R_dir_s, 'mod_exp_high_pr.mat'], 'subj_h', 'band_h', 'region_h', 'exp_h', 'slope')
+    save([R_dir_s, 'mod_exp_low_pr.mat'], 'subj_l', 'band_l', 'region_l', 'exp_l', 'slope')
+
+end
     
