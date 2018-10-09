@@ -35,20 +35,19 @@ grad3 = ['MEG0243';'MEG0233';'MEG0443';'MEG0433';'MEG0713';'MEG0743';'MEG1843';'
 Subj = [1:20];
 nSubj = numel(Subj);
 freqs = [7,14;15,30;31,45;55,70];
-bands = [{'alpha'}, {'beta'}, {'low_gamma'}];
+bands = [{'alpha'}, {'beta'}, {'low_gamma'}, {'gamma'}];
 sensors = [{'grad'}];
 regions = [{'Left_frontal'}, {'Left_occipital'}, {'Left_parietal'}, {'Left_temporal'}, ...
     {'Right_frontal'}, {'Right_occipital'}, {'Right_parietal'}, {'Right_temporal'}, {'Vertex'}];
 
 nNode = 102;
 nEdges = (nNode^2-nNode)/2;
-load([save_dir, 'noise_sg.mat']);
+load([save_dir, 'pr_noise_sg.mat']);
 noise_idx = noise_sg;
 
 % initialize
 high_states = zeros(nNode, nSubj, numel(bands));
 low_states = zeros(nNode, nSubj, numel(bands));
-small_states = zeros(nNode, nSubj, numel(bands));
 
 %% Make control set
 
@@ -75,17 +74,6 @@ for i = 1:size(grad2,1)
     B(idx) = 1;
 end
 
-% Get states for right temporal control state
-nControl = sum(B);
-
-% chosing right temporal
-load([top_dir, 'montages/Right_temporal_idx.mat'])
-B_control = idx;
-load([top_dir, 'montages/Right_occipital_idx.mat'])
-% get two regions from occipital that are close
-B_control(97:98) = idx(97:98);
-B_control = double(B_control);
-sum(B_control)
 
 %% Loop through data
 
@@ -101,13 +89,13 @@ for j = 1:numel(sensors)
             f = bands{k};
             
             % get subgraph data
-            subset = readNPY([data_dir, subj, '/', sens, 'wpli_', f, '_subset.npy']);
-            coeff = readNPY([data_dir, subj, '/',sens, 'wpli_', f, '_coeff.npy']);
+            subset = readNPY([data_dir, subj, '/', sens, 'wpli_pr_', f, '_subset.npy']);
+            coeff = readNPY([data_dir, subj, '/',sens, 'wpli_pr_', f, '_coeff.npy']);
             
             % remove noise SG
-%             idx = noise_sg{k,i};
-%             coeff = coeff(~idx,:);
-%             subset = subset(~idx,:);
+            idx = noise_sg{k,i};
+            coeff = coeff(~idx,:);
+            subset = subset(~idx,:);
             
             b_exp = subset(:,end);
             [~,bSG] = max(b_exp);
@@ -122,12 +110,11 @@ for j = 1:numel(sensors)
             low_mat = low_mat./eigs(low_mat,1) - eye(nNode).*1.001;
             
             % get largest eigenvector of grammian
-            [h_vect, h_val, small_vect] = easy_state(high_mat,diag(B),eye(nNode),zeros(nNode));
+            [h_vect, h_val] = easy_state(high_mat,diag(B),eye(nNode),zeros(nNode));
             [l_vect, l_val] = easy_state(low_mat,diag(B),eye(nNode),zeros(nNode));
             
             high_states(:,i,k) = h_vect;
             low_states(:,i,k) = l_vect;
-            small_states(:,i,k) = small_vect;
         end
     end
 end
@@ -159,6 +146,7 @@ end
 
 cfg.layout = [top_dir, 'layouts/neuromag306cmb.lay'];
 
+
 for i = 1:numel(bands)
     plot_data.powspctrm = mean(high_states(:,:,i),2);
     plot_data.label = cmb_labels;
@@ -167,17 +155,12 @@ for i = 1:numel(bands)
     plot_data.cfg = [];
     figure(1); clf
     ft_topoplotER(cfg,plot_data); colorbar
-    saveas(gca, [img_dir, bands{i}, '_avg_high_state.png'], 'png')
+    saveas(gca, [img_dir, bands{i}, '_avg_high_state_pr.png'], 'png')
     
     plot_data.powspctrm = mean(low_states(:,:,i),2);
     figure(2); clf
     ft_topoplotER(cfg,plot_data); colorbar
-    saveas(gca, [img_dir, bands{i}, '_avg_low_state.png'], 'png')
-    
-    plot_data.powspctrm = mean(small_states(:,:,i),2);
-    figure(3); clf
-    ft_topoplotER(cfg,plot_data); colorbar
-    saveas(gca, [img_dir, bands{i}, '_avg_small_state.png'], 'png')
+    saveas(gca, [img_dir, bands{i}, '_avg_low_state_pr.png'], 'png')
 end
 
 %% Categorize by lobe
@@ -208,124 +191,4 @@ for i = 1:numel(regions)
     end
 end
 
-save([R_dir, 'grad/control_state.mat'], 'region_ord', 'band_ord', 'h_region', 'l_region')
-
-
-
-%% Other control set - Loop through data --------------------------------
-
-for j = 1:numel(sensors)
-    sens = sensors{j};
-    R_dir_s = [R_dir, sens, '/'];
-    
-    for i = Subj
-        s_idx = find(i == Subj);
-        subj = sprintf('%03d', i);
-        
-        for k = 1:numel(bands)
-            f = bands{k};
-            
-            % get subgraph data
-            subset = readNPY([data_dir, subj, '/', sens, 'wpli_', f, '_subset.npy']);
-            coeff = readNPY([data_dir, subj, '/',sens, 'wpli_', f, '_coeff.npy']);
-            
-            % remove noise SG
-            idx = noise_sg{k,i};
-            coeff = coeff(~idx,:);
-            subset = subset(~idx,:);
-            
-            b_exp = subset(:,end);
-            [~,bSG] = max(b_exp);
-            [~,nbSG] = min(b_exp);
-            nSG = size(subset,1);
-            
-            % get gramian
-            % scale to be stable
-            high_mat = get_sg_matrix(nNode, subset(bSG,:));
-            high_mat = high_mat./eigs(high_mat,1) - eye(nNode).*1.001;
-            low_mat = get_sg_matrix(nNode, subset(nbSG,:));
-            low_mat = low_mat./eigs(low_mat,1) - eye(nNode).*1.001;
-            
-            % get largest eigenvector of grammian
-            [cont_h_vect, h_val] = easy_state(high_mat,diag(B_control),eye(nNode),zeros(nNode));
-            [cont_l_vect, l_val] = easy_state(low_mat,diag(B_control),eye(nNode),zeros(nNode));
-            
-            cont_high_states(:,i,k) = cont_h_vect;
-            cont_low_states(:,i,k) = cont_l_vect;
-        end
-    end
-end
-
-%% visualize
-
-% figure(1); clf
-% imagesc(high_states(:,:,2)); colorbar
-%
-% figure(2); clf
-% imagesc(low_states(:,:,2)); colorbar
-%
-% figure(3); clf
-% imagesc(high_states(:,:,2) - low_states(:,:,2)); colorbar
-%
-% h_corr = corr(high_states(:,:,2));
-% l_corr = corr(low_states(:,:,2));
-% figure(1); clf
-% imagesc(h_corr); colorbar
-%
-% figure(2); clf
-% imagesc(l_corr); colorbar
-%
-% figure(1); clf
-% imagesc(mean(high_states(:,:,2),2)); colorbar
-%
-% figure(2); clf
-% imagesc(mean(low_states(:,:,2),2)); colorbar
-
-cfg.layout = [top_dir, 'layouts/neuromag306cmb.lay'];
-fid = fopen([top_dir, 'layouts/neuromag306cmb.txt'], 'r');
-
-for i = 1:numel(bands)
-    plot_data.powspctrm = mean(cont_high_states(:,:,i),2);
-    plot_data.label = cmb_labels;
-    plot_data.dimord = 'chan_freq';
-    plot_data.freq = mean(freqs(i,:));
-    plot_data.cfg = [];
-    figure(1); clf
-    ft_topoplotER(cfg,plot_data); colorbar
-    saveas(gca, [img_dir, bands{i}, '_cont_avg_high_state.png'], 'png')
-    
-    plot_data.powspctrm = mean(cont_low_states(:,:,i),2);
-    figure(2); clf
-    ft_topoplotER(cfg,plot_data); colorbar
-    saveas(gca, [img_dir, bands{i}, '_cont_avg_low_state.png'], 'png')
-end
-
-%% Categorize by lobe
-
-
-cont_h_region = [];
-cont_l_region = [];
-region_ord = {};
-band_ord = {};
-
-cnt = 1;
-for i = 1:numel(regions)
-    for j = 1:numel(bands)
-        load([top_dir, 'montages/', regions{i}, '_idx.mat'])
-        
-        % get the mean edge between a lobes (total edges/number of edges), divided by
-        % the total edges
-        
-        % stupid frmatting thing for R
-        for k = 0:19
-            region_ord{cnt+k} = regions{i};
-            band_ord{cnt+k} = bands{j};
-        end
-        cont_h_region = [cont_h_region; mean(high_states(idx,:,j))];
-        cont_l_region = [cont_l_region, mean(low_states(idx,:,j))];
-        
-        cnt = cnt + nSubj;
-    end
-end
-
-save([R_dir, 'grad/cont_control_state.mat'], 'region_ord', 'band_ord', 'cont_h_region', 'cont_l_region')
+save([R_dir, 'grad/control_state_pr.mat'], 'region_ord', 'band_ord', 'h_region', 'l_region')
