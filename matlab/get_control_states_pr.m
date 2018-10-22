@@ -35,11 +35,10 @@ grad3 = ['MEG0243';'MEG0233';'MEG0443';'MEG0433';'MEG0713';'MEG0743';'MEG1843';'
 Subj = [1:20];
 nSubj = numel(Subj);
 freqs = [7,14;15,30;31,45;55,70];
-bands = [{'alpha'}, {'beta'}, {'low_gamma'}, {'gamma'}];
+bands = [{'alpha'}, {'beta'}, {'low_gamma'}];
 sensors = [{'grad'}];
 regions = [{'Left_frontal'}, {'Left_occipital'}, {'Left_parietal'}, {'Left_temporal'}, ...
-    {'Right_frontal'}, {'Right_occipital'}, {'Right_parietal'}, {'Right_temporal'}, {'Vertex'}];
-
+    {'Right_frontal'}, {'Right_occipital'}, {'Right_parietal'}, {'Right_temporal'}, {'Vertex'}, {'Left_motor'}, {'Right_motor'}];
 nNode = 102;
 nEdges = (nNode^2-nNode)/2;
 load([save_dir, 'pr_noise_sg.mat']);
@@ -99,7 +98,8 @@ for j = 1:numel(sensors)
             
             b_exp = subset(:,end);
             [~,bSG] = max(b_exp);
-            [~,nbSG] = min(b_exp);
+            [~, nbSG] = min(nonzeros((b_exp))); % smallest nonzero
+            %[~,nbSG] = min(b_exp);
             nSG = size(subset,1);
             
             % get gramian
@@ -175,7 +175,7 @@ cnt = 1;
 for i = 1:numel(regions)
     for j = 1:numel(bands)
         load([top_dir, 'montages/', regions{i}, '_idx.mat'])
-        
+        idx = logical(idx);
         % get the mean edge between a lobes (total edges/number of edges), divided by
         % the total edges
         
@@ -184,7 +184,7 @@ for i = 1:numel(regions)
             region_ord{cnt+k} = regions{i};
             band_ord{cnt+k} = bands{j};
         end
-        h_region = [h_region; mean(high_states(idx,:,j))];
+        h_region = [h_region, mean(high_states(idx,:,j))];
         l_region = [l_region, mean(low_states(idx,:,j))];
         
         cnt = cnt + nSubj;

@@ -147,8 +147,6 @@ end
 
 %% Null models - uniform PR
 
-%load noise sg
-load([save_dir, 'pr_noise_sg.mat']);
 
 %initialize
 max_corrs_null = zeros(nSubj, numel(bands), numel(sensors));
@@ -176,11 +174,11 @@ for j = 1:numel(sensors)
             
             % get subgraph data
             if strcmp(data_dir(end-5:end-1),'param')
-                subset = readNPY([data_dir, subj, '/', sens, 'wpli_pr_', f, '_subset.npy']);
-                coeff = readNPY([data_dir, subj, '/',sens, 'wpli_pr_', f, '_coeff.npy']);
+                subset = readNPY([data_dir, subj, '/', sens, 'pr_wpli_', f, '_subset.npy']);
+                coeff = readNPY([data_dir, subj, '/',sens, 'pr_wpli_', f, '_coeff.npy']);
             else
-                subset = readNPY([data_dir, subj, '/', sens, '/wpli_pr_', f, '_subset.npy']);
-                coeff = readNPY([data_dir, subj, '/',sens, '/wpli_pr_', f, '_coeff.npy']);
+                subset = readNPY([data_dir, subj, '/', sens, '/pr_wpli_', f, '_subset.npy']);
+                coeff = readNPY([data_dir, subj, '/',sens, '/pr_wpli_', f, '_coeff.npy']);
             end
             
             % remove noise SG
@@ -193,7 +191,7 @@ for j = 1:numel(sensors)
             b_exp = subset(:,end);
             [max_e2,bsg2] = max(b_exp(b_exp<max(b_exp))); % second biggest element
             [tmp,tmp_idx] = sort(b_exp,'descend');
-            max_e3 = tmp(3); % third biggest element
+             max_e3 = tmp(3); % third biggest element
             bsg3 = tmp_idx(3); % third biggest element
             [min_e,nbsg] = min(nonzeros(subset(:,end))); % here, low is smallest nonzero
             
@@ -201,8 +199,6 @@ for j = 1:numel(sensors)
             max_corrs_null(idx,k,j) = corr(behavior_all{i}', coeff(bsg,:)');
             min_corrs_null(idx,k,j) = corr(behavior_all{i}', coeff(nbsg,:)');
             max_exp_null(idx,k,j) = max_e;
-            max_exp_null2(idx,k,j) = max_e2;
-            max_exp_null3(idx,k,j) = max_e3;
             min_exp_null(idx,k,j) = min_e;
             sum_exp_null(idx,k,j) = mean(subset(:,end));
             sd_exp_null(idx,k,j) = std(subset(:,end));
