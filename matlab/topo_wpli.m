@@ -10,18 +10,26 @@ addpath(genpath('/Users/stiso/Documents/MATLAB/npy-matlab-master/'))
 addpath('/Users/stiso/Documents/MATLAB/fieldtrip-20170830/')
 
 top_dir = '/Users/stiso/Documents/MATLAB/NetBCI/';
-data_dir = '/Users/stiso/Documents/Python/NetBCI/NMF/';
+data_dir = '/Users/stiso/Documents/Python/NetBCI/NMF/param/';
+save_dir = [top_dir, 'GroupAvg/wpli/analysis/'];
 
 subjs = [1:20];
 nSubj = numel(subjs);
 nNode = 102;
 nEdge = (nNode^2-nNode)/2;
 freqs = [7,14;15,30;31,45;55,70];
-bands = [{'alpha'},{'beta'},{'low_gamma'},{'gamma'}];
+bands = [{'alpha'},{'beta'},{'low_gamma'}];
 sensors = [{'grad'}];
 % threshold for edge visualization
 thr = 1;
 consensus = zeros(nNode,nNode, nSubj-1, numel(bands));
+load([save_dir, 'noise_sg.mat']);
+noise_idx = noise_sg;
+img_dir = [top_dir, 'GroupAvg/wpli/images/'];
+
+% initialize
+high_states = zeros(nNode, nSubj, numel(bands));
+low_states = zeros(nNode, nSubj, numel(bands));
 
 %% Loop through data
 
@@ -190,3 +198,98 @@ plot(thrs,consistent_edges, 'linewidth', 2)
 legend(bands)
 saveas(gca, [img_dir, 'consensus_thresh.png'], 'png')
 
+
+%% Plot average strength for every high and low graph
+
+
+% get labels
+load(['/Users/stiso/Resilio Sync/NETBCI.RAW/DataBase/1_Signals/2_Segmentation/2_MEG/1_Signals/2_Segmentation/2_MEG/Session1/1_test01/Seg_MEG_Subj001_Ses1_test01.mat'])
+labels = Seg_MEG_Subj001_Ses1_test01.MI.label;
+load(['/Users/stiso/Resilio Sync/NETBCI.RAW/DataBase/1_Signals/0_RawData/2_MEG/Session1/1_test01/RawData_MEG_Subj001_Ses1_test01.mat'])
+mag_idx = strcmp(RawData_MEG_Subj001_Ses1_test01.meg_sensors.chantype,'megmag');
+grad_label = labels(~mag_idx);
+
+cnt = 1;
+cmb_labels = cell(nNode,1);
+for i = 1:2:numel(grad_label)
+    cmb_labels{cnt} = [grad_label{i}, '+', grad_label{i+1}(end-3:end)];
+    cnt = cnt + 1;
+end
+
+
+
+% this used to index over mag and grad, but we dont look at mag
+sens = sensors{1};
+
+for i = subjs
+    subj = sprintf('%03d', i);
+    
+    for k = 1:numel(bands)
+        f = bands{k};
+        
+        % get subgraph data
+        subset = readNPY([data_dir, subj, '/', sens, 'wpli_', f, '_subset.npy']);
+        coeff = readNPY([data_dir, subj, '/',sens, 'wpli_', f, '_coeff.npy']);
+        
+        % remove noise SG
+        idx = noise_sg{k,i};
+        coeff = coeff(~idx,:);
+        subset = subset(~idx,:);
+        
+        b_exp = subset(:,end);
+        [~,bSG] = max(b_exp);
+        %[~, nbSG] = max(b_exp(b_exp<max(b_exp))); % second biggest element
+        [~, nzSG] = min(nonzeros((b_exp))); % smallest nonzero
+        
+        % if you actualy want to look at 0s
+        if sum(b_exp == 0) <= 1
+            [~,nbSG] = min(b_exp);
+        else
+            nbSG = find(b_exp == 0);
+        end
+        nZero = numel(nbSG);
+        
+        
+        
+        
+        %get gramian
+        % scale to be stable
+        high_mat = get_sg_matrix(nNode, subset(bSG,:));
+        %low_mat = get_sg_matrix(nNode, subset(nbSG,:));
+        %low_mat = low_mat./eigs(low_mat,1) - eye(nNode).*1.001;
+        low_mat = zeros(nNode, nNode, nZero);
+        for j = 1:nZero
+            low_mat(:,:,j) = get_sg_matrix(nNode, subset(nbSG,:));
+        end
+        
+        
+        % get mean strength
+        high_states(:,i,k) = mean(high_mat,2);
+        
+        l_vect_all = zeros(nNode, nZero);
+        for j = 1:nZero
+             l_vect_all(:,j) = mean(low_mat(:,:,j),2);
+        end
+        low_states(:,i,k) = mean(l_vect_all,2);
+    end
+end
+
+
+cfg.layout = [top_dir, 'layouts/neuromag306cmb.lay'];
+
+for i = 1:numel(bands)
+    plot_data.powspctrm = mean(high_states(:,:,i),2);
+    plot_data.label = cmb_labels;
+    plot_data.dimord = 'chan_freq';
+    plot_data.freq = mean(freqs(i,:));
+    plot_data.cfg = [];
+    figure(1); clf
+    ft_topoplotER(cfg,plot_data); colorbar
+    saveas(gca, [img_dir, bands{i}, '_avg_high_strength.png'], 'png')
+    
+    plot_data.powspctrm = mean(low_states(:,:,i),2);
+    figure(2); clf
+    ft_topoplotER(cfg,plot_data); colorbar
+    saveas(gca, [img_dir, bands{i}, '_avg_low_strength.png'], 'png')
+    
+end
