@@ -42,11 +42,16 @@ regions = [{'Left_frontal'}, {'Left_occipital'}, {'Left_parietal'}, {'Left_tempo
 nNode = 102;
 nEdges = (nNode^2-nNode)/2;
 load([save_dir, 'pr_noise_sg.mat']);
-noise_idx = noise_sg;
 
 % initialize
 high_states = zeros(nNode, nSubj, numel(bands));
+high2_states = zeros(nNode, nSubj, numel(bands));
+high3_states = zeros(nNode, nSubj, numel(bands));
+high_states_ev2 = zeros(nNode, nSubj, numel(bands));
 low_states = zeros(nNode, nSubj, numel(bands));
+low_states_ev2 = zeros(nNode, nSubj, numel(bands));
+zero_states = zeros(nNode, nSubj, numel(bands));
+zero_states_ev2 = zeros(nNode, nSubj, numel(bands));
 
 %% Make control set
 
@@ -88,8 +93,13 @@ for j = 1:numel(sensors)
             f = bands{k};
             
             % get subgraph data
-            subset = readNPY([data_dir, subj, '/', sens, 'wpli_pr_', f, '_subset.npy']);
-            coeff = readNPY([data_dir, subj, '/',sens, 'wpli_pr_', f, '_coeff.npy']);
+            if strcmp(data_dir(end-5:end-1),'param')
+                subset = readNPY([data_dir, subj, '/', sens, 'wpli_pr_', f, '_subset.npy']);
+                coeff = readNPY([data_dir, subj, '/',sens, 'wpli_pr_', f, '_coeff.npy']);
+            else
+                subset = readNPY([data_dir, subj, '/', sens, '/wpli_pr_', f, '_subset.npy']);
+                coeff = readNPY([data_dir, subj, '/',sens, '/wpli_pr_', f, '_coeff.npy']);
+            end
             
             % remove noise SG
             idx = noise_sg{k,i};
@@ -97,52 +107,69 @@ for j = 1:numel(sensors)
             subset = subset(~idx,:);
             
             b_exp = subset(:,end);
-            [~,bSG] = max(b_exp);
-            [~, nbSG] = min(nonzeros((b_exp))); % smallest nonzero
-            %[~,nbSG] = min(b_exp);
-            nSG = size(subset,1);
+            [tmp,tmp_idx] = sort(b_exp,'descend');
+            bSG = tmp_idx(1);
+            bSG2 = tmp_idx(2); % second biggest element
+            bSG3 = tmp_idx(3); % third biggest element
+            [~, nzSG] = min(nonzeros((b_exp))); % smallest nonzero - this is how we will opporationalize "low"
             
-            % get gramian
+            % if you actualy want to look at 0s
+            if sum(b_exp == 0) <= 1
+                [~,nbSG] = min(b_exp);
+            else
+                nbSG = find(b_exp == 0);
+            end
+            nZero = numel(nbSG);
+            
+            
+            %get gramian
             % scale to be stable
+            % 1st
             high_mat = get_sg_matrix(nNode, subset(bSG,:));
             high_mat = high_mat./eigs(high_mat,1) - eye(nNode).*1.001;
-            low_mat = get_sg_matrix(nNode, subset(nbSG,:));
+            %2nd
+            high2_mat = get_sg_matrix(nNode, subset(bSG2,:));
+            high2_mat = high2_mat./eigs(high2_mat,1) - eye(nNode).*1.001;
+            %3rd
+            high3_mat = get_sg_matrix(nNode, subset(bSG3,:));
+            high3_mat = high3_mat./eigs(high3_mat,1) - eye(nNode).*1.001;
+            %lowest
+            low_mat = get_sg_matrix(nNode, subset(nzSG,:));
             low_mat = low_mat./eigs(low_mat,1) - eye(nNode).*1.001;
+            zero_mat = zeros(nNode, nNode, nZero);
+            for j = 1:nZero
+                zero_mat(:,:,j) = get_sg_matrix(nNode, subset(nbSG,:));
+                zero_mat(:,:,j) = zero_mat(:,:,j)./eigs(zero_mat(:,:,j),1) - eye(nNode).*1.001;
+            end
+            
             
             % get largest eigenvector of grammian
-            [h_vect, h_val] = easy_state(high_mat,diag(B),eye(nNode),zeros(nNode));
-            [l_vect, l_val] = easy_state(low_mat,diag(B),eye(nNode),zeros(nNode));
-            
+            [h_vect, ~, ~, vect2] = easy_state(high_mat,diag(B),eye(nNode),zeros(nNode));
             high_states(:,i,k) = h_vect;
+            high_states_ev2(:,i,k) = vect2;
+            [h2_vect, ~, ~] = easy_state(high2_mat,diag(B),eye(nNode),zeros(nNode));
+            high2_states(:,i,k) = h2_vect;
+            [h3_vect, ~, ~] = easy_state(high3_mat,diag(B),eye(nNode),zeros(nNode));
+            high3_states(:,i,k) = h3_vect;
+            [l_vect, ~, ~, l_v2] = easy_state(low_mat,diag(B),eye(nNode),zeros(nNode));
             low_states(:,i,k) = l_vect;
+            low_states_ev2(:,i,k) = l_v2;
+            
+            z_vect_all = zeros(nNode, nZero);
+            z_ev2_all = zeros(nNode, nZero);
+            for j = 1:nZero
+                [z_vect, ~, ~, z_ev2] = easy_state(zero_mat(:,:,j),diag(B),eye(nNode),zeros(nNode));
+                z_vect_all(:,j) = z_vect;
+                z_ev2_all(:,j) = z_ev2;
+            end
+            zero_states(:,i,k) = mean(z_vect_all,2);
+            zero_states_ev2(:,i,k) = mean(z_ev2_all,2);
         end
     end
 end
 
 %% visualize
 
-% figure(1); clf
-% imagesc(high_states(:,:,2)); colorbar
-%
-% figure(2); clf
-% imagesc(low_states(:,:,2)); colorbar
-%
-% figure(3); clf
-% imagesc(high_states(:,:,2) - low_states(:,:,2)); colorbar
-%
-% h_corr = corr(high_states(:,:,2));
-% l_corr = corr(low_states(:,:,2));
-% figure(1); clf
-% imagesc(h_corr); colorbar
-%
-% figure(2); clf
-% imagesc(l_corr); colorbar
-%
-% figure(1); clf
-% imagesc(mean(high_states(:,:,2),2)); colorbar
-%
-% figure(2); clf
-% imagesc(mean(low_states(:,:,2),2)); colorbar
 
 cfg.layout = [top_dir, 'layouts/neuromag306cmb.lay'];
 
@@ -161,6 +188,36 @@ for i = 1:numel(bands)
     figure(2); clf
     ft_topoplotER(cfg,plot_data); colorbar
     saveas(gca, [img_dir, bands{i}, '_avg_low_state_pr.png'], 'png')
+    
+    plot_data.powspctrm = mean(high2_states(:,:,i),2);
+    figure(3); clf
+    ft_topoplotER(cfg,plot_data); colorbar; caxis([0.06,.13])
+    saveas(gca, [img_dir, bands{i}, '_avg_high2_state_pr.png'], 'png')
+    
+    plot_data.powspctrm = mean(high3_states(:,:,i),2);
+    figure(4); clf
+    ft_topoplotER(cfg,plot_data); colorbar; caxis([0.06,.13])
+    saveas(gca, [img_dir, bands{i}, '_avg_high3_state_pr.png'], 'png')
+    
+    plot_data.powspctrm = mean(high_states_ev2(:,:,i),2);
+    figure(5); clf
+    ft_topoplotER(cfg,plot_data); colorbar; caxis([-.1,.1])
+    saveas(gca, [img_dir, bands{i}, '_avg_high_ev2_state_pr.png'], 'png')
+    
+    plot_data.powspctrm = mean(low_states_ev2(:,:,i),2);
+    figure(6); clf
+    ft_topoplotER(cfg,plot_data); colorbar; caxis([-.1,.1])
+    saveas(gca, [img_dir, bands{i}, '_avg_low_ev2_state_pr.png'], 'png')
+    
+        plot_data.powspctrm = mean(zero_states(:,:,i),2);
+    figure(7); clf
+    ft_topoplotER(cfg,plot_data); colorbar; caxis([0.06,.13])
+    saveas(gca, [img_dir, bands{i}, '_avg_zero_state.png'], 'png')
+    
+    plot_data.powspctrm = mean(zero_states_ev2(:,:,i),2);
+    figure(8); clf
+    ft_topoplotER(cfg,plot_data); colorbar; caxis([-.1,.1])
+    saveas(gca, [img_dir, bands{i}, '_avg_zero_ev2_state.png'], 'png')
 end
 
 %% Categorize by lobe
@@ -168,6 +225,12 @@ end
 
 h_region = [];
 l_region = [];
+l_region2 = [];
+h_region2 = [];
+h2_region = [];
+h3_region = [];
+z_region = [];
+z_region2 = [];
 region_ord = {};
 band_ord = {};
 
@@ -186,9 +249,15 @@ for i = 1:numel(regions)
         end
         h_region = [h_region, mean(high_states(idx,:,j))];
         l_region = [l_region, mean(low_states(idx,:,j))];
+        h2_region = [h2_region, mean(high2_states(idx,:,j))];
+        h3_region = [h3_region, mean(high3_states(idx,:,j))];
+        h_region2 = [h_region2, mean(high_states_ev2(idx,:,j))];
+        l_region2 = [l_region2, mean(low_states_ev2(idx,:,j))];
+        z_region = [z_region, mean(zero_states(idx,:,j))];
+        z_region2 = [z_region2, mean(zero_states_ev2(idx,:,j))];
         
         cnt = cnt + nSubj;
     end
 end
 
-save([R_dir, 'grad/control_state_pr.mat'], 'region_ord', 'band_ord', 'h_region', 'l_region')
+save([R_dir, 'grad/control_state_pr.mat'], 'region_ord', 'band_ord', 'h_region', 'l_region', 'h2_region', 'h3_region', 'h_region2', 'l_region2', 'z_region', 'z_region2')
