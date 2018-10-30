@@ -158,8 +158,8 @@ left_alpha
 right_alpha = t.test(filter(data, region == 'Right_motor', band == 'alpha')$high,filter(data, region == 'Right_motor', band == 'alpha')$low, paired=TRUE)
 right_alpha
 
-# gamma should have ???
-left_low_gamma = t.test(filter(data, region == 'Left_motor', band == 'low_gamma')$high,filter(data, region == 'Left_motor', band == 'low_gamma')$low, paired=TRUE)
+# gamma should have high motor and occipital
+left_low_gamma = t.test(filter(data, region == 'Left_motor', band == 'low_gamma')$high3,filter(data, region == 'Left_motor', band == 'low_gamma')$low, paired=TRUE)
 left_low_gamma
 right_low_gamma = t.test(filter(data, region == 'Right_motor', band == 'low_gamma')$high,filter(data, region == 'Right_motor', band == 'low_gamma')$low, paired=TRUE)
 right_low_gamma
@@ -356,10 +356,14 @@ stat_alpha
 stat_alpha_z = t.test(filter(data, region == 'Left_motor', band == 'alpha')$high_ev2,filter(data, region == 'Left_motor', band == 'alpha')$zero_ev2, paired=TRUE)
 stat_alpha_z
 # beta 
-stat_beta = t.test(filter(data, region == 'Left_motor', band == 'beta')$high3_ev2,filter(data, region == 'Left_motor', band == 'beta')$low_ev2, paired=TRUE)
-stat_beta
-stat_beta_z = t.test(filter(data, region == 'Left_motor', band == 'beta')$high3_ev2,filter(data, region == 'Left_motor', band == 'beta')$zero_ev2, paired=TRUE)
-stat_beta_z
+stat_beta3 = t.test(filter(data, region == 'Left_motor', band == 'beta')$high3_ev2,filter(data, region == 'Left_motor', band == 'beta')$low_ev2, paired=TRUE)
+stat_beta3
+stat_beta_z3 = t.test(filter(data, region == 'Left_motor', band == 'beta')$high3_ev2,filter(data, region == 'Left_motor', band == 'beta')$zero_ev2, paired=TRUE)
+stat_beta_z3
+stat_beta2 = t.test(filter(data, region == 'Left_motor', band == 'beta')$high2_ev2,filter(data, region == 'Left_motor', band == 'beta')$low_ev2, paired=TRUE)
+stat_beta2
+stat_beta_z2 = t.test(filter(data, region == 'Left_motor', band == 'beta')$high2_ev2,filter(data, region == 'Left_motor', band == 'beta')$zero_ev2, paired=TRUE)
+stat_beta_z2
 stat_gamma = t.test(filter(data, region == 'Left_motor', band == 'low_gamma')$high_ev2,filter(data, region == 'Left_motor', band == 'low_gamma')$low_ev2, paired=TRUE)
 stat_gamma
 stat_gamma_z = t.test(filter(data, region == 'Left_motor', band == 'low_gamma')$high_ev2,filter(data, region == 'Left_motor', band == 'low_gamma')$zero_ev2, paired=TRUE)
