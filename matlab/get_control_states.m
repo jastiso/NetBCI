@@ -201,29 +201,29 @@ for i = 1:numel(bands)
     plot_data.dimord = 'chan_freq';
     plot_data.freq = mean(freqs(i,:));
     plot_data.cfg = [];
-    figure(1); clf
-    ft_topoplotER(cfg,plot_data); colorbar; caxis([0.06,.13])
-    saveas(gca, [img_dir, bands{i}, '_avg_high_state.png'], 'png')
-    
-    plot_data.powspctrm = mean(low_states(:,:,i),2);
-    figure(2); clf
-    ft_topoplotER(cfg,plot_data); colorbar; caxis([0.06,.13])
-    saveas(gca, [img_dir, bands{i}, '_avg_low_state.png'], 'png')
-    
-    plot_data.powspctrm = mean(small_states(:,:,i),2);
-    figure(3); clf
-    ft_topoplotER(cfg,plot_data); colorbar;
-    saveas(gca, [img_dir, bands{i}, '_avg_small_state.png'], 'png')
-    
-    plot_data.powspctrm = mean(high2_states(:,:,i),2);
-    figure(4); clf
-    ft_topoplotER(cfg,plot_data); colorbar; caxis([0.06,.13])
-    saveas(gca, [img_dir, bands{i}, '_avg_high2_state.png'], 'png')
-    
-    plot_data.powspctrm = mean(high3_states(:,:,i),2);
-    figure(5); clf
-    ft_topoplotER(cfg,plot_data); colorbar; caxis([0.06,.13])
-    saveas(gca, [img_dir, bands{i}, '_avg_high3_state.png'], 'png')
+%     figure(1); clf
+%     ft_topoplotER(cfg,plot_data); colorbar; caxis([0.06,.13])
+%     saveas(gca, [img_dir, bands{i}, '_avg_high_state.png'], 'png')
+%     
+%     plot_data.powspctrm = mean(low_states(:,:,i),2);
+%     figure(2); clf
+%     ft_topoplotER(cfg,plot_data); colorbar; caxis([0.06,.13])
+%     saveas(gca, [img_dir, bands{i}, '_avg_low_state.png'], 'png')
+%     
+%     plot_data.powspctrm = mean(small_states(:,:,i),2);
+%     figure(3); clf
+%     ft_topoplotER(cfg,plot_data); colorbar;
+%     saveas(gca, [img_dir, bands{i}, '_avg_small_state.png'], 'png')
+%     
+%     plot_data.powspctrm = mean(high2_states(:,:,i),2);
+%     figure(4); clf
+%     ft_topoplotER(cfg,plot_data); colorbar; caxis([0.06,.13])
+%     saveas(gca, [img_dir, bands{i}, '_avg_high2_state.png'], 'png')
+%     
+%     plot_data.powspctrm = mean(high3_states(:,:,i),2);
+%     figure(5); clf
+%     ft_topoplotER(cfg,plot_data); colorbar; caxis([0.06,.13])
+%     saveas(gca, [img_dir, bands{i}, '_avg_high3_state.png'], 'png')
     
     plot_data.powspctrm = mean(high_states_ev2(:,:,i),2);
     figure(6); clf
