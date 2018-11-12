@@ -21,7 +21,8 @@ raw_data = readMat(paste('data/wpli/', sens, '/control_state.mat', sep = ''))
 data = data.frame(band = unlist(raw_data$band.ord), region = unlist(raw_data$region.ord), high = raw_data$h.region[1,], high2 = raw_data$h2.region[1,],
                   high3 = raw_data$h3.region[1,], high_ev2 = raw_data$h.region2[1,], low = raw_data$l.region[1,], low_ev2 = raw_data$l.region2[1,], 
                   zero = raw_data$z.region[1,], zero_ev2 = raw_data$z.region2[1,], small_ev = raw_data$small.region[1,], high2_ev2 = raw_data$h2.region2[1,], 
-                  high3_ev2 = raw_data$h3.region2[1,] )
+                  high3_ev2 = raw_data$h3.region2[1,], high_ev3 = raw_data$h.region3[1,], high2_ev3 = raw_data$h2.region3[1,], high3_ev3 = raw_data$h3.region3[1,],
+                  low_ev3 = raw_data$l.region3[1,], zero_ev3 = raw_data$z.region3[1,])
 
 plot = ggplot(data, aes(x = region, y = high, fill = band) )
 plot + geom_boxplot(notch = FALSE, lwd = 1) + 
@@ -334,6 +335,13 @@ plot + geom_boxplot(notch = FALSE, lwd = 1) +
   labs(x = 'Region', y = 'State Value')  + theme_minimal()
 ggsave(paste(sens, '_beta_ev2', '.png', sep = ''))
 
+curr_beta = filter(data_beta, cond == c("high2", "high3", "low"))
+plot = ggplot(curr_beta, aes(x = region, y = state, fill = cond) )
+plot + geom_boxplot(notch = FALSE, lwd = 1) + 
+  #geom_dotplot(binaxis='y', stackdir='center', dotsize=.5)
+  #scale_fill_manual(values = wes_palette("Moonrise1",4)) + 
+  labs(x = 'Region', y = 'State Value')  + theme_minimal()
+ggsave(paste(sens, '_beta_ev2_sub', '.png', sep = ''))
 
 plot = ggplot(data_alpha, aes(x = region, y = state, fill = cond) )
 plot + geom_boxplot(notch = FALSE, lwd = 1) + 
@@ -349,6 +357,13 @@ plot + geom_boxplot(notch = FALSE, lwd = 1) +
   labs(x = 'Region', y = 'State Value')  + theme_minimal()
 ggsave(paste(sens, '_low_gamma_ev2', '.png', sep = ''))
 
+curr_gamma = filter(data_low_gamma, cond == c("high", "high3", "low", "zero"))
+plot = ggplot(curr_gamma, aes(x = region, y = state, fill = cond) )
+plot + geom_boxplot(notch = FALSE, lwd = 1) + 
+  #geom_dotplot(binaxis='y', stackdir='center', dotsize=.5)
+  #scale_fill_manual(values = wes_palette("Moonrise1",4)) + 
+  labs(x = 'Region', y = 'State Value')  + theme_minimal()
+ggsave(paste(sens, '_low_gamma_ev2_sub', '.png', sep = ''))
 
 # alpha should have less motor exp in left
 stat_alpha = t.test(filter(data, region == 'Left_motor', band == 'alpha')$high_ev2,filter(data, region == 'Left_motor', band == 'alpha')$low_ev2, paired=TRUE)
@@ -364,9 +379,10 @@ stat_beta2 = t.test(filter(data, region == 'Left_motor', band == 'beta')$high2_e
 stat_beta2
 stat_beta_z2 = t.test(filter(data, region == 'Left_motor', band == 'beta')$high2_ev2,filter(data, region == 'Left_motor', band == 'beta')$zero_ev2, paired=TRUE)
 stat_beta_z2
-stat_gamma = t.test(filter(data, region == 'Left_motor', band == 'low_gamma')$high_ev2,filter(data, region == 'Left_motor', band == 'low_gamma')$low_ev2, paired=TRUE)
+#gamma
+stat_gamma = t.test(filter(data, region == 'Left_motor', band == 'low_gamma')$high3_ev2,filter(data, region == 'Left_motor', band == 'low_gamma')$low_ev2, paired=TRUE)
 stat_gamma
-stat_gamma_z = t.test(filter(data, region == 'Left_motor', band == 'low_gamma')$high_ev2,filter(data, region == 'Left_motor', band == 'low_gamma')$zero_ev2, paired=TRUE)
+stat_gamma_z = t.test(filter(data, region == 'Left_motor', band == 'low_gamma')$high3_ev2,filter(data, region == 'Left_motor', band == 'low_gamma')$zero_ev2, paired=TRUE)
 stat_gamma_z
 
 
@@ -506,3 +522,106 @@ stat_alpha = t.test(filter(cont_data, region == 'Right_motor', band == 'alpha')$
 stat_alpha
 stat_alpha_z = t.test(filter(cont_data, region == 'Right_motor', band == 'alpha')$high_ev2,filter(cont_data, region == 'Right_motor', band == 'alpha')$zero_ev2, paired=TRUE)
 stat_alpha_z
+
+
+
+
+
+
+
+
+
+
+
+
+
+#####################################################################
+
+## Eigenvector3
+
+####################################################################
+
+# reformat
+data_high = select(data, band, region, high_ev3)
+data_high$cond = 'high'
+names(data_high)[names(data_high)=='high_ev3'] = 'state'
+
+data_high2 = select(data, band, region, high2_ev3)
+data_high2$cond = 'high2'
+names(data_high2)[names(data_high2)=='high2_ev3'] = 'state'
+
+data_high3 = select(data, band, region, high3_ev3)
+data_high3$cond = 'high3'
+names(data_high3)[names(data_high3)=='high3_ev3'] = 'state'
+
+data_low = select(data,  band, region, low_ev3)
+data_low$cond = 'low'
+names(data_low)[names(data_low)=='low_ev3'] = 'state'
+
+data_zero = select(data,  band, region, zero_ev3)
+data_zero$cond = 'zero'
+names(data_zero)[names(data_zero)=='zero_ev3'] = 'state'
+
+data2 = rbind(data_high, data_low, data_zero, data_high2, data_high3)
+
+data_alpha = filter(data2, band == 'alpha')
+data_beta = filter(data2, band == 'beta')
+data_low_gamma = filter(data2, band == 'low_gamma')
+
+# plot sub data
+plot = ggplot(data_beta, aes(x = region, y = state, fill = cond) )
+plot + geom_boxplot(notch = FALSE, lwd = 1) + 
+  #geom_dotplot(binaxis='y', stackdir='center', dotsize=.5)
+  #scale_fill_manual(values = wes_palette("Moonrise1",4)) + 
+  labs(x = 'Region', y = 'State Value')  + theme_minimal()
+ggsave(paste(sens, '_beta_ev3', '.png', sep = ''))
+
+curr_beta = filter(data_beta, cond == c("high2", "high3", "low"))
+plot = ggplot(curr_beta, aes(x = region, y = state, fill = cond) )
+plot + geom_boxplot(notch = FALSE, lwd = 1) + 
+  #geom_dotplot(binaxis='y', stackdir='center', dotsize=.5)
+  #scale_fill_manual(values = wes_palette("Moonrise1",4)) + 
+  labs(x = 'Region', y = 'State Value')  + theme_minimal()
+ggsave(paste(sens, '_beta_ev3_sub', '.png', sep = ''))
+
+plot = ggplot(data_alpha, aes(x = region, y = state, fill = cond) )
+plot + geom_boxplot(notch = FALSE, lwd = 1) + 
+  #geom_dotplot(binaxis='y', stackdir='center', dotsize=.5)
+  #scale_fill_manual(values = wes_palette("Moonrise1",4)) + 
+  labs(x = 'Region', y = 'State Value')  + theme_minimal()
+ggsave(paste(sens, '_alpha_ev3', '.png', sep = ''))
+
+plot = ggplot(data_low_gamma, aes(x = region, y = state, fill = cond) )
+plot + geom_boxplot(notch = FALSE, lwd = 1) + 
+  #geom_dotplot(binaxis='y', stackdir='center', dotsize=.5)
+  #scale_fill_manual(values = wes_palette("Moonrise1",4)) + 
+  labs(x = 'Region', y = 'State Value')  + theme_minimal()
+ggsave(paste(sens, '_low_gamma_ev3', '.png', sep = ''))
+
+curr_gamma = filter(data_low_gamma, cond == c("high", "high3", "low", "zero"))
+plot = ggplot(curr_gamma, aes(x = region, y = state, fill = cond) )
+plot + geom_boxplot(notch = FALSE, lwd = 1) + 
+  #geom_dotplot(binaxis='y', stackdir='center', dotsize=.5)
+  #scale_fill_manual(values = wes_palette("Moonrise1",4)) + 
+  labs(x = 'Region', y = 'State Value')  + theme_minimal()
+ggsave(paste(sens, '_low_gamma_ev3_sub', '.png', sep = ''))
+
+# alpha should have less motor exp in left
+stat_alpha = t.test(filter(data, region == 'Left_motor', band == 'alpha')$high_ev3,filter(data, region == 'Left_motor', band == 'alpha')$low_ev3, paired=TRUE)
+stat_alpha
+stat_alpha_z = t.test(filter(data, region == 'Left_motor', band == 'alpha')$high_ev3,filter(data, region == 'Left_motor', band == 'alpha')$zero_ev3, paired=TRUE)
+stat_alpha_z
+# beta 
+stat_beta3 = t.test(filter(data, region == 'Left_motor', band == 'beta')$high3_ev3,filter(data, region == 'Left_motor', band == 'beta')$low_ev3, paired=TRUE)
+stat_beta3
+stat_beta_z3 = t.test(filter(data, region == 'Left_motor', band == 'beta')$high3_ev3,filter(data, region == 'Left_motor', band == 'beta')$zero_ev3, paired=TRUE)
+stat_beta_z3
+stat_beta2 = t.test(filter(data, region == 'Left_motor', band == 'beta')$high2_ev3,filter(data, region == 'Left_motor', band == 'beta')$low_ev3, paired=TRUE)
+stat_beta2
+stat_beta_z2 = t.test(filter(data, region == 'Left_motor', band == 'beta')$high2_ev3,filter(data, region == 'Left_motor', band == 'beta')$zero_ev3, paired=TRUE)
+stat_beta_z2
+#gamma
+stat_gamma = t.test(filter(data, region == 'Left_motor', band == 'low_gamma')$high3_ev3,filter(data, region == 'Left_motor', band == 'low_gamma')$low_ev3, paired=TRUE)
+stat_gamma
+stat_gamma_z = t.test(filter(data, region == 'Left_motor', band == 'low_gamma')$high3_ev3,filter(data, region == 'Left_motor', band == 'low_gamma')$zero_ev3, paired=TRUE)
+stat_gamma_z
