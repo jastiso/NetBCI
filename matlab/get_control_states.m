@@ -53,14 +53,19 @@ load([save_dir, 'noise_sg.mat']);
 high_states = zeros(nNode, nSubj, numel(bands));
 high2_states = zeros(nNode, nSubj, numel(bands));
 high2_states_ev2 = zeros(nNode, nSubj, numel(bands));
+high2_states_ev3 = zeros(nNode, nSubj, numel(bands));
 high3_states = zeros(nNode, nSubj, numel(bands));
 high3_states_ev2 = zeros(nNode, nSubj, numel(bands));
 high_states_ev2 = zeros(nNode, nSubj, numel(bands));
+high3_states_ev3 = zeros(nNode, nSubj, numel(bands));
+high_states_ev3 = zeros(nNode, nSubj, numel(bands));
 low_states = zeros(nNode, nSubj, numel(bands));
 low_states_ev2 = zeros(nNode, nSubj, numel(bands));
+low_states_ev3 = zeros(nNode, nSubj, numel(bands));
 small_states = zeros(nNode, nSubj, numel(bands));
 zero_states = zeros(nNode, nSubj, numel(bands));
 zero_states_ev2 = zeros(nNode, nSubj, numel(bands));
+zero_states_ev3 = zeros(nNode, nSubj, numel(bands));
 
 %% Make control set
 
@@ -164,29 +169,36 @@ for i = Subj
         
         
         % get largest eigenvector of grammian
-        [h_vect, ~, small_vect, vect2] = easy_state(high_mat,diag(B),eye(nNode),zeros(nNode));
+        [h_vect, ~, small_vect, vect2, vect3] = easy_state(high_mat,diag(B),eye(nNode),zeros(nNode));
         high_states(:,i,k) = h_vect;
         small_states(:,i,k) = small_vect;
         high_states_ev2(:,i,k) = vect2;
-        [h2_vect, ~, ~, h2_v2] = easy_state(high2_mat,diag(B),eye(nNode),zeros(nNode));
+        high_states_ev3(:,i,k) = vect3;
+        [h2_vect, ~, ~, h2_v2, h2_v3] = easy_state(high2_mat,diag(B),eye(nNode),zeros(nNode));
         high2_states(:,i,k) = h2_vect;
         high2_states_ev2(:,i,k) = h2_v2;
-        [h3_vect, ~, ~, h3_v2] = easy_state(high3_mat,diag(B),eye(nNode),zeros(nNode));
+        high2_states_ev3(:,i,k) = h2_v3;
+        [h3_vect, ~, ~, h3_v2, h3_v3] = easy_state(high3_mat,diag(B),eye(nNode),zeros(nNode));
         high3_states(:,i,k) = h3_vect;
         high3_states_ev2(:,i,k) = h3_v2;
-        [l_vect, ~, ~, l_v2] = easy_state(low_mat,diag(B),eye(nNode),zeros(nNode));
+        high3_states_ev3(:,i,k) = h3_v3;
+        [l_vect, ~, ~, l_v2, l_v3] = easy_state(low_mat,diag(B),eye(nNode),zeros(nNode));
         low_states(:,i,k) = l_vect;
         low_states_ev2(:,i,k) = l_v2;
-        
+        low_states_ev3(:,i,k) = l_v3;
+
         z_vect_all = zeros(nNode, nZero);
         z_ev2_all = zeros(nNode, nZero);
+        z_ev3_all = zeros(nNode, nZero);
         for j = 1:nZero
-            [z_vect, ~, ~, z_ev2] = easy_state(zero_mat(:,:,j),diag(B),eye(nNode),zeros(nNode));
+            [z_vect, ~, ~, z_ev2, z_ev3] = easy_state(zero_mat(:,:,j),diag(B),eye(nNode),zeros(nNode));
             z_vect_all(:,j) = z_vect;
             z_ev2_all(:,j) = z_ev2;
+            z_ev3_all(:,j) = z_ev3;
         end
         zero_states(:,i,k) = mean(z_vect_all,2);
         zero_states_ev2(:,i,k) = mean(z_ev2_all,2);
+        zero_states_ev3(:,i,k) = mean(z_ev3_all,2);
     end
 end
 
@@ -225,35 +237,35 @@ for i = 1:numel(bands)
 %     ft_topoplotER(cfg,plot_data); colorbar; caxis([0.06,.13])
 %     saveas(gca, [img_dir, bands{i}, '_avg_high3_state.png'], 'png')
     
-    plot_data.powspctrm = mean(high_states_ev2(:,:,i),2);
-    figure(6); clf
-    ft_topoplotER(cfg,plot_data); colorbar; caxis([-.1,.1])
-    saveas(gca, [img_dir, bands{i}, '_avg_high_ev2_state.png'], 'png')
-    
-    plot_data.powspctrm = mean(low_states_ev2(:,:,i),2);
-    figure(7); clf
-    ft_topoplotER(cfg,plot_data); colorbar; caxis([-.1,.1])
-    saveas(gca, [img_dir, bands{i}, '_avg_low_ev2_state.png'], 'png')
-    
-    plot_data.powspctrm = mean(zero_states(:,:,i),2);
-    figure(8); clf
-    ft_topoplotER(cfg,plot_data); colorbar; caxis([0.06,.13])
-    saveas(gca, [img_dir, bands{i}, '_avg_zero_state.png'], 'png')
-    
-    plot_data.powspctrm = mean(zero_states_ev2(:,:,i),2);
-    figure(9); clf
-    ft_topoplotER(cfg,plot_data); colorbar; caxis([-.1,.1])
-    saveas(gca, [img_dir, bands{i}, '_avg_zero_ev2_state.png'], 'png')
-    
-    plot_data.powspctrm = mean(high2_states_ev2(:,:,i),2);
-    figure(10); clf
-    ft_topoplotER(cfg,plot_data); colorbar; caxis([-.1,.1])
-    saveas(gca, [img_dir, bands{i}, '_avg_high2_ev2_state.png'], 'png')
-    
-    plot_data.powspctrm = mean(high3_states_ev2(:,:,i),2);
-    figure(11); clf
-    ft_topoplotER(cfg,plot_data); colorbar; caxis([-.1,.1])
-    saveas(gca, [img_dir, bands{i}, '_avg_high3_ev2_state.png'], 'png')  
+%     plot_data.powspctrm = mean(high_states_ev2(:,:,i),2);
+%     figure(6); clf
+%     ft_topoplotER(cfg,plot_data); colorbar; caxis([-.1,.1])
+%     saveas(gca, [img_dir, bands{i}, '_avg_high_ev2_state.png'], 'png')
+%     
+%     plot_data.powspctrm = mean(low_states_ev2(:,:,i),2);
+%     figure(7); clf
+%     ft_topoplotER(cfg,plot_data); colorbar; caxis([-.1,.1])
+%     saveas(gca, [img_dir, bands{i}, '_avg_low_ev2_state.png'], 'png')
+%     
+%     plot_data.powspctrm = mean(zero_states(:,:,i),2);
+%     figure(8); clf
+%     ft_topoplotER(cfg,plot_data); colorbar; caxis([0.06,.13])
+%     saveas(gca, [img_dir, bands{i}, '_avg_zero_state.png'], 'png')
+%     
+%     plot_data.powspctrm = mean(zero_states_ev2(:,:,i),2);
+%     figure(9); clf
+%     ft_topoplotER(cfg,plot_data); colorbar; caxis([-.1,.1])
+%     saveas(gca, [img_dir, bands{i}, '_avg_zero_ev2_state.png'], 'png')
+%     
+%     plot_data.powspctrm = mean(high2_states_ev2(:,:,i),2);
+%     figure(10); clf
+%     ft_topoplotER(cfg,plot_data); colorbar; caxis([-.1,.1])
+%     saveas(gca, [img_dir, bands{i}, '_avg_high2_ev2_state.png'], 'png')
+%     
+%     plot_data.powspctrm = mean(high3_states_ev2(:,:,i),2);
+%     figure(11); clf
+%     ft_topoplotER(cfg,plot_data); colorbar; caxis([-.1,.1])
+%     saveas(gca, [img_dir, bands{i}, '_avg_high3_ev2_state.png'], 'png')  
 end
 
 %% Categorize by lobe
@@ -263,13 +275,18 @@ h_region = [];
 l_region = [];
 l_region2 = [];
 h_region2 = [];
+l_region3 = [];
+h_region3 = [];
 h2_region = [];
 h3_region = [];
 h2_region2 = [];
 h3_region2 = [];
+h2_region3 = [];
+h3_region3 = [];
 small_region = [];
 z_region = [];
 z_region2 = [];
+z_region3 = [];
 region_ord = {};
 band_ord = {};
 
@@ -292,17 +309,22 @@ for i = 1:numel(regions)
         h3_region = [h3_region, mean(high3_states(idx,:,j))];
         h2_region2 = [h2_region2, mean(high2_states_ev2(idx,:,j))];
         h3_region2 = [h3_region2, mean(high3_states_ev2(idx,:,j))];
+        h2_region3 = [h2_region3, mean(high2_states_ev3(idx,:,j))];
+        h3_region3 = [h3_region3, mean(high3_states_ev3(idx,:,j))];
         h_region2 = [h_region2, mean(high_states_ev2(idx,:,j))];
         l_region2 = [l_region2, mean(low_states_ev2(idx,:,j))];
+        h_region3 = [h_region3, mean(high_states_ev3(idx,:,j))];
+        l_region3 = [l_region3, mean(low_states_ev3(idx,:,j))];
         z_region = [z_region, mean(zero_states(idx,:,j))];
         z_region2 = [z_region2, mean(zero_states_ev2(idx,:,j))];
+        z_region3 = [z_region3, mean(zero_states_ev3(idx,:,j))];
         small_region = [small_region, mean(small_states(idx,:,j))];
         cnt = cnt + nSubj;
     end
 end
 
 save([R_dir, 'grad/control_state.mat'], 'region_ord', 'band_ord', 'h_region', 'l_region', 'h2_region', 'h3_region', 'h_region2', 'l_region2', ...
-    'z_region', 'z_region2', 'small_region', 'h2_region2', 'h3_region2')
+    'z_region', 'z_region2', 'small_region', 'h2_region2', 'h3_region2', 'h2_region3', 'h3_region3', 'h_region3', 'l_region3', 'z_region3')
 
 
 
