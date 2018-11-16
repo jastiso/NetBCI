@@ -35,6 +35,8 @@ regions = [{'Left_frontal'}, {'Left_occipital'}, {'Left_parietal'}, {'Left_tempo
     {'Right_frontal'}, {'Right_occipital'}, {'Right_parietal'}, {'Right_temporal'}, {'Vertex'}, {'Left_motor'}, {'Right_motor'}];
 %regions = [{'Left_motor'}, {'Right_motor'}];
 
+% load behavior
+load([top_dir, 'Behavior/stats'])
 
 nNode = 102;
 nEdges = (nNode^2-nNode)/2;
@@ -54,6 +56,9 @@ u_low = [];
 u_zero = [];
 band_order = {};
 subj_order = {};
+slope = [];
+imp = [];
+sess_diff = [];
 
 %% Make control set
 
@@ -108,6 +113,9 @@ for i = Subj
         % get labels
         band_order{cnt} = f;
         subj_order{cnt} = subj;
+        slope(cnt) = betas(i);
+        imp(cnt) = improvement(i);
+        sess_diff(cnt) = difference(i);
         cnt = cnt + 1;
 
         % get subgraph data
@@ -177,7 +185,7 @@ for i = Subj
     end
 end
 
-save([R_dir, 'grad/opt_energy.mat'], 'band_order', 'subj_order', 'u_high', 'u_high2', 'u_high3', 'u_low', 'u_zero')
+save([R_dir, 'grad/opt_energy.mat'], 'band_order', 'subj_order', 'slope', 'imp', 'sess_diff', 'u_high', 'u_high2', 'u_high3', 'u_low', 'u_zero')
 
 
 

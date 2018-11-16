@@ -44,6 +44,8 @@ regions = [{'Left_frontal'}, {'Left_occipital'}, {'Left_parietal'}, {'Left_tempo
     {'Right_frontal'}, {'Right_occipital'}, {'Right_parietal'}, {'Right_temporal'}, {'Vertex'}, {'Left_motor'}, {'Right_motor'}];
 %regions = [{'Left_motor'}, {'Right_motor'}];
 
+% load behavior
+load([top_dir, 'Behavior/stats'])
 
 nNode = 102;
 nEdges = (nNode^2-nNode)/2;
@@ -174,14 +176,17 @@ for i = Subj
         small_states(:,i,k) = small_vect;
         high_states_ev2(:,i,k) = vect2;
         high_states_ev3(:,i,k) = vect3;
+        
         [h2_vect, ~, ~, h2_v2, h2_v3] = easy_state(high2_mat,diag(B),eye(nNode),zeros(nNode));
         high2_states(:,i,k) = h2_vect;
         high2_states_ev2(:,i,k) = h2_v2;
         high2_states_ev3(:,i,k) = h2_v3;
+        
         [h3_vect, ~, ~, h3_v2, h3_v3] = easy_state(high3_mat,diag(B),eye(nNode),zeros(nNode));
         high3_states(:,i,k) = h3_vect;
         high3_states_ev2(:,i,k) = h3_v2;
         high3_states_ev3(:,i,k) = h3_v3;
+        
         [l_vect, ~, ~, l_v2, l_v3] = easy_state(low_mat,diag(B),eye(nNode),zeros(nNode));
         low_states(:,i,k) = l_vect;
         low_states_ev2(:,i,k) = l_v2;
@@ -289,6 +294,7 @@ z_region2 = [];
 z_region3 = [];
 region_ord = {};
 band_ord = {};
+slope = [];
 
 cnt = 1;
 for i = 1:numel(regions)
@@ -302,6 +308,7 @@ for i = 1:numel(regions)
         for k = 0:19
             region_ord{cnt+k} = regions{i};
             band_ord{cnt+k} = bands{j};
+            slope(cnt+k) = betas(k+1);
         end
         h_region = [h_region, mean(high_states(idx,:,j))];
         l_region = [l_region, mean(low_states(idx,:,j))];
@@ -324,7 +331,7 @@ for i = 1:numel(regions)
 end
 
 save([R_dir, 'grad/control_state.mat'], 'region_ord', 'band_ord', 'h_region', 'l_region', 'h2_region', 'h3_region', 'h_region2', 'l_region2', ...
-    'z_region', 'z_region2', 'small_region', 'h2_region2', 'h3_region2', 'h2_region3', 'h3_region3', 'h_region3', 'l_region3', 'z_region3')
+    'z_region', 'z_region2', 'small_region', 'h2_region2', 'h3_region2', 'h2_region3', 'h3_region3', 'h_region3', 'l_region3', 'z_region3', 'slope')
 
 
 
