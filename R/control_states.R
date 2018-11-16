@@ -22,7 +22,7 @@ data = data.frame(band = unlist(raw_data$band.ord), region = unlist(raw_data$reg
                   high3 = raw_data$h3.region[1,], high_ev2 = raw_data$h.region2[1,], low = raw_data$l.region[1,], low_ev2 = raw_data$l.region2[1,], 
                   zero = raw_data$z.region[1,], zero_ev2 = raw_data$z.region2[1,], small_ev = raw_data$small.region[1,], high2_ev2 = raw_data$h2.region2[1,], 
                   high3_ev2 = raw_data$h3.region2[1,], high_ev3 = raw_data$h.region3[1,], high2_ev3 = raw_data$h2.region3[1,], high3_ev3 = raw_data$h3.region3[1,],
-                  low_ev3 = raw_data$l.region3[1,], zero_ev3 = raw_data$z.region3[1,])
+                  low_ev3 = raw_data$l.region3[1,], zero_ev3 = raw_data$z.region3[1,], slope = raw_data$slope[1,])
 
 plot = ggplot(data, aes(x = region, y = high, fill = band) )
 plot + geom_boxplot(notch = FALSE, lwd = 1) + 
@@ -370,6 +370,9 @@ stat_alpha = t.test(filter(data, region == 'Left_motor', band == 'alpha')$high_e
 stat_alpha
 stat_alpha_z = t.test(filter(data, region == 'Left_motor', band == 'alpha')$high_ev2,filter(data, region == 'Left_motor', band == 'alpha')$zero_ev2, paired=TRUE)
 stat_alpha_z
+stat = t.test(filter(data, region == 'Left_motor', band == 'alpha')$high_ev2)
+stat
+
 # beta 
 stat_beta3 = t.test(filter(data, region == 'Left_motor', band == 'beta')$high3_ev2,filter(data, region == 'Left_motor', band == 'beta')$low_ev2, paired=TRUE)
 stat_beta3
@@ -385,9 +388,17 @@ stat_gamma
 stat_gamma_z = t.test(filter(data, region == 'Left_motor', band == 'low_gamma')$high3_ev2,filter(data, region == 'Left_motor', band == 'low_gamma')$zero_ev2, paired=TRUE)
 stat_gamma_z
 
+# cor with slope
+scatterplot = ggplot(filter(data, region == 'Left_motor', band == 'alpha'), aes(x = high_ev2, y = slope)) 
+scatterplot+ geom_smooth(method="lm") + geom_point(size = 6) + labs(x = 'high', y = 'slope') +
+  theme_minimal() #+ scale_color_manual(values =  wes_palette("Moonrise1",4))
+ggsave('slope_ev2.png')
 
+corr_beta_high2 = cor.test(filter(data, region == 'Left_motor', band == 'alpha')$high_ev2,filter(data, region == 'Left_motor', band == 'alpha')$slope)
+corr_beta_high2
 
-
+fit = lm(slope~high_ev2,filter(data, region == 'Left_motor', band == 'alpha'))
+summary
 
 
 
@@ -444,6 +455,8 @@ stat_alpha = t.test(filter(pr_data, region == 'Left_motor', band == 'alpha')$hig
 stat_alpha
 stat_alpha_zero = t.test(filter(pr_data, region == 'Left_motor', band == 'alpha')$high_ev2,filter(pr_data, region == 'Left_motor', band == 'alpha')$zero_ev2, paired=TRUE)
 stat_alpha_zero
+stat =  t.test(filter(pr_data, region == 'Left_motor', band == 'alpha')$high_ev2)
+stat
 # beta more
 stat_beta = t.test(filter(pr_data, region == 'Left_motor', band == 'beta')$high,filter(pr_data, region == 'Left_motor', band == 'beta')$low, paired=TRUE)
 stat_beta
@@ -522,8 +535,8 @@ stat_alpha = t.test(filter(cont_data, region == 'Right_motor', band == 'alpha')$
 stat_alpha
 stat_alpha_z = t.test(filter(cont_data, region == 'Right_motor', band == 'alpha')$high_ev2,filter(cont_data, region == 'Right_motor', band == 'alpha')$zero_ev2, paired=TRUE)
 stat_alpha_z
-
-
+stat = t.test(filter(cont_data, region == 'Right_motor', band == 'alpha')$high_ev2)
+stat
 
 
 
@@ -625,3 +638,4 @@ stat_gamma = t.test(filter(data, region == 'Left_motor', band == 'low_gamma')$hi
 stat_gamma
 stat_gamma_z = t.test(filter(data, region == 'Left_motor', band == 'low_gamma')$high3_ev3,filter(data, region == 'Left_motor', band == 'low_gamma')$zero_ev3, paired=TRUE)
 stat_gamma_z
+
