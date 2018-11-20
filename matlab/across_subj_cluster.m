@@ -4,6 +4,7 @@
 
 
 addpath(genpath('/Users/stiso/Documents/MATLAB/npy-matlab-master/'))
+addpath(genpath('/Users/stiso/Documents/MATLAB/BCT/'))
 addpath('/Users/stiso/Documents/MATLAB/fieldtrip-20170830/')
 R_dir = '/Users/stiso/Documents/R/NetBCI/data/wpli/';
 
@@ -89,7 +90,7 @@ ci = cell(1,numel(bands));
 Q = zeros(1,numel(bands));
 for k = 1:numel(bands)
     f = bands{k};
-    [a,b] = modularity_und(corr_mat{k},1);
+    [a,b] = community_louvain(corr_mat{k},1,[],  'negative_sym');
     ci{k} = a;
     Q(k) = b;
 end

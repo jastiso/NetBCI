@@ -25,11 +25,11 @@ nSess = 4;
 nTp = 15;
 perf = zeros(nRuns*nSess*nTp,nSubj); % number of runs, * number of timepoints * number of sessions
 perf_real_time = zeros(nRuns*nSess,nSubj);
-for i = 1:nSubj
-    perf(:,i) = interp_perf( behavior_updated, i, nRuns, nTp );
-    
-end
-save([top_dir, 'Behavior/perf.mat'], 'perf')
+% for i = 1:nSubj
+%     perf(:,i) = interp_perf( behavior_updated, i, nRuns, nTp );
+%     
+% end
+% save([top_dir, 'Behavior/perf.mat'], 'perf')
 for i = 1:nSubj
     cnt = 1;
     tmp = behavior_updated.BCI.Perf.Sess1.Runs{i};
@@ -52,11 +52,13 @@ for i = 1:nSubj
 end
 betas = zeros(1,nSubj);
 for i = 1:nSubj
-   betas(i) = perf_real_time(:,i)\time'; 
+   betas(i) = time'\perf_real_time(:,i); 
 end
 improvement = max(perf_real_time) - min(perf_real_time);
-difference = perf_real_time(1,:) - perf_real_time(end,:);
-save([top_dir, 'Behavior/stats.mat'], 'betas', 'rhos', 'improvement', 'difference')
+difference = perf_real_time(end,:) - perf_real_time(1,:);
+maximum = max(perf_real_time);
+final = mean(perf_real_time((end-5):end,:)); % mean of last sessopm
+save([top_dir, 'Behavior/stats.mat'], 'betas', 'rhos', 'improvement', 'difference', 'maximum', 'final')
 
 % plot
 figure(1)

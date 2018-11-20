@@ -49,6 +49,16 @@ high2_eff_rm = [];
 high3_eff_rm = [];
 low_eff_rm = [];
 zero_eff_rm = [];
+high_nc = [];
+high2_nc = [];
+high3_nc = [];
+low_nc = [];
+zero_nc = [];
+high_pc = [];
+high2_pc = [];
+high3_pc = [];
+low_pc = [];
+zero_pc = [];
 
 %% Get Motor index
 
@@ -160,9 +170,50 @@ for i = Subj
         high3_eff_rm = [high3_eff_rm; E_high3_rm];
         low_eff_rm = [low_eff_rm; E_low_rm];
         zero_eff_rm = [zero_eff_rm; E_zero_rm];
+        
+        
+        % now do some community detection
+        M_high = community_louvain(high_mat,1); % gamma = 1
+        M_high2 = community_louvain(high2_mat,1);
+        M_high3 = community_louvain(high3_mat,1); 
+        M_low = community_louvain(low_mat,1); 
+        M_zero = zeros(nNode,nZero);
+        for j = 1:nZero
+            M_zero(:,j) = community_louvain(zero_mat(:,:,j),1);
+        end
+        
+        % get the number of communities
+        high_nc = [high_nc; numel(unique(M_high(lm)))];
+        high2_nc = [high2_nc; numel(unique(M_high2(lm)))];
+        high3_nc = [high3_nc; numel(unique(M_high3(lm)))];
+        low_nc = [low_nc; numel(unique(M_low(lm)))];
+        tmp = zeros(1,nZero);
+        for j = 1:nZero
+            tmp(j) = numel(unique(M_zero(:,j)));
+        end
+        zero_nc = [zero_nc; mean(tmp)];
+        
+        % participation coeff
+        pc_high = participation_coef(high_mat,M_high); % gamma = 1
+        pc_high2 = participation_coef(high2_mat,M_high2);
+        pc_high3 = participation_coef(high3_mat,M_high3); 
+        pc_low = participation_coef(low_mat,M_low); 
+        pc_zero = zeros(nNode,nZero);
+        for j = 1:nZero
+            pc_zero(:,j) = participation_coef(zero_mat(:,:,j),M_zero(:,j));
+        end
+        
+        high_pc = [high_pc; mean(pc_high(lm))];
+        high2_pc = [high2_pc; mean(pc_high2(lm))];
+        high3_pc = [high3_pc; mean(pc_high3(lm))];
+        low_pc = [low_pc; mean(pc_low(lm))];
+        zero_pc = [zero_pc; mean(mean(pc_zero(lm)))];
+        
     end
 end
 
 % save
-save([R_dir, 'grad/graph_stats.mat'], 'band_order', 'subj_order', 'high_eff', 'high2_eff', 'high3_eff', 'low_eff', 'zero_eff', 'high_eff_rm', 'high2_eff_rm', 'high3_eff_rm', 'low_eff_rm', 'zero_eff_rm')
+save([R_dir, 'grad/graph_stats.mat'], 'band_order', 'subj_order', 'high_eff', 'high2_eff', 'high3_eff', 'low_eff', 'zero_eff', 'high_eff_rm',...
+    'high2_eff_rm', 'high3_eff_rm', 'low_eff_rm', 'zero_eff_rm', 'high_nc', 'high2_nc', 'high3_nc', 'low_nc', 'zero_nc', 'high_pc', 'high2_pc',...
+    'high3_pc', 'low_pc', 'zero_pc')
 

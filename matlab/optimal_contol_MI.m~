@@ -35,6 +35,8 @@ regions = [{'Left_frontal'}, {'Left_occipital'}, {'Left_parietal'}, {'Left_tempo
     {'Right_frontal'}, {'Right_occipital'}, {'Right_parietal'}, {'Right_temporal'}, {'Vertex'}, {'Left_motor'}, {'Right_motor'}];
 %regions = [{'Left_motor'}, {'Right_motor'}];
 
+% load behavior
+load([top_dir, 'Behavior/stats'])
 
 nNode = 102;
 nEdges = (nNode^2-nNode)/2;
@@ -54,6 +56,13 @@ u_low = [];
 u_zero = [];
 band_order = {};
 subj_order = {};
+slope = [];
+fin = [];
+sess_diff = [];
+maxi = [];
+u_high2_m = [];
+u_high3_m = [];
+u_low_m = [];
 
 %% Make control set
 
@@ -103,11 +112,16 @@ for i = Subj
     
     for k = 1:numel(bands)
         f = bands{k};
-        fprintf('Subj %03d... band %s...', i, f)
+        fprintf('\nSubj %03d... band %s...', i, f)
 
         % get labels
         band_order{cnt} = f;
-        subj
+        subj_order{cnt} = subj;
+        slope(cnt) = betas(i);
+        fin(cnt) = final(i);
+        maxi(cnt) = maximum(i);
+        sess_diff(cnt) = difference(i);
+        cnt = cnt + 1;
 
         % get subgraph data
         if strcmp(data_dir(end-5:end-1),'param')
@@ -163,10 +177,22 @@ for i = Subj
         u_high = [u_high; U_h];
         [U_h2, err_h2] = get_opt_energy(high2_mat, T, B, x0, xT(:,k), rho, S);
         u_high2 = [u_high2; U_h2];
+        [U_h2_m, err_h2] = get_opt_energy(high2_mat, T, B, xT(:,k), xT(:,k), rho, S);
+        u_high2_m = [u_high2_m; U_h2_m];
+        [U_h2_t, err_h2] = get_opt_energy(high2_mat, T, B, x0, -xT(:,k), rho, S);
+        u_high2_t = [u_high2_t; U_h2_t];
         [U_h3, err_h3] = get_opt_energy(high3_mat, T, B, x0, xT(:,k), rho, S);
         u_high3 = [u_high3; U_h3];
+        [U_h3_m, err_h3] = get_opt_energy(high3_mat, T, B, xT(:,k), xT(:,k), rho, S);
+        u_high3_m = [u_high3_m; U_h3_m];
+        [U_h3_t, err_h3] = get_opt_energy(high3_mat, T, B, x0, -xT(:,k), rho, S);
+        u_high3_t = [u_high3_t; U_h3_t];
         [U_l, err_l] = get_opt_energy(low_mat, T, B, x0, xT(:,k), rho, S);
         u_low = [u_low; U_l];
+        [U_l_m, err_l] = get_opt_energy(low_mat, T, B, xT(:,k), xT(:,k), rho, S);
+        u_low_m = [u_low_m; U_l_m];
+        [U_l_t, err_l] = get_opt_energy(low_mat, T, B, x0, -xT(:,k), rho, S);
+        u_low_t = [u_low_t; U_l_t];
         U_z_all = zeros(nZero,1);
         for j = 1:nZero
             [U_z, err_z] = get_opt_energy(zero_mat(:,:,j), T, B, x0, xT(:,k), rho, S);
@@ -176,5 +202,210 @@ for i = Subj
     end
 end
 
-save([R_dir, 'grad/opt_energy.mat'], 'u_high', 'u_high2', 'u_high3', 'u_low', 'u_zero')
+save([R_dir, 'grad/opt_energy.mat'], 'band_order', 'subj_order', 'slope', 'fin', 'maxi', 'sess_diff', 'u_high', 'u_high2', 'u_high3', 'u_low', 'u_zero', ...
+    'u_high2_m', 'u_high3_m', 'u_low_m')
+
+
+
+%% Loop through data - other control set
+
+% initialize
+u_high_c = [];
+u_high2_c = [];
+u_high3_c = [];
+u_low_c = [];
+u_zero_c = [];
+band_order_c = {};
+subj_order_c = {};
+
+
+% this used to index over mag and grad, but we dont look at mag
+sens = sensors{1};
+R_dir_s = [R_dir, sens, '/'];
+
+cnt = 1; % for order
+for i = Subj
+    s_idx = find(i == Subj);
+    subj = sprintf('%03d', i);
+    
+    for k = 1:numel(bands)
+        f = bands{k};
+        fprintf('\nControl Subj %03d... band %s...', i, f)
+
+        % get labels
+        band_order_c{cnt} = f;
+        subj_order_c{cnt} = subj;
+        cnt = cnt + 1;
+
+        % get subgraph data
+        if strcmp(data_dir(end-5:end-1),'param')
+            subset = readNPY([data_dir, subj, '/', sens, 'wpli_', f, '_subset.npy']);
+            coeff = readNPY([data_dir, subj, '/',sens, 'wpli_', f, '_coeff.npy']);
+        else
+            subset = readNPY([data_dir, subj, '/', sens, '/wpli_', f, '_subset.npy']);
+            coeff = readNPY([data_dir, subj, '/',sens, '/wpli_', f, '_coeff.npy']);
+        end
+        
+        % remove noise SG
+        idx = noise_sg{k,i};
+        coeff = coeff(~idx,:);
+        subset = subset(~idx,:);
+        
+        b_exp = subset(:,end);
+        [tmp,tmp_idx] = sort(b_exp,'descend');
+        bSG = tmp_idx(1);
+        bSG2 = tmp_idx(2); % second biggest element
+        bSG3 = tmp_idx(3); % third biggest element
+        [~, nzSG] = min(nonzeros((b_exp))); % smallest nonzero - this is how we will opporationalize "low"
+        
+        % if you actualy want to look at 0s
+        if sum(b_exp == 0) <= 1
+            [~,nbSG] = min(b_exp);
+        else
+            nbSG = find(b_exp == 0);
+        end
+        nZero = numel(nbSG);
+        
+        % optimal control
+        % scale to be stable
+        % 1st
+        high_mat = get_sg_matrix(nNode, subset(bSG,:));
+        high_mat = high_mat./eigs(high_mat,1) - eye(nNode).*1.001;
+        %2nd
+        high2_mat = get_sg_matrix(nNode, subset(bSG2,:));
+        high2_mat = high2_mat./eigs(high2_mat,1) - eye(nNode).*1.001;
+        %3rd
+        high3_mat = get_sg_matrix(nNode, subset(bSG3,:));
+        high3_mat = high3_mat./eigs(high3_mat,1) - eye(nNode).*1.001;
+        %lowest
+        low_mat = get_sg_matrix(nNode, subset(nzSG,:));
+        low_mat = low_mat./eigs(low_mat,1) - eye(nNode).*1.001;
+        zero_mat = zeros(nNode, nNode, nZero);
+        for j = 1:nZero
+            zero_mat(:,:,j) = get_sg_matrix(nNode, subset(nbSG,:));
+            zero_mat(:,:,j) = zero_mat(:,:,j)./eigs(zero_mat(:,:,j),1) - eye(nNode).*1.001;
+        end
+
+        % optim_fun(A, T, B, x0, xf, rho, S)
+        [U_h, err_h] = get_opt_energy(high_mat, T, B_control, x0, xT(:,k), rho, S);
+        u_high_c = [u_high_c; U_h];
+        [U_h2, err_h2] = get_opt_energy(high2_mat, T, B_control, x0, xT(:,k), rho, S);
+        u_high2_c = [u_high2_c; U_h2];
+        [U_h3, err_h3] = get_opt_energy(high3_mat, T, B_control, x0, xT(:,k), rho, S);
+        u_high3_c = [u_high3_c; U_h3];
+        [U_l, err_l] = get_opt_energy(low_mat, T, B_control, x0, xT(:,k), rho, S);
+        u_low_c = [u_low_c; U_l];
+        U_z_all = zeros(nZero,1);
+        for j = 1:nZero
+            [U_z, err_z] = get_opt_energy(zero_mat(:,:,j), T, B_control, x0, xT(:,k), rho, S);
+            U_z_all(j) = U_z;
+        end
+        u_zero_c = [u_zero_c; mean(U_z_all)];
+    end
+end
+
+save([R_dir, 'grad/opt_energy_control.mat'], 'band_order_c', 'subj_order_c', 'u_high_c', 'u_high2_c', 'u_high3_c', 'u_low_c', 'u_zero_c')
+
+
+
+%% Loop through data - PR
+
+load([save_dir, 'pr_noise_sg.mat']);
+
+% initialize
+u_high_pr = [];
+u_high2_pr = [];
+u_high3_pr = [];
+u_low_pr = [];
+u_zero_pr = [];
+band_order_pr = {};
+subj_order_pr = {};
+
+
+% this used to index over mag and grad, but we dont look at mag
+sens = sensors{1};
+R_dir_s = [R_dir, sens, '/'];
+
+cnt = 1; % for order
+for i = Subj
+    s_idx = find(i == Subj);
+    subj = sprintf('%03d', i);
+    
+    for k = 1:numel(bands)
+        f = bands{k};
+        fprintf('\nUPR Subj %03d... band %s...', i, f)
+
+        % get labels
+        band_order_pr{cnt} = f;
+        subj_order_pr{cnt} = subj;
+        cnt = cnt + 1;
+
+        % get subgraph data
+        if strcmp(data_dir(end-5:end-1),'param')
+            subset = readNPY([data_dir, subj, '/', sens, 'wpli_pr_', f, '_subset.npy']);
+            coeff = readNPY([data_dir, subj, '/',sens, 'wpli_pr_', f, '_coeff.npy']);
+        else
+            subset = readNPY([data_dir, subj, '/', sens, '/wpli_pr_', f, '_subset.npy']);
+            coeff = readNPY([data_dir, subj, '/',sens, '/wpli_pr_', f, '_coeff.npy']);
+        end
+        
+        % remove noise SG
+        idx = noise_sg{k,i};
+        coeff = coeff(~idx,:);
+        subset = subset(~idx,:);
+        
+        b_exp = subset(:,end);
+        [tmp,tmp_idx] = sort(b_exp,'descend');
+        bSG = tmp_idx(1);
+        bSG2 = tmp_idx(2); % second biggest element
+        bSG3 = tmp_idx(3); % third biggest element
+        [~, nzSG] = min(nonzeros((b_exp))); % smallest nonzero - this is how we will opporationalize "low"
+        
+        % if you actualy want to look at 0s
+        if sum(b_exp == 0) <= 1
+            [~,nbSG] = min(b_exp);
+        else
+            nbSG = find(b_exp == 0);
+        end
+        nZero = numel(nbSG);
+        
+        % optimal control
+        % scale to be stable
+        % 1st
+        high_mat = get_sg_matrix(nNode, subset(bSG,:));
+        high_mat = high_mat./eigs(high_mat,1) - eye(nNode).*1.001;
+        %2nd
+        high2_mat = get_sg_matrix(nNode, subset(bSG2,:));
+        high2_mat = high2_mat./eigs(high2_mat,1) - eye(nNode).*1.001;
+        %3rd
+        high3_mat = get_sg_matrix(nNode, subset(bSG3,:));
+        high3_mat = high3_mat./eigs(high3_mat,1) - eye(nNode).*1.001;
+        %lowest
+        low_mat = get_sg_matrix(nNode, subset(nzSG,:));
+        low_mat = low_mat./eigs(low_mat,1) - eye(nNode).*1.001;
+        zero_mat = zeros(nNode, nNode, nZero);
+        for j = 1:nZero
+            zero_mat(:,:,j) = get_sg_matrix(nNode, subset(nbSG,:));
+            zero_mat(:,:,j) = zero_mat(:,:,j)./eigs(zero_mat(:,:,j),1) - eye(nNode).*1.001;
+        end
+
+        % optim_fun(A, T, B, x0, xf, rho, S)
+        [U_h, err_h] = get_opt_energy(high_mat, T, B, x0, xT(:,k), rho, S);
+        u_high_pr = [u_high_pr; U_h];
+        [U_h2, err_h2] = get_opt_energy(high2_mat, T, B, x0, xT(:,k), rho, S);
+        u_high2_pr = [u_high2_pr; U_h2];
+        [U_h3, err_h3] = get_opt_energy(high3_mat, T, B, x0, xT(:,k), rho, S);
+        u_high3_pr = [u_high3_pr; U_h3];
+        [U_l, err_l] = get_opt_energy(low_mat, T, B, x0, xT(:,k), rho, S);
+        u_low_pr = [u_low_pr; U_l];
+        U_z_all = zeros(nZero,1);
+        for j = 1:nZero
+            [U_z, err_z] = get_opt_energy(zero_mat(:,:,j), T, B, x0, xT(:,k), rho, S);
+            U_z_all(j) = U_z;
+        end
+        u_zero_pr = [u_zero_pr; mean(U_z_all)];
+    end
+end
+
+save([R_dir, 'grad/opt_energy_pr.mat'], 'band_order_pr', 'subj_order_pr', 'slope', 'fin', 'maxi', 'u_high_pr', 'u_high2_pr', 'u_high3_pr', 'u_low_pr', 'u_zero_pr')
 
