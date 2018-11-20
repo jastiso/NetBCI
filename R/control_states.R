@@ -22,7 +22,7 @@ data = data.frame(band = unlist(raw_data$band.ord), region = unlist(raw_data$reg
                   high3 = raw_data$h3.region[1,], high_ev2 = raw_data$h.region2[1,], low = raw_data$l.region[1,], low_ev2 = raw_data$l.region2[1,], 
                   zero = raw_data$z.region[1,], zero_ev2 = raw_data$z.region2[1,], small_ev = raw_data$small.region[1,], high2_ev2 = raw_data$h2.region2[1,], 
                   high3_ev2 = raw_data$h3.region2[1,], high_ev3 = raw_data$h.region3[1,], high2_ev3 = raw_data$h2.region3[1,], high3_ev3 = raw_data$h3.region3[1,],
-                  low_ev3 = raw_data$l.region3[1,], zero_ev3 = raw_data$z.region3[1,], slope = raw_data$slope[1,])
+                  low_ev3 = raw_data$l.region3[1,], zero_ev3 = raw_data$z.region3[1,], slope = raw_data$slope[1,], fin = raw_data$fin[1,], max = raw_data$maxi[1,])
 
 plot = ggplot(data, aes(x = region, y = high, fill = band) )
 plot + geom_boxplot(notch = FALSE, lwd = 1) + 
@@ -389,13 +389,29 @@ stat_gamma_z = t.test(filter(data, region == 'Left_motor', band == 'low_gamma')$
 stat_gamma_z
 
 # cor with slope
-scatterplot = ggplot(filter(data, region == 'Left_motor', band == 'alpha'), aes(x = high_ev2, y = slope)) 
-scatterplot+ geom_smooth(method="lm") + geom_point(size = 6) + labs(x = 'high', y = 'slope') +
+scatterplot = ggplot(filter(data, region == 'Left_motor', band == 'alpha'), aes(x = high2_ev2, y = slope)) 
+scatterplot+ geom_smooth(method="lm") + geom_point(size = 6) + labs(x = 'high2', y = 'slope') +
   theme_minimal() #+ scale_color_manual(values =  wes_palette("Moonrise1",4))
 ggsave('slope_ev2.png')
 
-corr_beta_high2 = cor.test(filter(data, region == 'Left_motor', band == 'alpha')$high_ev2,filter(data, region == 'Left_motor', band == 'alpha')$slope)
-corr_beta_high2
+scatterplot = ggplot(filter(data, region == 'Left_motor', band == 'alpha'), aes(x = high_ev2, y = fin)) 
+scatterplot+ geom_smooth(method="lm") + geom_point(size = 6) + labs(x = 'high', y = 'fin') +
+  theme_minimal() #+ scale_color_manual(values =  wes_palette("Moonrise1",4))
+ggsave('fin_ev2.png')
+
+scatterplot = ggplot(filter(data, region == 'Left_motor', band == 'alpha'), aes(x = high2_ev2, y = max)) 
+scatterplot+ geom_smooth(method="lm") + geom_point(size = 6) + labs(x = 'high', y = 'max') +
+  theme_minimal() #+ scale_color_manual(values =  wes_palette("Moonrise1",4))
+ggsave('max_ev2.png')
+
+corr_slope = cor.test(filter(data, region == 'Left_motor', band == 'alpha')$high2_ev2,filter(data, region == 'Left_motor', band == 'alpha')$slope)
+corr_slope
+
+corr_fin = cor.test(filter(data, region == 'Left_motor', band == 'alpha')$high2_ev2,filter(data, region == 'Left_motor', band == 'alpha')$fin)
+corr_fin
+
+corr_max = cor.test(filter(data, region == 'Left_motor', band == 'alpha')$high2_ev2,filter(data, region == 'Left_motor', band == 'alpha')$max)
+corr_max
 
 fit = lm(slope~high_ev2,filter(data, region == 'Left_motor', band == 'alpha'))
 summary

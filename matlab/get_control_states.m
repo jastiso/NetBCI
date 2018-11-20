@@ -295,6 +295,8 @@ z_region3 = [];
 region_ord = {};
 band_ord = {};
 slope = [];
+fin = [];
+maxi = [];
 
 cnt = 1;
 for i = 1:numel(regions)
@@ -309,6 +311,8 @@ for i = 1:numel(regions)
             region_ord{cnt+k} = regions{i};
             band_ord{cnt+k} = bands{j};
             slope(cnt+k) = betas(k+1);
+            fin(cnt+k) = final(k+1);
+            maxi(cnt+k) = maximum(k+1);
         end
         h_region = [h_region, mean(high_states(idx,:,j))];
         l_region = [l_region, mean(low_states(idx,:,j))];
@@ -331,7 +335,8 @@ for i = 1:numel(regions)
 end
 
 save([R_dir, 'grad/control_state.mat'], 'region_ord', 'band_ord', 'h_region', 'l_region', 'h2_region', 'h3_region', 'h_region2', 'l_region2', ...
-    'z_region', 'z_region2', 'small_region', 'h2_region2', 'h3_region2', 'h2_region3', 'h3_region3', 'h_region3', 'l_region3', 'z_region3', 'slope')
+    'z_region', 'z_region2', 'small_region', 'h2_region2', 'h3_region2', 'h2_region3', 'h3_region3', 'h_region3', 'l_region3', 'z_region3', 'slope',...
+    'fin', 'maxi')
 
 
 

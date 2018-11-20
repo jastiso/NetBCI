@@ -104,7 +104,7 @@ for j = 1:numel(sensors)
         %{'Beta',  'Im', 'Max', 'mean', 'sd'}, 'type', 'spearman','testr', 'on')
     
     % save to R_dir
-    save([R_dir, 'exp_beh_cor.mat'], 'betas',  'max_exp', 'sum_exp', 'sd_exp');
+    save([R_dir, 'exp_beh_cor.mat'], 'betas', 'max_exp', 'sum_exp', 'sd_exp');
     
 end
 

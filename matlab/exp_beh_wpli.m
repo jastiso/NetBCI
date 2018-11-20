@@ -81,7 +81,7 @@ for j = 1:numel(sensors)
             max_e4 = tmp(4); % 4th biggest element
             bsg4 = tmp_idx(4); % 4th biggest element
             [min_e,nbsg] = min(nonzeros(subset(:,end))); % here, low is smallest nonzero
-            [tmp,tmp_idx] = sort(b_exp,'ascend');
+            [tmp,tmp_idx] = sort(nonzeros(subset(:,end)),'ascend');
             min_e2 = tmp(2); % second smallest element
             nbsg2 = tmp_idx(2); % second smallest  element
             
@@ -136,7 +136,7 @@ for j = 1:numel(sensors)
         %{'Beta',  'Im', 'Max', 'mean', 'sd'}, 'type', 'spearman','testr', 'on')
     
     % save to R_dir
-    save([R_dir, 'exp_beh_cor.mat'], 'betas', 'improvement', 'num_zero', 'max_exp', 'max_exp2', 'min_exp', 'min_exp2', 'max_exp3', 'max_exp4', 'sum_exp', 'sd_exp');
+    save([R_dir, 'exp_beh_cor.mat'], 'Subj', 'final', 'maximum', 'betas', 'improvement', 'num_zero', 'max_exp', 'max_exp2', 'min_exp', 'min_exp2', 'max_exp3', 'max_exp4', 'sum_exp', 'sd_exp');
     
 end
 
@@ -253,7 +253,7 @@ for j = 1:numel(sensors)
         %{'Beta',  'Im', 'Max', 'mean', 'sd'}, 'type', 'spearman','testr', 'on')
     
     % save to R_dir
-    save([R_dir, 'exp_beh_cor_pr.mat'], 'betas',  'max_exp_null', 'max_exp_null2', 'max_exp_null3', 'min_exp_null', 'sum_exp_null', 'sd_exp_null');
+    save([R_dir, 'exp_beh_cor_pr.mat'], 'Subj', 'betas',  'max_exp_null', 'max_exp_null2', 'max_exp_null3', 'min_exp_null', 'sum_exp_null', 'sd_exp_null');
     
 end
 

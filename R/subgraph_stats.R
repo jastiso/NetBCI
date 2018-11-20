@@ -191,7 +191,7 @@ anova(fit_low_gamma_zero)
 summary(fit_low_gamma_zero)
 
 # make plots of only regions with significant regional differences
-curr_alpha = filter(data_alpha, cond == "high")
+curr_alpha = filter(data_alpha, cond == c("high2","high3"))
 plot = ggplot(curr_alpha, aes(x = region, y = strength, fill = cond) )
 plot + geom_boxplot(notch = FALSE, lwd = 1) + 
   #geom_dotplot(binaxis='y', stackdir='center', dotsize=.5)
@@ -199,7 +199,7 @@ plot + geom_boxplot(notch = FALSE, lwd = 1) +
   labs(x = 'Region', y = 'Strength')  + theme_minimal()
 ggsave(paste(sens, '_alpha_str_sub', '.png', sep = ''))
 
-curr_beta = filter(data_beta, cond == c("high2", "high3", "low"))
+curr_beta = filter(data_beta, cond == c("high2", "high3"))
 plot = ggplot(curr_beta, aes(x = region, y = strength, fill = cond) )
 plot + geom_boxplot(notch = FALSE, lwd = 1) + 
   #geom_dotplot(binaxis='y', stackdir='center', dotsize=.5)
@@ -207,7 +207,7 @@ plot + geom_boxplot(notch = FALSE, lwd = 1) +
   labs(x = 'Region', y = 'Strength')  + theme_minimal()
 ggsave(paste(sens, '_beta_str_sub', '.png', sep = ''))
 
-curr_gamma = filter(data_low_gamma, cond == c("high", "high3", "low"))
+curr_gamma = filter(data_low_gamma, cond == c("high2", "high3"))
 plot = ggplot(curr_gamma, aes(x = region, y = strength, fill = cond) )
 plot + geom_boxplot(notch = FALSE, lwd = 1) + 
   #geom_dotplot(binaxis='y', stackdir='center', dotsize=.5)

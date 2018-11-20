@@ -57,8 +57,15 @@ u_zero = [];
 band_order = {};
 subj_order = {};
 slope = [];
-imp = [];
+fin = [];
 sess_diff = [];
+maxi = [];
+u_high2_m = [];
+u_high3_m = [];
+u_low_m = [];
+u_high2_t = [];
+u_high3_t = [];
+u_low_t = [];
 
 %% Make control set
 
@@ -114,7 +121,8 @@ for i = Subj
         band_order{cnt} = f;
         subj_order{cnt} = subj;
         slope(cnt) = betas(i);
-        imp(cnt) = improvement(i);
+        fin(cnt) = final(i);
+        maxi(cnt) = maximum(i);
         sess_diff(cnt) = difference(i);
         cnt = cnt + 1;
 
@@ -172,10 +180,22 @@ for i = Subj
         u_high = [u_high; U_h];
         [U_h2, err_h2] = get_opt_energy(high2_mat, T, B, x0, xT(:,k), rho, S);
         u_high2 = [u_high2; U_h2];
+        [U_h2_m, err_h2] = get_opt_energy(high2_mat, T, B, xT(:,k), xT(:,k), rho, S);
+        u_high2_m = [u_high2_m; U_h2_m];
+        [U_h2_t, err_h2] = get_opt_energy(high2_mat, T, B, x0, -xT(:,k), rho, S);
+        u_high2_t = [u_high2_t; U_h2_t];
         [U_h3, err_h3] = get_opt_energy(high3_mat, T, B, x0, xT(:,k), rho, S);
         u_high3 = [u_high3; U_h3];
+        [U_h3_m, err_h3] = get_opt_energy(high3_mat, T, B, xT(:,k), xT(:,k), rho, S);
+        u_high3_m = [u_high3_m; U_h3_m];
+        [U_h3_t, err_h3] = get_opt_energy(high3_mat, T, B, x0, -xT(:,k), rho, S);
+        u_high3_t = [u_high3_t; U_h3_t];
         [U_l, err_l] = get_opt_energy(low_mat, T, B, x0, xT(:,k), rho, S);
         u_low = [u_low; U_l];
+        [U_l_m, err_l] = get_opt_energy(low_mat, T, B, xT(:,k), xT(:,k), rho, S);
+        u_low_m = [u_low_m; U_l_m];
+        [U_l_t, err_l] = get_opt_energy(low_mat, T, B, x0, -xT(:,k), rho, S);
+        u_low_t = [u_low_t; U_l_t];
         U_z_all = zeros(nZero,1);
         for j = 1:nZero
             [U_z, err_z] = get_opt_energy(zero_mat(:,:,j), T, B, x0, xT(:,k), rho, S);
@@ -185,7 +205,8 @@ for i = Subj
     end
 end
 
-save([R_dir, 'grad/opt_energy.mat'], 'band_order', 'subj_order', 'slope', 'imp', 'sess_diff', 'u_high', 'u_high2', 'u_high3', 'u_low', 'u_zero')
+save([R_dir, 'grad/opt_energy.mat'], 'band_order', 'subj_order', 'slope', 'fin', 'maxi', 'sess_diff', 'u_high', 'u_high2', 'u_high3', 'u_low', 'u_zero', ...
+    'u_high2_m', 'u_high3_m', 'u_low_m', 'u_high2_t', 'u_high3_t', 'u_low_t')
 
 
 
@@ -389,5 +410,5 @@ for i = Subj
     end
 end
 
-save([R_dir, 'grad/opt_energy_pr.mat'], 'band_order_pr', 'subj_order_pr', 'u_high_pr', 'u_high2_pr', 'u_high3_pr', 'u_low_pr', 'u_zero_pr')
+save([R_dir, 'grad/opt_energy_pr.mat'], 'band_order_pr', 'subj_order_pr', 'slope', 'fin', 'maxi', 'u_high_pr', 'u_high2_pr', 'u_high3_pr', 'u_low_pr', 'u_zero_pr')
 
