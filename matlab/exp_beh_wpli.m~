@@ -42,7 +42,7 @@ min_exp = zeros(nSubj, numel(bands), numel(sensors));
 min_exp2 = zeros(nSubj, numel(bands), numel(sensors));
 sum_exp = zeros(nSubj, numel(bands), numel(sensors));
 sd_exp = zeros(nSubj, numel(bands), numel(sensors));
-diff_exp = zeros(nSubj, numel(bands), numel(sensors));
+
 
 %% Loop through data
 
@@ -99,7 +99,6 @@ for j = 1:numel(sensors)
             max_exp4(idx,k,j) = max_e4;
             min_exp(idx,k,j) = min_e;
             min_exp2(idx,k,j) = min_e2;
-            diff_exp(idx,k,j) = max_e - min_e;
             sum_exp(idx,k,j) = mean(nonzeros(subset(:,end)));
             sd_exp(idx,k,j) = std(nonzeros(subset(:,end)));
             figure(1); clf
@@ -141,7 +140,7 @@ for j = 1:numel(sensors)
         %{'Beta',  'Im', 'Max', 'mean', 'sd'}, 'type', 'spearman','testr', 'on')
     
     % save to R_dir
-    save([R_dir, 'exp_beh_cor.mat'], 'Subj', 'final', 'maximum', 'betas', 'improvement', 'num_zero', 'max_exp', 'max_exp2', 'min_exp', 'min_exp2', 'max_exp3', 'max_exp4', 'sum_exp', 'diff_exp', 'sd_exp');
+    save([R_dir, 'exp_beh_cor.mat'], 'Subj', 'final', 'maximum', 'betas', 'improvement', 'num_zero', 'max_exp', 'max_exp2', 'min_exp', 'min_exp2', 'max_exp3', 'max_exp4', 'sum_exp', 'sd_exp');
     
 end
 

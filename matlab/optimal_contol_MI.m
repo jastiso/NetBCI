@@ -66,6 +66,10 @@ u_low_m = [];
 u_high2_t = [];
 u_high3_t = [];
 u_low_t = [];
+u_high_a = [];
+u_high2_a = [];
+u_high3_a = [];
+u_low_a = [];
 
 %% Make control set
 
@@ -92,15 +96,32 @@ B_control = idx;
 
 %% Make target states
 % make sure these are in the order of bands
+load([top_dir, 'montages/Left_parietal_idx.mat'])
+lp = idx;
+load([top_dir, 'montages/Right_parietal_idx.mat'])
+rp = idx;
+load([top_dir, 'montages/Vertex_idx.mat'])
+vert = idx;
+load([top_dir, 'montages/Left_frontal_idx.mat'])
+lf = idx;
+load([top_dir, 'montages/Right_frontal_idx.mat'])
+rf = idx;
+load([top_dir, 'montages/Left_occipital_idx.mat'])
+lo = idx;
+load([top_dir, 'montages/Right_occipital_idx.mat'])
+ro = idx;
 
 % alpha, suppression in left motor
 xT(:,1) = -B;
+xT_attend(:,1) = -(rp + lp); % suppression in parietal
 
 % beta - contralateral suppression, and ipsilateral activation
 xT(:,2) = -B + B_control;
+xT_attend(:,2) = -vert; % suppression in midline
 
 % gamma...contralateral activation?
 xT(:,3) = B;
+xT_attend(:,3) = (-B - B_control) + lf + rf + lo + ro; % no predictions here
 
 %% Loop through data
 
@@ -178,24 +199,36 @@ for i = Subj
         % optim_fun(A, T, B, x0, xf, rho, S)
         [U_h, err_h] = get_opt_energy(high_mat, T, B, x0, xT(:,k), rho, S);
         u_high = [u_high; U_h];
+        [U_ha, err_h] = get_opt_energy(high_mat, T, B, xT_attend(:,k), xT_attend(:,k), rho, S);
+        u_high_a = [u_high_a; U_ha];
+        
         [U_h2, err_h2] = get_opt_energy(high2_mat, T, B, x0, xT(:,k), rho, S);
         u_high2 = [u_high2; U_h2];
         [U_h2_m, err_h2] = get_opt_energy(high2_mat, T, B, xT(:,k), xT(:,k), rho, S);
         u_high2_m = [u_high2_m; U_h2_m];
         [U_h2_t, err_h2] = get_opt_energy(high2_mat, T, B, x0, -xT(:,k), rho, S);
         u_high2_t = [u_high2_t; U_h2_t];
+        [U_h2a, err_h] = get_opt_energy(high2_mat, T, B, xT_attend(:,k), xT_attend(:,k), rho, S);
+        u_high2_a = [u_high2_a; U_h2a];
+        
         [U_h3, err_h3] = get_opt_energy(high3_mat, T, B, x0, xT(:,k), rho, S);
         u_high3 = [u_high3; U_h3];
         [U_h3_m, err_h3] = get_opt_energy(high3_mat, T, B, xT(:,k), xT(:,k), rho, S);
         u_high3_m = [u_high3_m; U_h3_m];
         [U_h3_t, err_h3] = get_opt_energy(high3_mat, T, B, x0, -xT(:,k), rho, S);
         u_high3_t = [u_high3_t; U_h3_t];
+        [U_h3a, err_h] = get_opt_energy(high3_mat, T, B, xT_attend(:,k), xT_attend(:,k), rho, S);
+        u_high3_a = [u_high3_a; U_h3a];
+        
         [U_l, err_l] = get_opt_energy(low_mat, T, B, x0, xT(:,k), rho, S);
         u_low = [u_low; U_l];
         [U_l_m, err_l] = get_opt_energy(low_mat, T, B, xT(:,k), xT(:,k), rho, S);
         u_low_m = [u_low_m; U_l_m];
         [U_l_t, err_l] = get_opt_energy(low_mat, T, B, x0, -xT(:,k), rho, S);
         u_low_t = [u_low_t; U_l_t];
+        [U_l_a, err_l] = get_opt_energy(low_mat, T, B, xT_attend(:,k), xT_attend(:,k), rho, S);
+        u_low_a = [u_low_a; U_l_a];
+        
         U_z_all = zeros(nZero,1);
         for j = 1:nZero
             [U_z, err_z] = get_opt_energy(zero_mat(:,:,j), T, B, x0, xT(:,k), rho, S);
@@ -206,7 +239,7 @@ for i = Subj
 end
 
 save([R_dir, 'grad/opt_energy.mat'], 'band_order', 'subj_order', 'slope', 'fin', 'maxi', 'sess_diff', 'u_high', 'u_high2', 'u_high3', 'u_low', 'u_zero', ...
-    'u_high2_m', 'u_high3_m', 'u_low_m', 'u_high2_t', 'u_high3_t', 'u_low_t')
+    'u_high2_m', 'u_high3_m', 'u_low_m', 'u_high2_t', 'u_high3_t', 'u_low_t', 'u_high_a', 'u_high2_a', 'u_high3_a', 'u_low_a')
 
 
 

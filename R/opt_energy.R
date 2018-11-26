@@ -19,11 +19,14 @@ raw_data = readMat(paste('data/wpli/', sens, '/opt_energy.mat', sep = ''))
 data = data.frame(band = unlist(raw_data$band.order), subj = unlist(raw_data$subj.order), high = raw_data$u.high[,1], high2 = raw_data$u.high2[,1],
                   high3 = raw_data$u.high3[,1], low = raw_data$u.low[,1],zero = raw_data$u.zero[,1], slope = raw_data$slope[1,], fin = raw_data$fin[1,], 
                   sess_diff = raw_data$sess.diff[1,], max = raw_data$maxi[1,], high2_m = raw_data$u.high2.m[,1], high3_m = raw_data$u.high3.m[,1], 
-                  low_m = raw_data$u.low.m[,1])
+                  low_m = raw_data$u.low.m[,1], high_a = raw_data$u.high.a[,1], high2_a = raw_data$u.high2.a[,1],
+                  high3_a = raw_data$u.high3.a[,1], low_a = raw_data$u.low.a[,1])
 data = mutate(data, diff = log10(low)-log10(high2))
 data = mutate(data, diff3 = log10(low)-log10(high3))
 data = mutate(data, diffm = log10(low_m)-log10(high2_m))
 data = mutate(data, diffm3 = log10(low_m)-log10(high3_m))
+data = mutate(data, diffa = log10(low_a)-log10(high2_a))
+data = mutate(data, diffa3 = log10(low_a)-log10(high3_a))
 
 # reformat by condition
 data_high = select(data, band, subj, slope, fin, max, sess_diff, diff, diff3, high)
@@ -46,7 +49,7 @@ data_zero = select(data, band, subj, slope, fin, max, sess_diff, diff, diff3, ze
 data_zero$cond = 'zero'
 names(data_zero)[names(data_zero)=='zero'] = 'opt_u'
 
-data2 = rbind(data_low, data_high2, data_high3)
+data2 = rbind(data_low, data_high2, data_high3, data_high, data_zero)
 
 data_high2_m = select(data, band, subj, slope, fin, max, sess_diff, diffm, diffm3, high2_m)
 data_high2_m$cond = 'high2'
@@ -91,11 +94,11 @@ plot + geom_boxplot(notch = FALSE, lwd = 1) +
   labs(x = 'Loading', y = 'Optimal Energy')  + theme_minimal()
 ggsave(paste(sens, '_opt_u_m', '.png', sep = ''))
 
-plot = ggplot(data_alpha, aes(x = cond, y = log(opt_u), fill = band) )
+plot = ggplot(data_alpha_m, aes(x = cond, y = log(opt_u), fill = band) )
 plot + geom_boxplot(notch = FALSE, lwd = 1) + 
   geom_dotplot(binaxis='y', stackdir='center', dotsize=.5) + 
   labs(x = 'Loading', y = 'Optimal Energy')  + theme_minimal()
-ggsave(paste(sens, '_opt_u_alpha', '.png', sep = ''))
+ggsave(paste(sens, '_opt_u_alpha_m', '.png', sep = ''))
 
 plot = ggplot(data_beta, aes(x = cond, y = log(opt_u), fill = band) )
 plot + geom_boxplot(notch = FALSE, lwd = 1) + 
@@ -111,27 +114,36 @@ ggsave(paste(sens, '_opt_u_gamma', '.png', sep = ''))
 
 
 ## Stats
-beta_low2 = t.test(filter(data, band == 'beta')$high2,filter(data, band == 'beta')$low, paired=TRUE)
+beta_low2 = t.test(log(filter(data, band == 'beta')$high2),log(filter(data, band == 'beta')$low), paired=TRUE)
 beta_low2
 
-beta_zero2 = t.test(filter(data, band == 'beta')$high2,filter(data, band == 'beta')$zero, paired=TRUE)
+beta_zero2 = t.test(log(filter(data, band == 'beta')$high2),log(filter(data, band == 'beta')$zero), paired=TRUE)
 beta_zero2
 
 beta_low3 = t.test(filter(data, band == 'beta')$high3,filter(data, band == 'beta')$low, paired=TRUE)
 beta_low3
 
-beta_zero3 = t.test(filter(data, band == 'beta')$high3,filter(data, band == 'beta')$zero, paired=TRUE)
+beta_zero3 = t.test(log(filter(data, band == 'beta')$high3),log(filter(data, band == 'beta')$zero), paired=TRUE)
 beta_zero3
 
-#alpha
-alpha_low2 = t.test(filter(data, band == 'alpha')$high2,filter(data, band == 'alpha')$low, paired=TRUE)
+# other bands
+alpha_low2 = t.test(log(filter(data, band == 'alpha')$high2),log(filter(data, band == 'alpha')$low), paired=TRUE)
 alpha_low2
 
+alpha_m = t.test(log(filter(data, band == 'alpha')$high2_m),log(filter(data, band == 'alpha')$low_m), paired=TRUE)
+alpha_m
+
+gamma_low2 = t.test(log(filter(data, band == 'low_gamma')$high3),log(filter(data, band == 'low_gamma')$low), paired=TRUE)
+gamma_low2
+
+gamma_low2 = t.test(log(filter(data, band == 'low_gamma')$high3_m),log(filter(data, band == 'low_gamma')$low_m), paired=TRUE)
+gamma_low2
+
 # maintainance
-beta_low2_m = t.test(filter(data, band == 'beta')$high2_m,filter(data, band == 'beta')$low_m, paired=TRUE)
+beta_low2_m = t.test(log(filter(data, band == 'beta')$high2_m),log(filter(data, band == 'beta')$low_m), paired=TRUE)
 beta_low2_m
 
-beta_low3_m = t.test(filter(data, band == 'beta')$high3_m,filter(data, band == 'beta')$low_m, paired=TRUE)
+beta_low3_m = t.test(log(filter(data, band == 'beta')$high3_m),log(filter(data, band == 'beta')$low_m), paired=TRUE)
 beta_low3_m
 
 
@@ -151,12 +163,6 @@ scatterplot = ggplot(data_beta, aes(x = log(opt_u), y = slope, color = cond))
 scatterplot+ geom_smooth(method="lm") + geom_point(size = 6) + labs(x = 'opt_u', y = 'slope') +
   theme_minimal() #+ scale_color_manual(values =  wes_palette("Moonrise1",4))
 ggsave('slope_opt_u_high3.png')
-
-# corr with end_perf - start_perf
-scatterplot = ggplot(data_beta, aes(x = diff, y = sess_diff)) 
-scatterplot+ geom_smooth(method="lm") + geom_point(size = 6) + labs(x = 'log(low)-log(high)', y = 'sess_diff') +
-  theme_minimal() #+ scale_color_manual(values =  wes_palette("Moonrise1",4))
-ggsave('sess_diff_opt_u.png')
 
 # corr with max
 scatterplot = ggplot(data_beta, aes(x = diff, y = max)) 
@@ -195,17 +201,23 @@ corr_beta_diff
 corr_beta_diff = cor.test(filter(data, band == 'beta')$diff,filter(data, band == 'beta')$max)
 corr_beta_diff
 
-fit1 = lm(slope ~ diff + max + fin, filter(data, band == 'beta'))
+fit1 = lm(slope ~ diff, filter(data, band == 'beta'))
 summary(fit1)
 
-fit3 = lm(max ~ diff + slope + fin, filter(data, band == 'beta'))
+fit3 = lm(max ~ diff, filter(data, band == 'beta'))
 summary(fit3)
 
-fit4 = lm(fin ~ diff + slope + max, filter(data, band == 'beta'))
+fit4 = lm(fin ~ diff, filter(data, band == 'beta'))
 summary(fit4)
+
 
 # maintainance
 scatterplot = ggplot(data_beta_m, aes(x = diffm, y = slope)) 
+scatterplot+ geom_smooth(method="lm") + geom_point(size = 6) + labs(x = 'log(low)-log(high)', y = 'slope') +
+  theme_minimal() #+ scale_color_manual(values =  wes_palette("Moonrise1",4))
+ggsave('slope_opt_u_m.png')
+
+scatterplot = ggplot(data_m, aes(x = log(opt_u), y = slope, color = cond)) 
 scatterplot+ geom_smooth(method="lm") + geom_point(size = 6) + labs(x = 'log(low)-log(high)', y = 'slope') +
   theme_minimal() #+ scale_color_manual(values =  wes_palette("Moonrise1",4))
 ggsave('slope_opt_u_m.png')
@@ -222,6 +234,66 @@ plot + geom_boxplot(notch = FALSE, lwd = 1) +
   labs(x = 'Loading', y = 'Optimal Energy')  + theme_minimal() + geom_line(aes(group = subj), alpha = 0.6)
 ggsave(paste(sens, '_opt_u_m', '.png', sep = ''))
 
+
+##############################################
+
+# Attention Networks
+
+#############################################
+
+# reformat by condition
+data_high_a = select(data, band, subj, slope, fin, max, diffa, diffa3, high_a)
+data_high_a$cond = 'high'
+names(data_high_a)[names(data_high_a)=='high_a'] = 'opt_u'
+
+data_high2_a = select(data, band, subj, slope, fin, max, diffa, diffa3, high2_a)
+data_high2_a$cond = 'high2'
+names(data_high2_a)[names(data_high2_a)=='high2_a'] = 'opt_u'
+
+data_high3_a = select(data, band, subj, slope, fin, max, diffa, diffa3, high3_a)
+data_high3_a$cond = 'high3'
+names(data_high3_a)[names(data_high3_a)=='high3_a'] = 'opt_u'
+
+data_low_a = select(data, band, subj, slope, fin, max, diffa, diffa3, low_a)
+data_low_a$cond = 'low'
+names(data_low_a)[names(data_low_a)=='low_a'] = 'opt_u'
+
+
+data_a = rbind(data_low_a, data_high2_a, data_high3_a, data_high_a)
+
+
+plot = ggplot(data_a, aes(x = cond, y = log(opt_u), fill = band) )
+plot + geom_boxplot(notch = FALSE, lwd = 1) + 
+  #geom_dotplot(binaxis='y', stackdir='center', dotsize=.5)
+  scale_fill_manual(values = wes_palette("Royal1",4)) + 
+  labs(x = 'Loading', y = 'Optimal Energy')  + theme_minimal()
+ggsave(paste(sens, '_opt_u_a', '.png', sep = ''))
+
+data_alpha_a = filter(data_a, band == "alpha")
+data_beta_a = filter(data_a, band == "beta")
+data_gamma_a = filter(data_a, band == "low_gamma")
+
+# Stats
+alpha_a = t.test(log(filter(data, band == 'alpha')$high2_a),log(filter(data, band == 'alpha')$low_a), paired=TRUE)
+alpha_a
+
+beta_a = t.test(log(filter(data, band == 'beta')$high2_a),log(filter(data, band == 'beta')$low_a), paired=TRUE)
+beta_a
+
+gamma_a = t.test(log(filter(data, band == 'low_gamma')$high2_a),log(filter(data, band == 'low_gamma')$low_a), paired=TRUE)
+gamma_a
+
+
+# corr with slope
+scatterplot = ggplot(data_alpha_a, aes(x = diffa, y = slope)) 
+scatterplot+ geom_smooth(method="lm") + geom_point(size = 6) + labs(x = 'log(low)-log(high)', y = 'slope') +
+  theme_minimal() #+ scale_color_manual(values =  wes_palette("Moonrise1",4))
+ggsave('slope_diff_a.png')
+
+scatterplot = ggplot(data, aes(x = log(low_a), y = slope, color = band)) 
+scatterplot+ geom_smooth(method="lm") + geom_point(size = 6) + labs(x = 'log(low)-log(high)', y = 'slope') +
+  theme_minimal() #+ scale_color_manual(values =  wes_palette("Moonrise1",4))
+ggsave('slope_opt_u_a.png')
 
 
 
