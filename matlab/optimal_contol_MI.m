@@ -192,7 +192,7 @@ for i = Subj
         low_mat = low_mat./eigs(low_mat,1) - eye(nNode).*1.001;
         zero_mat = zeros(nNode, nNode, nZero);
         for j = 1:nZero
-            zero_mat(:,:,j) = get_sg_matrix(nNode, subset(nbSG,:));
+            zero_mat(:,:,j) = get_sg_matrix(nNode, subset(nbSG(j),:));
             zero_mat(:,:,j) = zero_mat(:,:,j)./eigs(zero_mat(:,:,j),1) - eye(nNode).*1.001;
         end
 
@@ -318,7 +318,7 @@ for i = Subj
         low_mat = low_mat./eigs(low_mat,1) - eye(nNode).*1.001;
         zero_mat = zeros(nNode, nNode, nZero);
         for j = 1:nZero
-            zero_mat(:,:,j) = get_sg_matrix(nNode, subset(nbSG,:));
+            zero_mat(:,:,j) = get_sg_matrix(nNode, subset(nbSG(j),:));
             zero_mat(:,:,j) = zero_mat(:,:,j)./eigs(zero_mat(:,:,j),1) - eye(nNode).*1.001;
         end
 
@@ -421,7 +421,7 @@ for i = Subj
         low_mat = low_mat./eigs(low_mat,1) - eye(nNode).*1.001;
         zero_mat = zeros(nNode, nNode, nZero);
         for j = 1:nZero
-            zero_mat(:,:,j) = get_sg_matrix(nNode, subset(nbSG,:));
+            zero_mat(:,:,j) = get_sg_matrix(nNode, subset(nbSG(j),:));
             zero_mat(:,:,j) = zero_mat(:,:,j)./eigs(zero_mat(:,:,j),1) - eye(nNode).*1.001;
         end
 
