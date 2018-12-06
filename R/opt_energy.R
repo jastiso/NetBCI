@@ -195,7 +195,7 @@ corr_beta_high3
 corr_beta_low = cor.test(log(filter(data, band == 'beta')$low),filter(data, band == 'beta')$slope)
 corr_beta_low
 
-corr_beta_diff = cor.test(filter(data, band == 'beta')$diff,filter(data, band == 'beta')$slope, method = "spearman")
+corr_beta_diff = cor.test(filter(data, band == 'beta')$diff,filter(data, band == 'beta')$slope, method = "pearson")
 corr_beta_diff
 
 corr_beta_diff = cor.test(filter(data, band == 'beta')$diff,filter(data, band == 'beta')$max)
@@ -390,26 +390,29 @@ beta_zero3_control
 
 raw_data = readMat(paste('data/wpli/', sens, '/opt_energy_pr.mat', sep = ''))
 data_pr = data.frame(band = unlist(raw_data$band.order.pr), subj = unlist(raw_data$subj.order.pr), high = raw_data$u.high.pr[,1], high2 = raw_data$u.high2.pr[,1],
-                          high3 = raw_data$u.high3.pr[,1], low = raw_data$u.low.pr[,1],zero = raw_data$u.zero.pr[,1])
+                          high3 = raw_data$u.high3.pr[,1], low = raw_data$u.low.pr[,1],zero = raw_data$u.zero.pr[,1], slope = raw_data$slope[1,], fin = raw_data$fin[1,], 
+                          max = raw_data$maxi[1,])
+data_pr = mutate(data_pr, diff = log10(low)-log10(high2))
+data_pr = mutate(data_pr, diff3 = log10(low)-log10(high3))
 
 # reformat by condition
-data_high_pr = select(data_pr, band, subj, high)
+data_high_pr = select(data_pr, band, subj, slope, fin, max, diff, high)
 data_high_pr$cond = 'high'
 names(data_high_pr)[names(data_high_pr)=='high'] = 'opt_u'
 
-data_high2_pr = select(data_pr, band, subj, high2)
+data_high2_pr = select(data_pr, band, subj, slope, fin, max, diff, high2)
 data_high2_pr$cond = 'high2'
 names(data_high2_pr)[names(data_high2_pr)=='high2'] = 'opt_u'
 
-data_high3_pr = select(data_pr, band, subj, high3)
+data_high3_pr = select(data_pr, band, subj, slope, fin, max, diff, high3)
 data_high3_pr$cond = 'high3'
 names(data_high3_pr)[names(data_high3_pr)=='high3'] = 'opt_u'
 
-data_low_pr = select(data_pr, band, subj, low)
+data_low_pr = select(data_pr, band, subj, slope, fin, max, diff, low)
 data_low_pr$cond = 'low'
 names(data_low_pr)[names(data_low_pr)=='low'] = 'opt_u'
 
-data_zero_pr = select(data_pr, band, subj, zero)
+data_zero_pr = select(data_pr, band, subj, slope, fin, max, diff, zero)
 data_zero_pr$cond = 'zero'
 names(data_zero_pr)[names(data_zero_pr)=='zero'] = 'opt_u'
 
@@ -458,3 +461,21 @@ beta_low3_pr
 beta_zero3_pr = t.test(filter(data_pr, band == 'beta')$high3,filter(data_pr, band == 'beta')$zero, paired=TRUE)
 beta_zero3_pr
 
+## Relationship to slope
+
+scatterplot = ggplot(data_beta_pr, aes(x = diff, y = slope)) 
+scatterplot+ geom_smooth(method="lm") + geom_point(size = 6) + labs(x = 'log(low)-log(high)', y = 'slope') +
+  theme_minimal() #+ scale_color_manual(values =  wes_palette("Moonrise1",4))
+ggsave('slope_opt_u_pr.png')
+
+corr_beta_high2 = cor.test(log(filter(data_pr, band == 'beta')$high2),filter(data_pr, band == 'beta')$slope)
+corr_beta_high2
+
+# combined plot
+data_comb = data_frame(diff = c(data$diff, data_pr$diff), slope = c(data$slope, data_pr$slope), model = c(rep('emp', times = 60), rep('upr', times = 60)), band = c(data$band, data_pr$band) )
+data_comb = filter(data_comb, band == "2")
+
+scatterplot = ggplot(data_comb, aes(x = diff, y = slope, color = model)) 
+scatterplot+ geom_smooth(method="lm") + geom_point(size = 6) + labs(x = 'log(low)-log(high)', y = 'slope') +
+  theme_minimal() + scale_color_manual(values =  wes_palette("Moonrise2",4))
+ggsave('slope_opt_u_comb.png')
