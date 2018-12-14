@@ -31,6 +31,9 @@ nSubj = numel(Subj);
 freqs = [7,14;15,30;31,45;55,70];
 bands = [{'alpha'}, {'beta'}, {'low_gamma'}];
 sensors = [{'grad'}];
+regions = [{'Left_frontal'}, {'Left_occipital'}, {'Left_parietal'}, {'Left_temporal'}, ...
+    {'Right_frontal'}, {'Right_occipital'}, {'Right_parietal'}, {'Right_temporal'}, {'Vertex'}, {'Left_motor'}, {'Right_motor'}];
+%regions = [{'Left_motor'}, {'Right_motor'}];
 
 % load behavior
 load([top_dir, 'Behavior/stats'])
@@ -40,13 +43,10 @@ nEdges = (nNode^2-nNode)/2;
 load([save_dir, 'noise_sg.mat']);
 
 % control parameters
-rho = .1;
-T = 0.1;
+rho = 1;
+T = 1;
+S = eye(nNode);
 x0 = zeros(nNode,1);
-S = zeros(nNode,nNode,numel(bands));
-
-% tolerance for error
-tol = 1e-3;
 
 % initialize
 u_high = [];
@@ -57,14 +57,19 @@ u_zero = [];
 band_order = {};
 subj_order = {};
 slope = [];
+fin = [];
+sess_diff = [];
+maxi = [];
+u_high2_m = [];
+u_high3_m = [];
+u_low_m = [];
+u_high2_t = [];
+u_high3_t = [];
+u_low_t = [];
 u_high_a = [];
 u_high2_a = [];
 u_high3_a = [];
 u_low_a = [];
-error = [];
-error_a = [];
-error_c = [];
-error_pr = [];
 
 %% Make control set
 
@@ -108,26 +113,21 @@ ro = idx;
 
 % alpha, suppression in left motor
 xT(:,1) = -B;
-S(:,:,1) = eye(nNode); %diag((xT(:,1) ~= 0));
 xT_attend(:,1) = -(rp + lp); % suppression in parietal
 
 % beta - contralateral suppression, and ipsilateral activation
 xT(:,2) = -B + B_control;
-S(:,:,2) = eye(nNode); %diag((xT(:,2) ~= 0));
 xT_attend(:,2) = -vert; % suppression in midline
 
-% gamma - contralateral activation
+% gamma...contralateral activation?
 xT(:,3) = B;
-S(:,:,3) = eye(nNode); %diag((xT(:,2) ~= 0));
-xT_attend(:,3) = (-B - B_control) + lf + rf + lo + ro; 
-
-% relax B
-B(~B) = 1e-5;
-B_control(~B_control) = 1e-5;
+xT_attend(:,3) = (-B - B_control) + lf + rf + lo + ro; % no predictions here
 
 %% Loop through data
 
-sens = 'grad';
+% this used to index over mag and grad, but we dont look at mag
+sens = sensors{1};
+R_dir_s = [R_dir, sens, '/'];
 
 cnt = 1; % for order
 for i = Subj
@@ -142,6 +142,9 @@ for i = Subj
         band_order{cnt} = f;
         subj_order{cnt} = subj;
         slope(cnt) = betas(i);
+        fin(cnt) = final(i);
+        maxi(cnt) = maximum(i);
+        sess_diff(cnt) = difference(i);
         cnt = cnt + 1;
 
         % get subgraph data
@@ -194,83 +197,50 @@ for i = Subj
         end
 
         % optim_fun(A, T, B, x0, xf, rho, S)
-        [x_h, U_h, err] = get_opt_energy(high_mat, T, diag(B), x0, xT(:,k), rho, S(:,:,k));
+        [U_h, err_h] = get_opt_energy(high_mat, T, B, x0, xT(:,k), rho, S);
         u_high = [u_high; U_h];
-        [x_ha, U_ha, erra] = get_opt_energy(high_mat, T, diag(B), x0, xT_attend(:,k), rho, S(:,:,k));
+        [U_ha, err_h] = get_opt_energy(high_mat, T, B, xT_attend(:,k), xT_attend(:,k), rho, S);
         u_high_a = [u_high_a; U_ha];
-        error = [error, err];
-        error_a = [error_a, erra];
         
-        [x_h2, U_h2, err] = get_opt_energy(high2_mat, T, diag(B), x0, xT(:,k), rho, S(:,:,k));
+        [U_h2, err_h2] = get_opt_energy(high2_mat, T, B, x0, xT(:,k), rho, S);
         u_high2 = [u_high2; U_h2];
-        [x_h2a, U_h2a, erra] = get_opt_energy(high2_mat, T, diag(B), x0, xT_attend(:,k), rho, S(:,:,k));
+        [U_h2_m, err_h2] = get_opt_energy(high2_mat, T, B, xT(:,k), xT(:,k), rho, S);
+        u_high2_m = [u_high2_m; U_h2_m];
+        [U_h2_t, err_h2] = get_opt_energy(high2_mat, T, B, x0, -xT(:,k), rho, S);
+        u_high2_t = [u_high2_t; U_h2_t];
+        [U_h2a, err_h] = get_opt_energy(high2_mat, T, B, xT_attend(:,k), xT_attend(:,k), rho, S);
         u_high2_a = [u_high2_a; U_h2a];
-        error = [error, err];
-        error_a = [error_a, erra];
-    
-        [x_h3, U_h3, err] = get_opt_energy(high3_mat, T, diag(B), x0, xT(:,k), rho, S(:,:,k));
-        u_high3 = [u_high3; U_h3];
-        [x_h3a, U_h3a, erra] = get_opt_energy(high3_mat, T, diag(B), x0, xT_attend(:,k), rho, S(:,:,k));
-        u_high3_a = [u_high3_a; U_h3a];
-        error = [error, err];
-        error_a = [error_a, erra];
         
-        [x_l, U_l, err] = get_opt_energy(low_mat, T, diag(B), x0, xT(:,k), rho, S(:,:,k));
+        [U_h3, err_h3] = get_opt_energy(high3_mat, T, B, x0, xT(:,k), rho, S);
+        u_high3 = [u_high3; U_h3];
+        [U_h3_m, err_h3] = get_opt_energy(high3_mat, T, B, xT(:,k), xT(:,k), rho, S);
+        u_high3_m = [u_high3_m; U_h3_m];
+        [U_h3_t, err_h3] = get_opt_energy(high3_mat, T, B, x0, -xT(:,k), rho, S);
+        u_high3_t = [u_high3_t; U_h3_t];
+        [U_h3a, err_h] = get_opt_energy(high3_mat, T, B, xT_attend(:,k), xT_attend(:,k), rho, S);
+        u_high3_a = [u_high3_a; U_h3a];
+        
+        [U_l, err_l] = get_opt_energy(low_mat, T, B, x0, xT(:,k), rho, S);
         u_low = [u_low; U_l];
-        [x_la, U_l_a, erra] = get_opt_energy(low_mat, T, diag(B), x0, xT_attend(:,k), rho, S(:,:,k));
+        [U_l_m, err_l] = get_opt_energy(low_mat, T, B, xT(:,k), xT(:,k), rho, S);
+        u_low_m = [u_low_m; U_l_m];
+        [U_l_t, err_l] = get_opt_energy(low_mat, T, B, x0, -xT(:,k), rho, S);
+        u_low_t = [u_low_t; U_l_t];
+        [U_l_a, err_l] = get_opt_energy(low_mat, T, B, xT_attend(:,k), xT_attend(:,k), rho, S);
         u_low_a = [u_low_a; U_l_a];
-        error = [error, err];
-        error_a = [error_a, erra];
         
         U_z_all = zeros(nZero,1);
         for j = 1:nZero
-            [x_z, U_z, err] = get_opt_energy(zero_mat(:,:,j), T, diag(B), x0, xT(:,k), rho, S(:,:,k));
+            [U_z, err_z] = get_opt_energy(zero_mat(:,:,j), T, B, x0, xT(:,k), rho, S);
             U_z_all(j) = U_z;
         end
         u_zero = [u_zero; mean(U_z_all)];
-        error = [error, err];
-        
-        
-        
-        
-        % check that you are reaching your target state
-        state_idx = logical(diag(S(:,:,k)));
-        if norm((x_h(state_idx) - xT(state_idx,k))) > tol
-            warning ('Your high error is too large and you are not reaching your target state. Check that your error is within your desired tolerance. If not, try adding more entries to B, fewer to S, or using smaller matrices')
-        end
-        if norm((x_h2(state_idx) - xT(state_idx,k))) > tol
-            warning ('Your high2 error is too large and you are not reaching your target state. Check that your error is within your desired tolerance. If not, try adding more entries to B, fewer to S, or using smaller matrices')
-        end
-        if norm((x_h3(state_idx) - xT(state_idx,k))) > tol
-            warning ('Your high3 error is too large and you are not reaching your target state. Check that your error is within your desired tolerance. If not, try adding more entries to B, fewer to S, or using smaller matrices')
-        end
-        if norm((x_l(state_idx) - xT(state_idx,k))) > tol
-            warning ('Your low error is too large and you are not reaching your target state. Check that your error is within your desired tolerance. If not, try adding more entries to B, fewer to S, or using smaller matrices')
-        end
-        if norm((x_z(state_idx) - xT(state_idx,k))) > tol
-            warning ('Your zero error is too large and you are not reaching your target state. Check that your error is within your desired tolerance. If not, try adding more entries to B, fewer to S, or using smaller matrices')
-        end
-        
-        if norm((x_ha(state_idx) - xT_attend(state_idx,k))) > tol
-            warning ('Your attn high error is too large and you are not reaching your target state. Check that your error is within your desired tolerance. If not, try adding more entries to B, fewer to S, or using smaller matrices')
-        end
-        if norm((x_h2a(state_idx) - xT_attend(state_idx,k))) > tol
-            warning ('Your attn high2 error is too large and you are not reaching your target state. Check that your error is within your desired tolerance. If not, try adding more entries to B, fewer to S, or using smaller matrices')
-        end
-        if norm((x_h3a(state_idx) - xT_attend(state_idx,k))) > tol
-            warning ('Your attn high3 error is too large and you are not reaching your target state. Check that your error is within your desired tolerance. If not, try adding more entries to B, fewer to S, or using smaller matrices')
-        end
-        if norm((x_la(state_idx) - xT_attend(state_idx,k))) > tol
-            warning ('Your attn low error is too large and you are not reaching your target state. Check that your error is within your desired tolerance. If not, try adding more entries to B, fewer to S, or using smaller matrices')
-        end
-
     end
 end
 
-save([R_dir, 'grad/opt_energy.mat'], 'band_order', 'subj_order', 'slope', 'u_high', 'u_high2', 'u_high3', 'u_low', 'u_zero', ...
-    'u_high_a', 'u_high2_a', 'u_high3_a', 'u_low_a')
-save([save_dir, 'oc_error_mi'], 'error');
-save([save_dir, 'oc_error_attn'], 'error_a');
+save([R_dir, 'grad/opt_energy.mat'], 'band_order', 'subj_order', 'slope', 'fin', 'maxi', 'sess_diff', 'u_high', 'u_high2', 'u_high3', 'u_low', 'u_zero', ...
+    'u_high2_m', 'u_high3_m', 'u_low_m', 'u_high2_t', 'u_high3_t', 'u_low_t', 'u_high_a', 'u_high2_a', 'u_high3_a', 'u_low_a')
+
 
 
 %% Loop through data - other control set
@@ -283,7 +253,7 @@ u_low_c = [];
 u_zero_c = [];
 band_order_c = {};
 subj_order_c = {};
-slope = [];
+
 
 % this used to index over mag and grad, but we dont look at mag
 sens = sensors{1};
@@ -301,7 +271,6 @@ for i = Subj
         % get labels
         band_order_c{cnt} = f;
         subj_order_c{cnt} = subj;
-        slope(cnt) = betas(i);
         cnt = cnt + 1;
 
         % get subgraph data
@@ -354,24 +323,24 @@ for i = Subj
         end
 
         % optim_fun(A, T, B, x0, xf, rho, S)
-        [~, U_h, err_h] = get_opt_energy(high_mat, T, diag(B_control), x0, xT_attend(:,k), rho, S(:,:,k));
+        [U_h, err_h] = get_opt_energy(high_mat, T, B_control, x0, xT(:,k), rho, S);
         u_high_c = [u_high_c; U_h];
-        [~, U_h2, err_h2] = get_opt_energy(high2_mat, T, diag(B_control), x0, xT_attend(:,k), rho, S(:,:,k));
+        [U_h2, err_h2] = get_opt_energy(high2_mat, T, B_control, x0, xT(:,k), rho, S);
         u_high2_c = [u_high2_c; U_h2];
-        [~, U_h3, err_h3] = get_opt_energy(high3_mat, T, diag(B_control), x0, xT_attend(:,k), rho, S(:,:,k));
+        [U_h3, err_h3] = get_opt_energy(high3_mat, T, B_control, x0, xT(:,k), rho, S);
         u_high3_c = [u_high3_c; U_h3];
-        [~, U_l, err_l] = get_opt_energy(low_mat, T, diag(B_control), x0, xT_attend(:,k), rho, S(:,:,k));
+        [U_l, err_l] = get_opt_energy(low_mat, T, B_control, x0, xT(:,k), rho, S);
         u_low_c = [u_low_c; U_l];
         U_z_all = zeros(nZero,1);
         for j = 1:nZero
-            [~, U_z, err_z] = get_opt_energy(zero_mat(:,:,j), T, diag(B_control), x0, xT_attend(:,k), rho, S(:,:,k));
+            [U_z, err_z] = get_opt_energy(zero_mat(:,:,j), T, B_control, x0, xT(:,k), rho, S);
             U_z_all(j) = U_z;
         end
         u_zero_c = [u_zero_c; mean(U_z_all)];
     end
 end
 
-save([R_dir, 'grad/opt_energy_control.mat'], 'slope', 'band_order_c', 'subj_order_c', 'u_high_c', 'u_high2_c', 'u_high3_c', 'u_low_c', 'u_zero_c')
+save([R_dir, 'grad/opt_energy_control.mat'], 'band_order_c', 'subj_order_c', 'u_high_c', 'u_high2_c', 'u_high3_c', 'u_low_c', 'u_zero_c')
 
 
 
@@ -457,22 +426,22 @@ for i = Subj
         end
 
         % optim_fun(A, T, B, x0, xf, rho, S)
-        [~, U_h, err_h] = get_opt_energy(high_mat, T, diag(B), x0, xT_attend(:,k), rho, S(:,:,k));
+        [U_h, err_h] = get_opt_energy(high_mat, T, B, x0, xT(:,k), rho, S);
         u_high_pr = [u_high_pr; U_h];
-        [~, U_h2, err_h2] = get_opt_energy(high2_mat, T, diag(B), x0, xT_attend(:,k), rho, S(:,:,k));
+        [U_h2, err_h2] = get_opt_energy(high2_mat, T, B, x0, xT(:,k), rho, S);
         u_high2_pr = [u_high2_pr; U_h2];
-        [~, U_h3, err_h3] = get_opt_energy(high3_mat, T, diag(B), x0, xT_attend(:,k), rho, S(:,:,k));
+        [U_h3, err_h3] = get_opt_energy(high3_mat, T, B, x0, xT(:,k), rho, S);
         u_high3_pr = [u_high3_pr; U_h3];
-        [~, U_l, err_l] = get_opt_energy(low_mat, T, diag(B), x0, xT_attend(:,k), rho, S(:,:,k));
+        [U_l, err_l] = get_opt_energy(low_mat, T, B, x0, xT(:,k), rho, S);
         u_low_pr = [u_low_pr; U_l];
         U_z_all = zeros(nZero,1);
         for j = 1:nZero
-            [~, U_z, err_z] = get_opt_energy(zero_mat(:,:,j), T, diag(B), x0, xT_attend(:,k), rho, S(:,:,k));
+            [U_z, err_z] = get_opt_energy(zero_mat(:,:,j), T, B, x0, xT(:,k), rho, S);
             U_z_all(j) = U_z;
         end
         u_zero_pr = [u_zero_pr; mean(U_z_all)];
     end
 end
 
-save([R_dir, 'grad/opt_energy_pr.mat'], 'band_order_pr', 'subj_order_pr', 'slope', 'u_high_pr', 'u_high2_pr', 'u_high3_pr', 'u_low_pr', 'u_zero_pr')
+save([R_dir, 'grad/opt_energy_pr.mat'], 'band_order_pr', 'subj_order_pr', 'slope', 'fin', 'maxi', 'u_high_pr', 'u_high2_pr', 'u_high3_pr', 'u_low_pr', 'u_zero_pr')
 

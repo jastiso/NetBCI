@@ -31,9 +31,6 @@ nSubj = numel(Subj);
 freqs = [7,14;15,30;31,45;55,70];
 bands = [{'alpha'}, {'beta'}, {'low_gamma'}];
 sensors = [{'grad'}];
-regions = [{'Left_frontal'}, {'Left_occipital'}, {'Left_parietal'}, {'Left_temporal'}, ...
-    {'Right_frontal'}, {'Right_occipital'}, {'Right_parietal'}, {'Right_temporal'}, {'Vertex'}, {'Left_motor'}, {'Right_motor'}];
-%regions = [{'Left_motor'}, {'Right_motor'}];
 
 % load behavior
 load([top_dir, 'Behavior/stats'])

@@ -17,31 +17,35 @@ subgraphs and expression coefficients.
 import os
 import numpy as np
 import scipy.io as io
-import matplotlib.pyplot as plt
-os.chdir('/Users/stiso/Documents/Python/Echobase-master/')
+import sys
+#os.chdir('/Users/stiso/Documents/Python/Echobase-master/')
 #from Echobase import optimize_nmf
 import optimize_nmf
+import importlib.util
+#spec = importlib.util.spec_from_file_location('optimize_nmf', '/data/jag/bassett-lab/jstiso/Echobase-master/Echobase/Network/Partitioning/Subgraph/optimize_nmf.py')
+#optimize_nmf = importlib.util.module_from_spec(spec)
+#spec.loader.exec_module(optimize_nmf)
 
 def pipe(subj, band, eType):
 
 #%% Global variables
-    os.chdir('/Users/stiso/Documents/Python/NetBCI/')
-    data_dir = '/Users/stiso/Documents/Matlab/NetBCI/NMF/'
-    save_dir = ''.join(['/Users/stiso/Documents/Python/NetBCI/NMF/', subj, '/', eType, '/'])
+    os.chdir('/data/jag/bassett-lab/jstiso/Python/NetBCI/')
+    data_dir = '/data/jag/bassett-lab/jstiso/Python/NetBCI/data/'
+    save_dir = ''.join(['/data/jag/bassett-lab/jstiso/Python/NetBCI/NMF/', subj, '/', eType, '/'])
 # make directory
     if not os.path.exists(save_dir):
         os.makedirs(save_dir)
 #%% Load data 
 
-    data = io.loadmat(''.join([data_dir, 'gc_', band, '_', eType, '_', subj, '.mat']))
+    data = io.loadmat(''.join([data_dir, 'pr_ac_', band, '_', eType, '_', subj, '.mat']))
     val = np.transpose(np.array(data['A']))
     nWin = val.shape[0]
 
 #%% Test all parameters
 
-    alpha_range = (0.001,2)
-    beta_range = (0.001,2)
-    m_range = (2,20)
+    alpha_range = (0.01,2)
+    beta_range = (0.01,2)
+    m_range = (2,8)
     n_param = 10000
 
 #%% get fold id
@@ -73,7 +77,7 @@ def pipe(subj, band, eType):
     
 #%% Consensus clustering for best parameters
 
-    n_proc = 4
+    n_proc = 1
     opt_alpha = opt_param.get('alpha')
     opt_beta = opt_param.get('beta')
     opt_rank= opt_param.get('rank')
@@ -83,15 +87,11 @@ def pipe(subj, band, eType):
     np.save("".join([save_dir,'ac_', band, '_coeff']), coeff)
     np.save("".join([save_dir, 'ac_',band, '_err']), err)
 
-#%% Plot
+#%% work with command line
 
-#plt.imshow(coeff, cmap='plasma',  ax=plt.subplots(figsize=(10,10)))
-#plt.show()
-    fig = plt.figure()
-    plt.plot(np.transpose(coeff))
-    fig.savefig("".join([save_dir, 'ac_', band, '_', subj, '_node_exp.png']))
+if __name__ == '__main__':
+    # Map command line arguments to function arguments.
+    pipe(*sys.argv[1:])
 
-    fig = plt.figure()
-    plt.plot(coeff)
-    fig.savefig("".join([save_dir, 'ac_', band, '_', subj, '_sg_exp.png']))
+
 

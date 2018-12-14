@@ -21,20 +21,22 @@ condition = [{'test01'}, {'test02'}, {'test03'}, {'test04'}, {'test05'}, {'test0
 subjs = [1:20];
 nNode = 102;
 
-freqs = [7,14;15,30;31,45;55,70];
-bands = [{'alpha'},{'beta'},{'low_gamma'}, {'gamma'}];
+%freqs = [7,14;15,30;31,45;55,70];
+%bands = [{'alpha'},{'beta'},{'low_gamma'}, {'gamma'}];
+freqs = [8,10];
+bands = [{'mu'}];
+
 st = 3;
 en = 6; % in seconds, the feedback period: 3-6s
 
 
-
 %% Start Loop
 
-errors = cell(1,numel(subjs));
+errors = cell(1,4);
 
 parfor i = subjs
     subj = i;
-   [ errors{i} ] = wrapper_pr_wpli( sessions, condition, subj, data_dir, raw_dir, top_dir, bands, freqs, st, en, nNode );
+   [ errors{i} ] = wrapper_wpli( sessions, condition, subj, data_dir, raw_dir, top_dir, bands, freqs, st, en, nNode );
 end
 
 

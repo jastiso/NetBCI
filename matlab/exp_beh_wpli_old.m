@@ -31,14 +31,18 @@ load([top_dir, 'Behavior/stats'])
 load([save_dir, 'noise_sg.mat']);
 
 %initialize
+max_corrs = zeros(nSubj, numel(bands), numel(sensors));
+min_corrs = zeros(nSubj, numel(bands), numel(sensors));
 max_exp = zeros(nSubj, numel(bands), numel(sensors));
 num_zero = zeros(nSubj, numel(bands), numel(sensors));
 max_exp2 = zeros(nSubj, numel(bands), numel(sensors));
 max_exp3 = zeros(nSubj, numel(bands), numel(sensors));
 max_exp4 = zeros(nSubj, numel(bands), numel(sensors));
 min_exp = zeros(nSubj, numel(bands), numel(sensors));
+min_exp2 = zeros(nSubj, numel(bands), numel(sensors));
 sum_exp = zeros(nSubj, numel(bands), numel(sensors));
 sd_exp = zeros(nSubj, numel(bands), numel(sensors));
+diff_exp = zeros(nSubj, numel(bands), numel(sensors));
 
 %% Loop through data
 
@@ -78,30 +82,83 @@ for j = 1:numel(sensors)
             bsg4 = tmp_idx(4); % 4th biggest element
             [min_e,nbsg] = min(nonzeros(subset(:,end))); % here, low is smallest nonzero
             [tmp,tmp_idx] = sort(nonzeros(subset(:,end)),'ascend');
-
+            try
+                min_e2 = tmp(2); % second smallest element
+                nbsg2 = tmp_idx(2); % second smallest  element
+            catch
+                min_e2 = tmp(1);
+                nbsg2 = tmp_idx(1);
+            end
             % get corr
+            max_corrs(idx,k,j) = corr(behavior_all{i}', coeff(bsg,:)');
+            min_corrs(idx,k,j) = corr(behavior_all{i}', coeff(nbsg,:)');
             num_zero(idx,k,j) = sum(b_exp == 0);
             max_exp(idx,k,j) = max_e;
             max_exp2(idx,k,j) = max_e2;
             max_exp3(idx,k,j) = max_e3;
             max_exp4(idx,k,j) = max_e4;
             min_exp(idx,k,j) = min_e;
+            min_exp2(idx,k,j) = min_e2;
+            diff_exp(idx,k,j) = max_e - min_e;
             sum_exp(idx,k,j) = mean(nonzeros(subset(:,end)));
             sd_exp(idx,k,j) = std(nonzeros(subset(:,end)));
-            
-            % visual check that there is some distribution of performance
-            % loadings
             figure(1); clf
             hist(subset(:,end))
             pause(0.001)
-            %saveas(gca, [save_dir, subj, '_', f, '_exp_hist.png'], 'png')
+            saveas(gca, [save_dir, subj, '_', f, '_exp_hist.png'], 'png')
         end
     end
     
+    
+    % make picture
+    figure(1)
+    imagesc(max_corrs);
+    caxis([min(min(min_corrs)), max(max(max_corrs))])
+    colorbar
+    xlabel('Frequency')
+    ylabel('Subject')
+    saveas(gca, [save_dir, 'behavior_exp_corr.png'], 'png')
+    save([R_dir, 'max_exp_b_corr.mat'], 'max_corrs')
+    save([R_dir, 'min_exp_b_corr.mat'], 'min_corrs')
+    
+    figure(2)
+    imagesc(min_corrs);
+    caxis([min(min(min_corrs)), max(max(max_corrs))])
+    colorbar
+    xlabel('Frequency')
+    ylabel('Subject')
+    saveas(gca, [save_dir, 'min_behavior_exp_corr.png'], 'png')
+    
+    % plot realtionship between slope of learning and expression
+    %for i = 1:numel(bands)
+      %  corrplot([betas(Subj)', improvement(Subj)', max_exp(:,i), sum_exp(:, i), sd_exp(:,i)], 'Var', {'Beta', 'Im', 'Max', 'mean', 'sd'}, 'type', 'pearson','testr', 'on')
+      %  pause(0.001)
+    %end
+    
+    %figure(1); clf
+    %corrplot([repmat(betas(Subj)',numel(bands),1), repmat(improvement(Subj)',numel(bands),1),  ...
+       % reshape(max_exp,[],1),reshape(sum_exp(:, :), [],1), reshape(sd_exp(:, :), [],1)], 'Var',...
+        %{'Beta',  'Im', 'Max', 'mean', 'sd'}, 'type', 'spearman','testr', 'on')
+    
     % save to R_dir
-    save([R_dir, 'exp_beh_cor.mat'], 'Subj', 'betas', 'num_zero', 'max_exp', 'max_exp2', 'min_exp', 'max_exp3', 'max_exp4', 'sum_exp', 'sd_exp');
+    save([R_dir, 'exp_beh_cor.mat'], 'Subj', 'final', 'maximum', 'betas', 'improvement', 'num_zero', 'max_exp', 'max_exp2', 'min_exp', 'min_exp2', 'max_exp3', 'max_exp4', 'sum_exp', 'diff_exp', 'sd_exp');
     
 end
+
+
+
+% % select individual corrplot
+% figure(1); clf
+% s1 = plot(betas(Subj)', max_exp(:,1), 'k.', 'color', [.7,.7,.7]);
+% set(s1, 'MarkerSize', 20, 'LineWidth', 2);
+% %%% regression line
+% hold on
+% l = lsline ;
+% set(l,'color', 'k', 'LineWidth', 2)
+% hold off
+% [p,r] = mult_comp_perm_corr(betas(Subj)', max_exp(:,1))
+% saveas(gca, [save_dir, 'max_beta_alpha.png'], 'png')
+
 
 
 %% Null models - uniform PR
@@ -110,6 +167,8 @@ end
 load([save_dir, 'pr_noise_sg.mat']);
 
 %initialize
+max_corrs_null = zeros(nSubj, numel(bands), numel(sensors));
+min_corrs_null = zeros(nSubj, numel(bands), numel(sensors));
 max_exp_null = zeros(nSubj, numel(bands), numel(sensors));
 max_exp_null2 = zeros(nSubj, numel(bands), numel(sensors));
 max_exp_null3 = zeros(nSubj, numel(bands), numel(sensors));
@@ -119,6 +178,7 @@ sd_exp_null = zeros(nSubj, numel(bands), numel(sensors));
 
 
 % Loop through data
+
 for j = 1:numel(sensors)
     sens = sensors{j};
     R_dir = [R_dir_o, sens, '/'];
@@ -154,17 +214,64 @@ for j = 1:numel(sensors)
             [min_e,nbsg] = min(nonzeros(subset(:,end))); % here, low is smallest nonzero
             
             % get corr
+            max_corrs_null(idx,k,j) = corr(behavior_all{i}', coeff(bsg,:)');
+            min_corrs_null(idx,k,j) = corr(behavior_all{i}', coeff(nbsg,:)');
             max_exp_null(idx,k,j) = max_e;
             max_exp_null2(idx,k,j) = max_e2;
             max_exp_null3(idx,k,j) = max_e3;
             min_exp_null(idx,k,j) = min_e;
             sum_exp_null(idx,k,j) = mean(nonzeros(subset(:,end)));
             sd_exp_null(idx,k,j) = std(nonzeros(subset(:,end)));
+            figure(1); clf
+            hist(subset(:,end))
+            pause(0.001)
         end
     end
-
+    
+    
+    % make picture
+    figure(1)
+    imagesc(max_corrs_null);
+    caxis([min(min(min_corrs_null)), max(max(max_corrs_null))])
+    colorbar
+    xlabel('Frequency')
+    ylabel('Subject')
+    save([R_dir, 'max_exp_b_corr_pr.mat'], 'max_corrs_null')
+    save([R_dir, 'min_exp_b_corr_pr.mat'], 'min_corrs_null')
+    
+    figure(2)
+    imagesc(min_corrs_null);
+    caxis([min(min(min_corrs_null)), max(max(max_corrs_null))])
+    colorbar
+    xlabel('Frequency')
+    ylabel('Subject')
+    
+    % plot realtionship between slope of learning and expression
+    %for i = 1:numel(bands)
+      %  corrplot([betas(Subj)', improvement(Subj)', max_exp(:,i), sum_exp(:, i), sd_exp(:,i)], 'Var', {'Beta', 'Im', 'Max', 'mean', 'sd'}, 'type', 'pearson','testr', 'on')
+      %  pause(0.001)
+    %end
+    
+    %figure(1); clf
+    %corrplot([repmat(betas(Subj)',numel(bands),1), repmat(improvement(Subj)',numel(bands),1),  ...
+       % reshape(max_exp,[],1),reshape(sum_exp(:, :), [],1), reshape(sd_exp(:, :), [],1)], 'Var',...
+        %{'Beta',  'Im', 'Max', 'mean', 'sd'}, 'type', 'spearman','testr', 'on')
+    
     % save to R_dir
     save([R_dir, 'exp_beh_cor_pr.mat'], 'Subj', 'betas',  'max_exp_null', 'max_exp_null2', 'max_exp_null3', 'min_exp_null', 'sum_exp_null', 'sd_exp_null');
     
 end
+
+% figure(1); clf
+% s1 = plot(betas(Subj)', max_exp_null(:,2), 'k.', 'color', [.7,.7,.7]);
+% set(s1, 'MarkerSize', 20, 'LineWidth', 2);
+% ylim([.00018, .00025])
+% 
+% %%% regression line
+% hold on
+% l = lsline ;
+% set(l,'color', 'k', 'LineWidth', 2)
+% hold off
+% [p,r] = mult_comp_perm_corr(betas(Subj)', max_exp_null(:,2))
+% saveas(gca, [save_dir, 'max_beta_beta_pr.png'], 'png')
 

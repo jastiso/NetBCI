@@ -6,6 +6,7 @@
 
 addpath(genpath('/Users/stiso/Documents/MATLAB/npy-matlab-master/'))
 addpath('/Users/stiso/Documents/MATLAB/fieldtrip-20170830/')
+addpath(genpath('/Users/stiso/Documents/MATLAB/BCT/'))
 
 top_dir = '/Users/stiso/Documents/MATLAB/NetBCI/';
 data_dir = '/Users/stiso/Documents/Python/NetBCI/NMF/param/';
@@ -131,11 +132,16 @@ for i = 1:numel(bands)
             %c_zero(:,:,k) = thresh_mat(curr_zero(:,:,k),thr(j));
         end
         % get consistency
-        c_high_avg = sum(c_high, 3); % ~=0 for consistency
-        c_high2_avg = sum(c_high2, 3);
-        c_high3_avg = sum(c_high3, 3);
-        c_low_avg = sum(c_low, 3);
+        c_high_avg = sum(c_high ~=0, 3); % ~=0 for consistency
+        c_high2_avg = sum(c_high2 ~=0, 3);
+        c_high3_avg = sum(c_high3 ~=0, 3);
+        c_low_avg = sum(c_low ~=0, 3);
         %c_zero_avg = sum(c_zero ~= 0, 3);
+        % add some additional thresholding
+        c_high_avg(c_high_avg <= 5) = 0;
+        c_high2_avg(c_high2_avg <= 5) = 0;
+        c_high3_avg(c_high3_avg <= 5) = 0;
+        c_low_avg(c_low_avg <= 5) = 0;
         
         % cluster
         [ci_high,q_high] = community_louvain(c_high_avg,1);
@@ -147,73 +153,35 @@ for i = 1:numel(bands)
         [ci_low,q_low] = community_louvain(c_low_avg,1);
         [~,idx_low] = sort(ci_low);
         
-        %plot
-        figure(1); clf
-        imagesc(c_high_avg(idx_high,idx_high)); colorbar; colormap('pink') % change the colormap
-        %caxis([0,20])
-        %saveas(gca,[img_dir, 'consesnus_high_', bands{i}, '_', num2str(j), '.png'], 'png');
         
-        figure(2); clf
-        imagesc(c_high2_avg(idx_high2,idx_high2)); colorbar; colormap('pink')
-        %caxis([0,20])
-        %saveas(gca,[img_dir, 'consesnus_high2_', bands{i}, '_', num2str(j), '.png'], 'png');
         
-        figure(3); clf
-        imagesc(c_high3_avg(idx_high3,idx_high3)); colorbar; colormap('pink')
-        %caxis([0,20])
-        %saveas(gca,[img_dir, 'consesnus_high3_', bands{i}, '_', num2str(j), '.png'], 'png');
+        % save for gephi - coordinates, and community in CSV, and matrix in
+        % txt
+        dlmwrite(['/Users/stiso/Documents/MATLAB/NetBCI/GroupAvg/wpli/gephi/', bands{i}, '_', num2str(j), '_high_matrix.txt'],c_high_avg, 'delimiter', '\t')
+        dlmwrite(['/Users/stiso/Documents/MATLAB/NetBCI/GroupAvg/wpli/gephi/', bands{i}, '_', num2str(j), '_high2_matrix.txt'],c_high2_avg, 'delimiter', '\t')
+        dlmwrite(['/Users/stiso/Documents/MATLAB/NetBCI/GroupAvg/wpli/gephi/', bands{i}, '_', num2str(j), '_high3_matrix.txt'],c_high3_avg, 'delimiter', '\t')
+        dlmwrite(['/Users/stiso/Documents/MATLAB/NetBCI/GroupAvg/wpli/gephi/', bands{i}, '_', num2str(j), '_low_matrix.txt'],c_low_avg, 'delimiter', '\t')
+        % csv
+        fid = fopen([top_dir, 'layouts/neuromag306cmb.txt'], 'r');
+        coord = textscan(fid, '%d %10f %10f %d %d %s', 'Delimiter', '\n');
+        fclose(fid);
+        header = ['x,y,z,community,'];
         
-        figure(4); clf
-        imagesc(c_low_avg(idx_low,idx_low)); colorbar; colormap('pink')
-        %caxis([0,20])
-        %saveas(gca,[img_dir, 'consesnus_low_', bands{i}, '_', num2str(j), '.png'], 'png');
+        fid = fopen(['/Users/stiso/Documents/MATLAB/NetBCI/GroupAvg/wpli/gephi/', bands{i}, '_', num2str(j), '_high_attributes.csv'],'w');
+        fprintf(fid,'%s\n',header); fclose(fid);
+        dlmwrite(['/Users/stiso/Documents/MATLAB/NetBCI/GroupAvg/wpli/gephi/', bands{i}, '_', num2str(j), '_high_attributes.csv'],[coord{2}, coord{3}, ones(nNode,1), ci_high],'-append');
         
-        %figure(5); clf
-        %imagesc(c_zero_avg); colorbar
-        %caxis([0,20])
-        %saveas(gca,[img_dir, 'consesnus_zero_', bands{i}, '_', num2str(j), '.png'], 'png');
+        fid = fopen(['/Users/stiso/Documents/MATLAB/NetBCI/GroupAvg/wpli/gephi/', bands{i}, '_', num2str(j), '_high2_attributes.csv'],'w');
+        fprintf(fid,'%s\n',header); fclose(fid);
+        dlmwrite(['/Users/stiso/Documents/MATLAB/NetBCI/GroupAvg/wpli/gephi/', bands{i}, '_', num2str(j), '_high2_attributes.csv'],[coord{2}, coord{3}, ones(nNode,1), ci_high2],'-append');
         
-        % get into fieldtrip format for topoplot
-        cfg = [];
-        cfg.style = 'straight';
-        cfg.interpolatenans = 'no';
-        %cfg.interplimits = 'electrodes';
-        cfg.layout = [top_dir, 'layouts/neuromag306cmb.lay'];
+        fid = fopen(['/Users/stiso/Documents/MATLAB/NetBCI/GroupAvg/wpli/gephi/', bands{i}, '_', num2str(j), '_high3_attributes.csv'],'w');
+        fprintf(fid,'%s\n',header); fclose(fid);
+        dlmwrite(['/Users/stiso/Documents/MATLAB/NetBCI/GroupAvg/wpli/gephi/', bands{i}, '_', num2str(j), '_high3_attributes.csv'],[coord{2}, coord{3}, ones(nNode,1), ci_high3],'-append');
         
-        plot_data.powspctrm = ci_high;
-        plot_data.label = labels;
-        plot_data.dimord = 'chan_freq';
-        plot_data.freq = 6;
-        figure(1); clf
-        ft_topoplotER(cfg,plot_data); colorbar
-        % so far it was the same as above, now change the colormap
-        ft_hastoolbox('brewermap', 1);         % ensure this toolbox is on the path
-        colormap(flipud(brewermap(numel(unique(ci_high)),'Set2'))) % change the colormap
-        saveas(gca, [img_dir, 'consesnus_high_', bands{i}, '_', num2str(j), '_topo.png'], 'png')
-        
-        plot_data.powspctrm = ci_high2;
-        figure(2); clf
-        ft_topoplotER(cfg,plot_data); colorbar
-        % so far it was the same as above, now change the colormap
-        ft_hastoolbox('brewermap', 1);         % ensure this toolbox is on the path
-        colormap(flipud(brewermap(numel(unique(ci_high2)),'Set2'))) % change the colormap
-        saveas(gca, [img_dir, 'consesnus_high2_', bands{i}, '_', num2str(j), '_topo.png'], 'png')
-        
-        plot_data.powspctrm = ci_high3;
-        figure(3); clf
-        ft_topoplotER(cfg,plot_data); colorbar
-        % so far it was the same as above, now change the colormap
-        ft_hastoolbox('brewermap', 1);         % ensure this toolbox is on the path
-        colormap(flipud(brewermap(numel(unique(ci_high3)),'Set2'))) % change the colormap
-        saveas(gca, [img_dir, 'consesnus_high3_', bands{i}, '_', num2str(j), '_topo.png'], 'png')
-        
-        plot_data.powspctrm = ci_low;
-        figure(4); clf
-        ft_topoplotER(cfg,plot_data); colorbar
-        % so far it was the same as above, now change the colormap
-        ft_hastoolbox('brewermap', 1);         % ensure this toolbox is on the path
-        colormap(flipud(brewermap(numel(unique(ci_low)),'Set2'))) % change the colormap
-        saveas(gca, [img_dir, 'consesnus_low_', bands{i}, '_', num2str(j), '_topo.png'], 'png')
+        fid = fopen(['/Users/stiso/Documents/MATLAB/NetBCI/GroupAvg/wpli/gephi/', bands{i}, '_', num2str(j), '_low_attributes.csv'],'w');
+        fprintf(fid,'%s\n',header); fclose(fid);
+        dlmwrite(['/Users/stiso/Documents/MATLAB/NetBCI/GroupAvg/wpli/gephi/', bands{i}, '_', num2str(j), '_low_attributes.csv'],[coord{2}, coord{3}, ones(nNode,1), ci_low],'-append');
         
     end
 end
