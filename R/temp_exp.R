@@ -61,19 +61,23 @@ data_gamma = filter(data2, band == "low_gamma")
 
 ## Plots
 
-plot = ggplot(data2, aes(x = cond, y = log(e), fill = band) )
+plot = ggplot(data2, aes(x = band, y = log(e), fill = cond) )
 plot + geom_boxplot(notch = FALSE, lwd = 1) + 
   #geom_dotplot(binaxis='y', stackdir='center', dotsize=.5)
-  scale_fill_manual(values = wes_palette("Royal1",4)) + 
+  scale_fill_manual(values = wes_palette("Moonrise3",5)) + 
   labs(x = 'Loading', y = 'Energy')  + theme_minimal()
 ggsave(paste(sens, '_energy', '.png', sep = ''))
 
-plot = ggplot(data2, aes(x = cond, y = p, fill = band) )
-plot + geom_boxplot(notch = FALSE, lwd = 1) + 
+plot = ggplot(data2, aes(x = cond, y = p) )
+plot + geom_violin(aes(fill = band), trim = FALSE, position = position_dodge(0.9)) + 
+  geom_boxplot(aes(fill = band), width = 0.15,
+    position = position_dodge(0.9)
+  ) +
   #geom_dotplot(binaxis='y', stackdir='center', dotsize=.5)
-  scale_fill_manual(values = wes_palette("Royal1",4)) + 
+  scale_fill_manual(values = wes_palette("Royal1",3)) + 
+  #scale_fill_manual(values = wes_palette("Set2")) + 
   labs(x = 'Loading', y = 'Peak')  + theme_minimal()
-ggsave(paste(sens, '_peak', '.png', sep = ''))
+ggsave(paste(sens, '_peak.pdf', sep = ''))
 
 plot = ggplot(data2, aes(x = cond, y = m, fill = band) )
 plot + geom_boxplot(notch = FALSE, lwd = 1) + 

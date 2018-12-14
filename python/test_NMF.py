@@ -18,33 +18,34 @@ import os
 import numpy as np
 import scipy.io as io
 import matplotlib.pyplot as plt
-os.chdir('/Users/stiso/Documents/Python/Echobase-master/')
+#os.chdir('/Users/stiso/Documents/Python/Echobase-master/')
 #from Echobase import optimize_nmf
-import optimize_nmf
+#import optimize_nmf
+import importlib.util
+spec = importlib.util.spec_from_file_location('optimize_nmf', '/data/jag/bassett-lab/jstiso/Echobase-master/Echobase/Network/Partitioning/Subgraph/optimize_nmf.py')
+optimize_nmf = importlib.util.module_from_spec(spec)
+spec.loader.exec_module(optimize_nmf)
 
 #%% Global variables
-
-os.chdir('/Users/stiso/Documents/Python/NetBCI/')
-subj = '003';
+subj = '003'
 band = 'alpha'
-eType = 'mag'
-
-data_dir = '/Users/stiso/Documents/Matlab/NetBCI/NMF/'
-save_dir = ''.join(['/Users/stiso/Documents/Python/NetBCI/NMF/', subj, '/'])
+eType = 'grad'
+os.chdir('/data/jag/bassett-lab/jstiso/Python/NetBCI/')
+data_dir = '/data/jag/bassett-lab/jstiso/Python/NetBCI/data/'
+save_dir = ''.join(['/data/jag/bassett-lab/jstiso/Python/NetBCI/NMF/', subj, '/', eType, '/'])
 # make directory
 if not os.path.exists(save_dir):
     os.makedirs(save_dir)
 #%% Load data 
 
-data = io.loadmat(''.join([data_dir, 'gc_', band, '_', eType, '_', subj, '.mat']))
-# should be nWin x nCon
+data = io.loadmat(''.join([data_dir, 'ts_gc_', band, '_', eType, '_', subj, '.mat']))
 val = np.transpose(np.array(data['A']))
 nWin = val.shape[0]
 
 #%% Test all parameters
 
-alpha_range = (.001,2)
-beta_range = (.001,2)
+alpha_range = (0.001,2)
+beta_range = (0.001,2)
 m_range = (2,20)
 n_param = 10000
 
@@ -56,12 +57,12 @@ indices = np.arange(0,nWin-1)
 sizes = np.tile(int(np.floor(nWin/k)), k)
 for i in range(nWin%k):
     sizes[i] = sizes[i] + 1
-# make ids
+    # make ids
 indices = np.random.choice(nWin, replace = False, size=nWin)
 for i in range(k):
     fold_id[i] = indices[0:sizes[i]].tolist()
     indices = np.delete(indices, np.arange(0,sizes[i]))
-    
+           
 params = optimize_nmf.gen_random_sampling_paramset(m_range, alpha_range, beta_range, n_param, fold_id)
 
 #%% Cross validation for parameters
@@ -73,7 +74,8 @@ for i in range(n_param):
 #%% Use the best parameters
 
 [opt_dict, opt_param] = optimize_nmf.find_optimum_xval_paramset(params, qual_meas)
-
+np.save("".join([save_dir,'ac_', band, '_params']), opt_param)
+    
 #%% Consensus clustering for best parameters
 
 n_proc = 1
@@ -81,11 +83,10 @@ opt_alpha = opt_param.get('alpha')
 opt_beta = opt_param.get('beta')
 opt_rank= opt_param.get('rank')
 n_seed = 100;
-[subset, coeff, err] = optimize_nmf.consensus_nmf(val, opt_alpha, opt_beta,
-                  opt_rank, n_seed, n_proc,)
-np.save("".join([save_dir, band, '_subset']), subset)
-np.save("".join([save_dir, band, '_coeff']), coeff)
-np.save("".join([save_dir, band, '_err']), err)
+[subset, coeff, err] = optimize_nmf.consensus_nmf(val, opt_alpha, opt_beta, opt_rank, n_seed, n_proc)
+np.save("".join([save_dir, 'ac_',band, '_subset']), subset)
+np.save("".join([save_dir,'ac_', band, '_coeff']), coeff)
+np.save("".join([save_dir, 'ac_',band, '_err']), err)
 
 #%% Plot
 
@@ -93,17 +94,9 @@ np.save("".join([save_dir, band, '_err']), err)
 #plt.show()
 fig = plt.figure()
 plt.plot(np.transpose(coeff))
-fig.savefig("".join([save_dir, band, '_', subj, '_node_exp.png']))
+fig.savefig("".join([save_dir, 'ac_', band, '_', subj, '_node_exp.png']))
 
 fig = plt.figure()
 plt.plot(coeff)
-fig.savefig("".join([save_dir, band, '_', subj, '_sg_exp.png']))
+fig.savefig("".join([save_dir, 'ac_', band, '_', subj, '_sg_exp.png']))
 
-coeff_nb = coeff[0:6,0:20706]
-fig = plt.figure()
-plt.plot(np.transpose(coeff_nb))
-fig.savefig("".join([save_dir, band, '_', subj, '_node_exp_nb.png']))
-
-fig = plt.figure()
-plt.plot(coeff_nb)
-fig.savefig("".join([save_dir, band, '_', subj, '_sg_exp_nb.png']))

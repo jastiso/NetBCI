@@ -1,14 +1,6 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 """
-Created on Wed Mar 21 17:24:38 2018
-
-@author: stiso
-"""
-
-#!/usr/bin/env python3
-# -*- coding: utf-8 -*-
-"""
 Created on Fri Feb  2 11:34:50 2018
 
 Run NMF on a single subject
@@ -24,16 +16,17 @@ subgraphs and expression coefficients.
 """
 import os
 import numpy as np
-import sys
 import scipy.io as io
+import sys
+#os.chdir('/Users/stiso/Documents/Python/Echobase-master/')
 #from Echobase import optimize_nmf
 import optimize_nmf
-#import importlib.util
+import importlib.util
 #spec = importlib.util.spec_from_file_location('optimize_nmf', '/data/jag/bassett-lab/jstiso/Echobase-master/Echobase/Network/Partitioning/Subgraph/optimize_nmf.py')
 #optimize_nmf = importlib.util.module_from_spec(spec)
 #spec.loader.exec_module(optimize_nmf)
 
-def pipe_bl(subj, band, eType):
+def pipe(subj, band, eType):
 
 #%% Global variables
     os.chdir('/data/jag/bassett-lab/jstiso/Python/NetBCI/')
@@ -41,22 +34,22 @@ def pipe_bl(subj, band, eType):
     save_dir = ''.join(['/data/jag/bassett-lab/jstiso/Python/NetBCI/NMF/', subj, '/', eType, '/'])
 # make directory
     if not os.path.exists(save_dir):
-        os.makedirs(save_dir)
+        os.makedirs(save_dir, exist_ok=True)
 #%% Load data 
 
-    data = io.loadmat(''.join([data_dir, 'ac_bl_', band, '_', eType, '_', subj, '.mat']))
+    data = io.loadmat(''.join([data_dir, 'nb_pr_gc_', band, '_', eType, '_', subj, '.mat']))
     val = np.transpose(np.array(data['A']))
     nWin = val.shape[0]
 
 #%% Test all parameters
 
-    alpha_range = (0.01,1)
-    beta_range = (0.01,1)
-    m_range = (2,8)
+    alpha_range = (0.01,1.5)
+    beta_range = (0.01,1.5)
+    m_range = (2,15)
     n_param = 10000
 
 #%% get fold id
-    k = 3
+    k = 10
     fold_id = [[] for i in range(k)]
     indices = np.arange(0,nWin-1)
     # get sizes of each fold
@@ -80,7 +73,7 @@ def pipe_bl(subj, band, eType):
 #%% Use the best parameters
 
     [opt_dict, opt_param] = optimize_nmf.find_optimum_xval_paramset(params, qual_meas)
-    np.save("".join([save_dir, 'ac_',band, '_params_bl']), opt_param)
+    np.save("".join([save_dir,'nb_pr_gc_', band, '_params']), opt_param)
     
 #%% Consensus clustering for best parameters
 
@@ -89,15 +82,16 @@ def pipe_bl(subj, band, eType):
     opt_beta = opt_param.get('beta')
     opt_rank= opt_param.get('rank')
     n_seed = 100;
-    [subset, coeff, err] = optimize_nmf.consensus_nmf(val, opt_alpha, opt_beta, opt_rank, n_seed, n_proc,)
-    np.save("".join([save_dir, 'ac_',band, '_subset_bl']), subset)
-    np.save("".join([save_dir,'ac_', band, '_coeff_bl']), coeff)
-    np.save("".join([save_dir, 'ac_',band, '_err_bl']), err)
+    [subset, coeff, err] = optimize_nmf.consensus_nmf(val, opt_alpha, opt_beta, opt_rank, n_seed, n_proc)
+    np.save("".join([save_dir, 'nb_pr_gc_',band, '_subset']), subset)
+    np.save("".join([save_dir,'nb_pr_gc_', band, '_coeff']), coeff)
+    np.save("".join([save_dir, 'nb_pr_gc_',band, '_err']), err)
 
-#%% work with commandline 
-    
+#%% work with command line
+
 if __name__ == '__main__':
     # Map command line arguments to function arguments.
-    pipe_bl(*sys.argv[1:])
+    pipe(*sys.argv[1:])
+
 
 
