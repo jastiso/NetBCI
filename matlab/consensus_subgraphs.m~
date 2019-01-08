@@ -142,14 +142,6 @@ for i = 1:numel(bands)
         c_high3_avg = sum(c_high3 ~=0, 3);
         c_low_avg = sum(c_low ~=0, 3);
         %c_zero_avg = sum(c_zero ~= 0, 3);
-        
-         % get number of edges remaining
-        sum_high(j,i) = sum(sum(c_high_avg))/numel(c_high_avg); % same number in each sg
-        sum_high2(j,i) = sum(sum(c_high2_avg))/numel(c_high_avg); % same number in each sg
-        sum_high3(j,i) = sum(sum(c_high3_avg))/numel(c_high_avg); % same number in each sg
-        sum_low(j,i) = sum(sum(c_low_avg))/numel(c_high_avg); % same number in each sg
-        
-        
         % add some additional thresholding
         c_high_avg(c_high_avg <= 5) = 0;
         c_high2_avg(c_high2_avg <= 5) = 0;
@@ -166,7 +158,12 @@ for i = 1:numel(bands)
         [ci_low,q_low] = community_louvain(c_low_avg,1);
         [~,idx_low] = sort(ci_low);
         
-       
+        % get number of edges remaining
+        sum_high(i,j) = mean(mean(c_high_avg));
+        sum_high2(i,j) = mean(mean(c_high2_avg));
+        sum_high3(i,j) = mean(mean(c_high3_avg));
+        sum_low(i,j) = mean(mean(c_low_avg));
+        
         
 %         % save for gephi - coordinates, and community in CSV, and matrix in
 %         % txt
@@ -199,4 +196,4 @@ for i = 1:numel(bands)
     end
 end
 
-save([save_dir, 'consensus_sums.mat'], 'sum_high', 'sum_high2', 'sum_high3', 'sum_low')
+save([save_dir, 'consens

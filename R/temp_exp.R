@@ -18,7 +18,7 @@ sens = 'grad'
 raw_data = readMat(paste('data/wpli/', sens, '/temp_exp.mat', sep = ''))
 data = data.frame(band = unlist(raw_data$band.order), subj = unlist(raw_data$subj.order), high_e = raw_data$e.high[1,], high2_e = raw_data$e.high2[1,],
                   high3_e = raw_data$e.high3[1,], low_e = raw_data$e.low[1,],zero_e = raw_data$e.zero[1,], high_p = raw_data$p.high[1,], high2_p = raw_data$p.high2[1,],
-                  high3_p = raw_data$p.high[1,], low_p = raw_data$p.low[1,],zero_p = raw_data$p.zero[1,], high_m = raw_data$m.high[1,], high2_m = raw_data$m.high2[1,],
+                  high3_p = raw_data$p.high3[1,], low_p = raw_data$p.low[1,],zero_p = raw_data$p.zero[1,], high_m = raw_data$m.high[1,], high2_m = raw_data$m.high2[1,],
                   high3_m = raw_data$m.high3[1,], low_m = raw_data$m.low[1,],zero_m = raw_data$m.zero[1,], slope = raw_data$slope[1,])
 
 data_high = select(data, band, subj, slope, high_e, high_p, high_m)
@@ -51,7 +51,7 @@ names(data_zero)[names(data_zero)=='zero_e'] = 'e'
 names(data_zero)[names(data_zero)=='zero_p'] = 'p'
 names(data_zero)[names(data_zero)=='zero_m'] = 'm'
 
-data2 = rbind(data_high, data_high2, data_high3, data_low, data_zero)
+data2 = rbind(data_high, data_high2, data_high3, data_low)
 data2 = mutate(data2,hl = cond == c('high','high2','high3'))
 
 data_alpha = filter(data2, band == "alpha")
@@ -69,9 +69,9 @@ plot + geom_boxplot(notch = FALSE, lwd = 1) +
 ggsave(paste(sens, '_energy', '.png', sep = ''))
 
 plot = ggplot(data2, aes(x = cond, y = p) )
-plot + geom_violin(aes(fill = band), trim = FALSE, position = position_dodge(0.9)) + 
+plot + geom_violin(aes(fill = band), trim = FALSE, position = position_dodge(0.75)) + 
   geom_boxplot(aes(fill = band), width = 0.15,
-    position = position_dodge(0.9)
+    position = position_dodge(0.75)
   ) +
   #geom_dotplot(binaxis='y', stackdir='center', dotsize=.5)
   scale_fill_manual(values = wes_palette("Royal1",3)) + 
@@ -90,6 +90,10 @@ ggsave(paste(sens, '_max', '.png', sep = ''))
 
 
 ## Stats
+fit = lmp(p ~ cond + band, data2)
+summary(fit)
+anova(fit)
+
 fit_beta_e = lm(e~cond, data_beta)
 anova(fit_beta_e)
 fit_beta_p = lm(p~cond, data_beta)
@@ -132,3 +136,72 @@ alpha_peak
 
 gamma_peak = t.test(log(filter(data, band == 'low_gamma')$high2_p),log(filter(data, band == 'low_gamma')$high3_p), paired=TRUE)
 gamma_peak
+
+
+
+#######################
+
+#UPR
+
+#######################
+raw_data = readMat(paste('data/wpli/', sens, '/temp_exp_pr.mat', sep = ''))
+data_pr = data.frame(band = unlist(raw_data$band.order), subj = unlist(raw_data$subj.order), high_e = raw_data$e.high[1,], high2_e = raw_data$e.high2[1,],
+                  high3_e = raw_data$e.high3[1,], low_e = raw_data$e.low[1,],zero_e = raw_data$e.zero[1,], high_p = raw_data$p.high[1,], high2_p = raw_data$p.high2[1,],
+                  high3_p = raw_data$p.high3[1,], low_p = raw_data$p.low[1,],zero_p = raw_data$p.zero[1,], high_m = raw_data$m.high[1,], high2_m = raw_data$m.high2[1,],
+                  high3_m = raw_data$m.high3[1,], low_m = raw_data$m.low[1,],zero_m = raw_data$m.zero[1,], slope = raw_data$slope[1,])
+
+
+data_pr_high = select(data_pr, band, subj, slope, high_e, high_p, high_m)
+data_pr_high$cond = 'high'
+names(data_pr_high)[names(data_pr_high)=='high_e'] = 'e'
+names(data_pr_high)[names(data_pr_high)=='high_p'] = 'p'
+names(data_pr_high)[names(data_pr_high)=='high_m'] = 'm'
+
+data_pr_high2 = select(data_pr, band, subj, slope, high2_e, high2_p, high2_m)
+data_pr_high2$cond = 'high2'
+names(data_pr_high2)[names(data_pr_high2)=='high2_e'] = 'e'
+names(data_pr_high2)[names(data_pr_high2)=='high2_p'] = 'p'
+names(data_pr_high2)[names(data_pr_high2)=='high2_m'] = 'm'
+
+data_pr_high3 = select(data_pr, band, subj, slope, high3_e, high3_p, high3_m)
+data_pr_high3$cond = 'high3'
+names(data_pr_high3)[names(data_pr_high3)=='high3_e'] = 'e'
+names(data_pr_high3)[names(data_pr_high3)=='high3_p'] = 'p'
+names(data_pr_high3)[names(data_pr_high3)=='high3_m'] = 'm'
+
+data_pr_low = select(data_pr, band, subj, slope, low_e, low_p, low_m)
+data_pr_low$cond = 'low'
+names(data_pr_low)[names(data_pr_low)=='low_e'] = 'e'
+names(data_pr_low)[names(data_pr_low)=='low_p'] = 'p'
+names(data_pr_low)[names(data_pr_low)=='low_m'] = 'm'
+
+data_pr_zero = select(data_pr, band, subj, slope, zero_e, zero_p, zero_m)
+data_pr_zero$cond = 'zero'
+names(data_pr_zero)[names(data_pr_zero)=='zero_e'] = 'e'
+names(data_pr_zero)[names(data_pr_zero)=='zero_p'] = 'p'
+names(data_pr_zero)[names(data_pr_zero)=='zero_m'] = 'm'
+
+data_pr2 = rbind(data_pr_high, data_pr_high2, data_pr_high3, data_pr_low)
+data_pr2 = mutate(data_pr2,hl = cond == c('high','high2','high3'))
+
+data_pr_alpha = filter(data_pr2, band == "alpha")
+data_pr_beta = filter(data_pr2, band == "beta")
+data_pr_gamma = filter(data_pr2, band == "low_gamma")
+
+
+# stats
+fit_pr = lmp(p ~ cond + band, data_pr2)
+summary(fit_pr)
+anova(fit_pr)
+
+plot = ggplot(data_pr2, aes(x = cond, y = p) )
+plot + geom_violin(aes(fill = band), trim = FALSE, position = position_dodge(0.75)) + 
+  geom_boxplot(aes(fill = band), width = 0.15,
+               position = position_dodge(0.75)
+  ) +
+  #geom_dotplot(binaxis='y', stackdir='center', dotsize=.5)
+  scale_fill_manual(values = brewer.pal(3,"Greys")) + 
+  #scale_fill_manual(values = wes_palette("Set2")) + 
+  labs(x = 'Loading', y = 'Peak')  + theme_minimal()
+ggsave(paste(sens, '_peak_upr.pdf', sep = ''))
+

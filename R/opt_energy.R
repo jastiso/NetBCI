@@ -16,13 +16,25 @@ nSubj = 20
 sens = 'grad'
 
 raw_data = readMat(paste('data/wpli/', sens, '/opt_energy.mat', sep = ''))
+dens = readMat(paste('data/wpli/', sens, '/density.mat', sep = ''))
 data = data.frame(band = unlist(raw_data$band.order), subj = unlist(raw_data$subj.order), high = raw_data$u.high[,1], high2 = raw_data$u.high2[,1],
                   high3 = raw_data$u.high3[,1], low = raw_data$u.low[,1],zero = raw_data$u.zero[,1], slope = raw_data$slope[1,], 
-                   high_a = raw_data$u.high.a[,1], high2_a = raw_data$u.high2.a[,1], high3_a = raw_data$u.high3.a[,1], low_a = raw_data$u.low.a[,1])
+                   high_a = raw_data$u.high.a[,1], high2_a = raw_data$u.high2.a[,1], high3_a = raw_data$u.high3.a[,1], low_a = raw_data$u.low.a[,1],
+                  high_a2 = raw_data$u.high.a2[,1], high2_a2 = raw_data$u.high2.a2[,1], high3_a2 = raw_data$u.high3.a2[,1], low_a2 = raw_data$u.low.a2[,1])
 data = mutate(data, diff = log10(low)-log10(high2))
 data = mutate(data, diff3 = log10(low)-log10(high3))
 data = mutate(data, diffa = log10(high3_a)-log10(high2_a))
 data = mutate(data, diffa3 = log10(low_a)-log10(high3_a))
+data = mutate(data, diff2a3 = log10(low_a2)-log10(high3_a2))
+
+# add density 
+dens_data = data.frame(band = unlist(dens$band.order), subj = unlist(dens$subj.order), high3 = dens$d.high3[,1], low = dens$d.low[,1])
+dens_data = mutate(data, dens_diff = low-high3)
+# check order is correct
+any(dens_data$band != data$band)
+any(dens_data$subj != data$subj)
+
+data$dens_diff = dens_data$dens_diff
 
 # reformat by condition
 data_high = select(data, band, subj, slope, diff, diff3, high)
@@ -104,7 +116,7 @@ gamma_low2
 
 
 # corr with slope
-scatterplot = ggplot(data_beta, aes(x = diff, y = slope)) 
+scatterplot = ggplot(data_beta, aes(x = diff3, y = slope)) 
   scatterplot+ geom_smooth(method="lm") + geom_point(size = 6) + labs(x = 'log(low)-log(high)', y = 'slope') +
     theme_minimal() #+ scale_color_manual(values =  wes_palette("Moonrise1",4))
 ggsave('slope_opt_u.png')
@@ -146,24 +158,23 @@ summary(fit1)
 #############################################
 
 # reformat by condition
-data_high_a = select(data, band, subj, slope, diffa, diffa3, high_a)
+data_high_a = select(data, band, subj, slope, diffa, diffa3, diff2a3, high_a)
 data_high_a$cond = 'high'
 names(data_high_a)[names(data_high_a)=='high_a'] = 'opt_u'
 
-data_high2_a = select(data, band, subj, slope, diffa, diffa3, high2_a)
+data_high2_a = select(data, band, subj, slope, diffa, diffa3, diff2a3, high2_a)
 data_high2_a$cond = 'high2'
 names(data_high2_a)[names(data_high2_a)=='high2_a'] = 'opt_u'
 
-data_high3_a = select(data, band, subj, slope, diffa, diffa3, high3_a)
+data_high3_a = select(data, band, subj, slope, diffa, diffa3, diff2a3, high3_a)
 data_high3_a$cond = 'high3'
 names(data_high3_a)[names(data_high3_a)=='high3_a'] = 'opt_u'
 
-data_low_a = select(data, band, subj, slope, diffa, diffa3, low_a)
+data_low_a = select(data, band, subj, slope, diffa, diffa3, diff2a3, low_a)
 data_low_a$cond = 'low'
 names(data_low_a)[names(data_low_a)=='low_a'] = 'opt_u'
 
-
-data_a = rbind(data_low_a, data_high2_a, data_high3_a, data_high_a)
+data_a = rbind(data_high3_a, data_low_a)
 
 
 plot = ggplot(data_a, aes(x = cond, y = log(opt_u), fill = band) )
@@ -197,11 +208,28 @@ scatterplot+ geom_smooth(method="lm") + geom_point(size = 6) + labs(x = 'log(low
   theme_minimal() #+ scale_color_manual(values =  wes_palette("Moonrise1",4))
 ggsave('slope_diff_a.png')
 
-scatterplot = ggplot(data, aes(x = (diffa3), y = slope, color = band)) 
+scatterplot = ggplot(data_beta_a, aes(x = diff2a3, y = slope)) 
 scatterplot+ geom_smooth(method="lm") + geom_point(size = 6) + labs(x = 'log(low)-log(high)', y = 'slope') +
   theme_minimal() #+ scale_color_manual(values =  wes_palette("Moonrise1",4))
+ggsave('slope_diff_a2.png')
+
+scatterplot = ggplot(data_beta_a, aes(x = diffa, y = slope)) 
+scatterplot+ geom_smooth(method="lm") + geom_point(size = 6) + labs(x = 'log(low)-log(high)', y = 'slope') +
+  theme_minimal() #+ scale_color_manual(values =  wes_palette("Moonrise1",4))
+ggsave('slope_diff23_a.png')
+
+scatterplot = ggplot(data, aes(x = (diffa3), y = slope, color = band)) 
+scatterplot+ geom_smooth(method="lm", size = 4) + geom_point(size = 4) + labs(x = 'log(low)-log(high)', y = 'slope') +
+  theme_minimal() + scale_color_manual(values =  wes_palette("Royal1",4))
 ggsave('slope_opt_u_a.png')
 
+scatterplot = ggplot(data_beta_a, aes(x = log(opt_u), y = slope, color = cond)) 
+scatterplot+ geom_smooth(method="lm", size = 3) + geom_point(size = 4) + labs(x = 'log(low)-log(high)', y = 'slope') +
+  theme_minimal() + #scale_color_manual(values =  wes_palette("Moonrise1",4))
+ #scale_color_manual(values = c(rgb(53/255,57/255,61/255), rgb(169/255,225/255,186/255)))
+  #scale_color_manual(values = c(rgb(0,169/255,208/255), rgb(215/255,190/255,123/255)))
+  scale_color_manual(values = c(rgb(215/255,190/255,123/255), rgb(33/255,67/255,104/255)))
+ggsave('slope_opt_u_interaction.svg')
 
 corr_beta_high2 = cor.test(log(filter(data, band == 'beta')$high2_a),filter(data, band == 'beta')$slope)
 corr_beta_high2
@@ -218,7 +246,7 @@ corr_beta_diff
 corr_beta_diff = cor.test(filter(data, band == 'beta')$diffa,filter(data, band == 'beta')$slope)
 corr_beta_diff
 
-fit1 = lm(slope ~ diffa3, filter(data, band == 'beta'))
+fit1 = lm(slope ~ diffa3 + dens_diff, filter(data, band == 'beta'))
 summary(fit1)
 
 
@@ -232,31 +260,37 @@ summary(fit1)
 
 
 raw_data = readMat(paste('data/wpli/', sens, '/opt_energy_control.mat', sep = ''))
-data_control = data.frame(band = unlist(raw_data$band.order.c), subj = unlist(raw_data$subj.order.c), high = raw_data$u.high.c[,1], high2 = raw_data$u.high2.c[,1],
+data_control = data.frame(slope = raw_data$slope[1,], band = unlist(raw_data$band.order.c), subj = unlist(raw_data$subj.order.c), high = raw_data$u.high.c[,1], high2 = raw_data$u.high2.c[,1],
                   high3 = raw_data$u.high3.c[,1], low = raw_data$u.low.c[,1],zero = raw_data$u.zero.c[,1])
+data_control = mutate(data_control, diff3 = log10(low)-log10(high3))
+
 
 # reformat by condition
-data_high_control = select(data_control, band, subj, high)
+data_high_control = select(data_control, band, subj, high, slope)
 data_high_control$cond = 'high'
 names(data_high_control)[names(data_high_control)=='high'] = 'opt_u'
 
-data_high2_control = select(data_control, band, subj, high2)
+data_diff_control = select(data_control, band, subj, diff3, slope)
+data_diff_control$cond = 'diff'
+names(data_diff_control)[names(data_diff_control)=='diff3'] = 'opt_u'
+
+data_high2_control = select(data_control, band, subj, high2, slope)
 data_high2_control$cond = 'high2'
 names(data_high2_control)[names(data_high2_control)=='high2'] = 'opt_u'
 
-data_high3_control = select(data_control, band, subj, high3)
+data_high3_control = select(data_control, band, subj, high3, slope)
 data_high3_control$cond = 'high3'
 names(data_high3_control)[names(data_high3_control)=='high3'] = 'opt_u'
 
-data_low_control = select(data_control, band, subj, low)
+data_low_control = select(data_control, band, subj, low, slope)
 data_low_control$cond = 'low'
 names(data_low_control)[names(data_low_control)=='low'] = 'opt_u'
 
-data_zero_control = select(data_control, band, subj, zero)
+data_zero_control = select(data_control, band, subj, zero, slope)
 data_zero_control$cond = 'zero'
 names(data_zero_control)[names(data_zero_control)=='zero'] = 'opt_u'
 
-data2_control = rbind(data_high_control, data_low_control, data_high2_control, data_high3_control, data_zero_control)
+data2_control = rbind(data_high_control, data_low_control, data_high2_control, data_high3_control, data_zero_control, data_diff_control)
 
 data_alpha_control = filter(data2_control, band == "alpha")
 data_beta_control = filter(data2_control, band == "beta")
@@ -304,7 +338,15 @@ beta_low3_control
 beta_zero3_control = t.test(filter(data_control, band == 'beta')$high3,filter(data_control, band == 'beta')$zero, paired=TRUE)
 beta_zero3_control
 
+## Relationship to slope
 
+scatterplot = ggplot(data_diff_control, aes(x = opt_u, y = slope, color = band)) 
+scatterplot+ geom_smooth(method="lm") + geom_point(size = 6) + labs(x = 'log(low)-log(high)', y = 'slope') +
+  theme_minimal() + scale_color_manual(values =  wes_palette("Royal1",4))
+ggsave('slope_opt_u_cont.png')
+
+corr_beta_high2 = cor.test(filter(data_control, band == 'beta')$diff3,filter(data_control, band == 'beta')$slope)
+corr_beta_high2
 
 ################################################
 
@@ -321,23 +363,23 @@ data_pr = mutate(data_pr, diff = log10(low)-log10(high2))
 data_pr = mutate(data_pr, diff3 = log10(low)-log10(high3))
 
 # reformat by condition
-data_high_pr = select(data_pr, band, subj, slope, diff, high)
+data_high_pr = select(data_pr, band, subj, slope, diff3, high)
 data_high_pr$cond = 'high'
 names(data_high_pr)[names(data_high_pr)=='high'] = 'opt_u'
 
-data_high2_pr = select(data_pr, band, subj, slope, diff, high2)
+data_high2_pr = select(data_pr, band, subj, slope, diff3, high2)
 data_high2_pr$cond = 'high2'
 names(data_high2_pr)[names(data_high2_pr)=='high2'] = 'opt_u'
 
-data_high3_pr = select(data_pr, band, subj, slope, diff, high3)
+data_high3_pr = select(data_pr, band, subj, slope, diff3, high3)
 data_high3_pr$cond = 'high3'
 names(data_high3_pr)[names(data_high3_pr)=='high3'] = 'opt_u'
 
-data_low_pr = select(data_pr, band, subj, slope, diff, low)
+data_low_pr = select(data_pr, band, subj, slope, diff3, low)
 data_low_pr$cond = 'low'
 names(data_low_pr)[names(data_low_pr)=='low'] = 'opt_u'
 
-data_zero_pr = select(data_pr, band, subj, slope, diff, zero)
+data_zero_pr = select(data_pr, band, subj, slope, diff3, zero)
 data_zero_pr$cond = 'zero'
 names(data_zero_pr)[names(data_zero_pr)=='zero'] = 'opt_u'
 
@@ -391,19 +433,26 @@ beta_zero3_pr
 
 ## Relationship to slope
 
-scatterplot = ggplot(data_beta_pr, aes(x = diff, y = slope)) 
+scatterplot = ggplot(data_beta_pr, aes(x = diff3, y = slope)) 
 scatterplot+ geom_smooth(method="lm") + geom_point(size = 6) + labs(x = 'log(low)-log(high)', y = 'slope') +
   theme_minimal() #+ scale_color_manual(values =  wes_palette("Moonrise1",4))
 ggsave('slope_opt_u_pr.png')
 
-corr_beta_high2 = cor.test(log(filter(data_pr, band == 'beta')$high2),filter(data_pr, band == 'beta')$slope)
+corr_beta_high2 = cor.test((filter(data_pr, band == 'beta')$diff3),filter(data_pr, band == 'beta')$slope)
 corr_beta_high2
 
 # combined plot
-data_comb = data_frame(diff = c(data$diff, data_pr$diff), slope = c(data$slope, data_pr$slope), model = c(rep('emp', times = 60), rep('upr', times = 60)), band = c(data$band, data_pr$band) )
+data_comb = data_frame(diff = c(data$diffa3, data_pr$diff3, data_control$diff3, data$diff3), slope = c(data$slope, data_pr$slope, data_control$slope, data$slope), model = c(rep('emp', times = 60), rep('upr', times = 60), rep('cont', times = 60), rep('state', times = 60)), band = c(data$band, data_pr$band, data_control$band, data$band) )
 data_comb = filter(data_comb, band == "2")
 
-scatterplot = ggplot(data_comb, aes(x = diff, y = slope, color = model)) 
-scatterplot+ geom_smooth(method="lm") + geom_point(size = 6) + labs(x = 'log(low)-log(high)', y = 'slope') +
-  theme_minimal() + scale_color_manual(values =  wes_palette("Moonrise2",4))
-ggsave('slope_opt_u_comb.png')
+plot_data = filter(data_comb, model != "cont", model != "state")
+plot_data$model = as.factor(plot_data$model)
+plot_data$model <- relevel(plot_data$model, "upr")
+scatterplot = ggplot(plot_data, aes(x = diff, y = slope, color = model)) 
+scatterplot+ geom_smooth(method="lm", size=3) + geom_point(size = 4) + 
+  labs(x = 'log(low)-log(high)', y = 'slope') +
+  theme_minimal() + #scale_color_manual(values = c(rgb(215/255,190/255,123/255), rgb(33/255,67/255,104/255)))
+  scale_color_manual(values = c('grey', rgb(81/255,184/255,161/255)))
+  #scale_color_manual(values =  rev(wes_palette("GrandBudapest1",4)))
+ggsave('slope_opt_u_comb.svg')
+
