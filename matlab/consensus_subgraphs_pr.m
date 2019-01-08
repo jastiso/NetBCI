@@ -20,7 +20,7 @@ nEdge = (nNode^2-nNode)/2;
 freqs = [7,14;15,30;31,45;55,70];
 bands = [{'alpha'},{'beta'},{'low_gamma'}];
 sensors = [{'grad'}];
-load([save_dir, 'noise_sg.mat']);
+load([save_dir, 'pr_noise_sg.mat']);
 
 % initialize
 consensus_high = zeros(nNode,nNode, nSubj, numel(bands));
@@ -56,11 +56,11 @@ for i = subjs
         
         % get subgraph data
         if strcmp(data_dir(end-5:end-1),'param')
-            subset = readNPY([data_dir, subj, '/', sens, 'wpli_', f, '_subset.npy']);
-            coeff = readNPY([data_dir, subj, '/',sens, 'wpli_', f, '_coeff.npy']);
+            subset = readNPY([data_dir, subj, '/', sens, 'wpli_pr_', f, '_subset.npy']);
+            coeff = readNPY([data_dir, subj, '/',sens, 'wpli_pr_', f, '_coeff.npy']);
         else
-            subset = readNPY([data_dir, subj, '/', sens, '/wpli_', f, '_subset.npy']);
-            coeff = readNPY([data_dir, subj, '/',sens, '/wpli_', f, '_coeff.npy']);
+            subset = readNPY([data_dir, subj, '/', sens, '/wpli_pr_', f, '_subset.npy']);
+            coeff = readNPY([data_dir, subj, '/',sens, '/wpli_pr_', f, '_coeff.npy']);
         end
         
         % remove noise SG
@@ -108,12 +108,11 @@ end
 
 %% make and plot consensus - consistency
 
-thr = [.25 .5 .75];
+thr = [.75];
 sum_high = zeros(numel(thr), numel(bands));
 sum_high2 = zeros(numel(thr), numel(bands));
 sum_high3 = zeros(numel(thr), numel(bands));
 sum_low = zeros(numel(thr), numel(bands));
-
 
 for i = 1:numel(bands)
     curr_high = consensus_high(:,:,:,i);
@@ -142,8 +141,7 @@ for i = 1:numel(bands)
         c_high3_avg = sum(c_high3 ~=0, 3);
         c_low_avg = sum(c_low ~=0, 3);
         %c_zero_avg = sum(c_zero ~= 0, 3);
-        
-         % get number of edges remaining
+        % get number of edges remaining
         sum_high(j,i) = sum(sum(c_high_avg))/numel(c_high_avg); % same number in each sg
         sum_high2(j,i) = sum(sum(c_high2_avg))/numel(c_high_avg); % same number in each sg
         sum_high3(j,i) = sum(sum(c_high3_avg))/numel(c_high_avg); % same number in each sg
@@ -166,37 +164,36 @@ for i = 1:numel(bands)
         [ci_low,q_low] = community_louvain(c_low_avg,1);
         [~,idx_low] = sort(ci_low);
         
-       
         
-%         % save for gephi - coordinates, and community in CSV, and matrix in
-%         % txt
-%         dlmwrite(['/Users/stiso/Documents/MATLAB/NetBCI/GroupAvg/wpli/gephi/', bands{i}, '_', num2str(j), '_high_matrix.txt'],c_high_avg, 'delimiter', '\t')
-%         dlmwrite(['/Users/stiso/Documents/MATLAB/NetBCI/GroupAvg/wpli/gephi/', bands{i}, '_', num2str(j), '_high2_matrix.txt'],c_high2_avg, 'delimiter', '\t')
-%         dlmwrite(['/Users/stiso/Documents/MATLAB/NetBCI/GroupAvg/wpli/gephi/', bands{i}, '_', num2str(j), '_high3_matrix.txt'],c_high3_avg, 'delimiter', '\t')
-%         dlmwrite(['/Users/stiso/Documents/MATLAB/NetBCI/GroupAvg/wpli/gephi/', bands{i}, '_', num2str(j), '_low_matrix.txt'],c_low_avg, 'delimiter', '\t')
-%         % csv
-%         fid = fopen([top_dir, 'layouts/neuromag306cmb.txt'], 'r');
-%         coord = textscan(fid, '%d %10f %10f %d %d %s', 'Delimiter', '\n');
-%         fclose(fid);
-%         header = ['x,y,z,community,'];
-%         
-%         fid = fopen(['/Users/stiso/Documents/MATLAB/NetBCI/GroupAvg/wpli/gephi/', bands{i}, '_', num2str(j), '_high_attributes.csv'],'w');
-%         fprintf(fid,'%s\n',header); fclose(fid);
-%         dlmwrite(['/Users/stiso/Documents/MATLAB/NetBCI/GroupAvg/wpli/gephi/', bands{i}, '_', num2str(j), '_high_attributes.csv'],[coord{2}, coord{3}, ones(nNode,1), ci_high],'-append');
-%         
-%         fid = fopen(['/Users/stiso/Documents/MATLAB/NetBCI/GroupAvg/wpli/gephi/', bands{i}, '_', num2str(j), '_high2_attributes.csv'],'w');
-%         fprintf(fid,'%s\n',header); fclose(fid);
-%         dlmwrite(['/Users/stiso/Documents/MATLAB/NetBCI/GroupAvg/wpli/gephi/', bands{i}, '_', num2str(j), '_high2_attributes.csv'],[coord{2}, coord{3}, ones(nNode,1), ci_high2],'-append');
-%         
-%         fid = fopen(['/Users/stiso/Documents/MATLAB/NetBCI/GroupAvg/wpli/gephi/', bands{i}, '_', num2str(j), '_high3_attributes.csv'],'w');
-%         fprintf(fid,'%s\n',header); fclose(fid);
-%         dlmwrite(['/Users/stiso/Documents/MATLAB/NetBCI/GroupAvg/wpli/gephi/', bands{i}, '_', num2str(j), '_high3_attributes.csv'],[coord{2}, coord{3}, ones(nNode,1), ci_high3],'-append');
-%         
-%         fid = fopen(['/Users/stiso/Documents/MATLAB/NetBCI/GroupAvg/wpli/gephi/', bands{i}, '_', num2str(j), '_low_attributes.csv'],'w');
-%         fprintf(fid,'%s\n',header); fclose(fid);
-%         dlmwrite(['/Users/stiso/Documents/MATLAB/NetBCI/GroupAvg/wpli/gephi/', bands{i}, '_', num2str(j), '_low_attributes.csv'],[coord{2}, coord{3}, ones(nNode,1), ci_low],'-append');
-%         
+        % save for gephi - coordinates, and community in CSV, and matrix in
+        % txt
+        dlmwrite(['/Users/stiso/Documents/MATLAB/NetBCI/GroupAvg/wpli/gephi/', bands{i}, '_', num2str(j), '_high_matrix_pr.txt'],c_high_avg, 'delimiter', '\t')
+        dlmwrite(['/Users/stiso/Documents/MATLAB/NetBCI/GroupAvg/wpli/gephi/', bands{i}, '_', num2str(j), '_high2_matrix_pr.txt'],c_high2_avg, 'delimiter', '\t')
+        dlmwrite(['/Users/stiso/Documents/MATLAB/NetBCI/GroupAvg/wpli/gephi/', bands{i}, '_', num2str(j), '_high3_matrix_pr.txt'],c_high3_avg, 'delimiter', '\t')
+        dlmwrite(['/Users/stiso/Documents/MATLAB/NetBCI/GroupAvg/wpli/gephi/', bands{i}, '_', num2str(j), '_low_matrix_pr.txt'],c_low_avg, 'delimiter', '\t')
+        % csv
+        fid = fopen([top_dir, 'layouts/neuromag306cmb.txt'], 'r');
+        coord = textscan(fid, '%d %10f %10f %d %d %s', 'Delimiter', '\n');
+        fclose(fid);
+        header = ['x,y,z,community,'];
+        
+        fid = fopen(['/Users/stiso/Documents/MATLAB/NetBCI/GroupAvg/wpli/gephi/', bands{i}, '_', num2str(j), '_high_attributes_pr.csv'],'w');
+        fprintf(fid,'%s\n',header); fclose(fid);
+        dlmwrite(['/Users/stiso/Documents/MATLAB/NetBCI/GroupAvg/wpli/gephi/', bands{i}, '_', num2str(j), '_high_attributes_pr.csv'],[coord{2}, coord{3}, ones(nNode,1), ci_high],'-append');
+        
+        fid = fopen(['/Users/stiso/Documents/MATLAB/NetBCI/GroupAvg/wpli/gephi/', bands{i}, '_', num2str(j), '_high2_attributes_pr.csv'],'w');
+        fprintf(fid,'%s\n',header); fclose(fid);
+        dlmwrite(['/Users/stiso/Documents/MATLAB/NetBCI/GroupAvg/wpli/gephi/', bands{i}, '_', num2str(j), '_high2_attributes_pr.csv'],[coord{2}, coord{3}, ones(nNode,1), ci_high2],'-append');
+        
+        fid = fopen(['/Users/stiso/Documents/MATLAB/NetBCI/GroupAvg/wpli/gephi/', bands{i}, '_', num2str(j), '_high3_attributes_pr.csv'],'w');
+        fprintf(fid,'%s\n',header); fclose(fid);
+        dlmwrite(['/Users/stiso/Documents/MATLAB/NetBCI/GroupAvg/wpli/gephi/', bands{i}, '_', num2str(j), '_high3_attributes_pr.csv'],[coord{2}, coord{3}, ones(nNode,1), ci_high3],'-append');
+        
+        fid = fopen(['/Users/stiso/Documents/MATLAB/NetBCI/GroupAvg/wpli/gephi/', bands{i}, '_', num2str(j), '_low_attributes_pr.csv'],'w');
+        fprintf(fid,'%s\n',header); fclose(fid);
+        dlmwrite(['/Users/stiso/Documents/MATLAB/NetBCI/GroupAvg/wpli/gephi/', bands{i}, '_', num2str(j), '_low_attributes_pr.csv'],[coord{2}, coord{3}, ones(nNode,1), ci_low],'-append');
+        
     end
 end
 
-save([save_dir, 'consensus_sums.mat'], 'sum_high', 'sum_high2', 'sum_high3', 'sum_low')
+save([save_dir, 'consensus_sums_pr.mat'], 'sum_high', 'sum_high2', 'sum_high3', 'sum_low')

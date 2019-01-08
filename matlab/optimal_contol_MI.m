@@ -1,4 +1,4 @@
-%% Optimal control to motor imagery pattern
+%% Optimal control to motor imagery and attention pattern
 
 addpath(genpath('/Users/stiso/Documents/MATLAB/npy-matlab-master/'))
 addpath('/Users/stiso/Documents/MATLAB/fieldtrip-20170830/')
@@ -43,6 +43,7 @@ load([save_dir, 'noise_sg.mat']);
 rho = .1;
 T = 0.1;
 x0 = zeros(nNode,1);
+x02 = zeros(nNode,1) + 1;
 S = zeros(nNode,nNode,numel(bands));
 
 % tolerance for error
@@ -61,6 +62,10 @@ u_high_a = [];
 u_high2_a = [];
 u_high3_a = [];
 u_low_a = [];
+u_high_a2 = [];
+u_high2_a2 = [];
+u_high3_a2 = [];
+u_low_a2 = [];
 error = [];
 error_a = [];
 error_c = [];
@@ -110,16 +115,19 @@ ro = idx;
 xT(:,1) = -B;
 S(:,:,1) = eye(nNode); %diag((xT(:,1) ~= 0));
 xT_attend(:,1) = -(rp + lp); % suppression in parietal
+xT_attend2(:,1) = -(rp + lp).*2 + 1;
 
 % beta - contralateral suppression, and ipsilateral activation
 xT(:,2) = -B + B_control;
 S(:,:,2) = eye(nNode); %diag((xT(:,2) ~= 0));
 xT_attend(:,2) = -vert; % suppression in midline
+xT_attend2(:,2) = (-vert).*2 + 1;
 
 % gamma - contralateral activation
 xT(:,3) = B;
 S(:,:,3) = eye(nNode); %diag((xT(:,2) ~= 0));
 xT_attend(:,3) = (-B - B_control) + lf + rf + lo + ro; 
+xT_attend2(:,3) = ((-B - B_control) + lf + rf + lo + ro).*2 + 1; 
 
 % relax B
 B(~B) = 1e-5;
@@ -200,6 +208,8 @@ for i = Subj
         u_high_a = [u_high_a; U_ha];
         error = [error, err];
         error_a = [error_a, erra];
+        [~, U_ha2, ~] = get_opt_energy(high_mat, T, diag(B), x02, -xT_attend2(:,k), rho, S(:,:,k));
+        u_high_a2 = [u_high_a2; U_ha2];
         
         [x_h2, U_h2, err] = get_opt_energy(high2_mat, T, diag(B), x0, xT(:,k), rho, S(:,:,k));
         u_high2 = [u_high2; U_h2];
@@ -207,6 +217,8 @@ for i = Subj
         u_high2_a = [u_high2_a; U_h2a];
         error = [error, err];
         error_a = [error_a, erra];
+        [~, U_h2a2, ~] = get_opt_energy(high2_mat, T, diag(B), x02, -xT_attend2(:,k), rho, S(:,:,k));
+        u_high2_a2 = [u_high2_a2; U_h2a2];
     
         [x_h3, U_h3, err] = get_opt_energy(high3_mat, T, diag(B), x0, xT(:,k), rho, S(:,:,k));
         u_high3 = [u_high3; U_h3];
@@ -214,6 +226,8 @@ for i = Subj
         u_high3_a = [u_high3_a; U_h3a];
         error = [error, err];
         error_a = [error_a, erra];
+        [~, U_h3a2, ~] = get_opt_energy(high3_mat, T, diag(B), x02, -xT_attend2(:,k), rho, S(:,:,k));
+        u_high3_a2 = [u_high3_a2; U_h3a2];
         
         [x_l, U_l, err] = get_opt_energy(low_mat, T, diag(B), x0, xT(:,k), rho, S(:,:,k));
         u_low = [u_low; U_l];
@@ -221,6 +235,8 @@ for i = Subj
         u_low_a = [u_low_a; U_l_a];
         error = [error, err];
         error_a = [error_a, erra];
+        [~, U_la2, ~] = get_opt_energy(low_mat, T, diag(B), x02, -xT_attend2(:,k), rho, S(:,:,k));
+        u_low_a2 = [u_low_a2; U_la2];
         
         U_z_all = zeros(nZero,1);
         for j = 1:nZero
@@ -268,7 +284,7 @@ for i = Subj
 end
 
 save([R_dir, 'grad/opt_energy.mat'], 'band_order', 'subj_order', 'slope', 'u_high', 'u_high2', 'u_high3', 'u_low', 'u_zero', ...
-    'u_high_a', 'u_high2_a', 'u_high3_a', 'u_low_a')
+    'u_high_a', 'u_high2_a', 'u_high3_a', 'u_low_a', 'u_high_a2', 'u_high2_a2', 'u_high3_a2', 'u_low_a2')
 save([save_dir, 'oc_error_mi'], 'error');
 save([save_dir, 'oc_error_attn'], 'error_a');
 

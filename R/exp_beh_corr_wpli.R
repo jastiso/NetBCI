@@ -44,6 +44,11 @@ for (b in c(1:length(bands))){
 
 }
 corr_data$subj = as.factor(corr_data$subj)
+# save p_values
+stats = data.frame(p_val = rep(0, times = 12), b_val = rep(0, times = 12), pred = c('mean', 'sd', 'high', 'high2', 'high3', 'low', 
+                                                                                    'mean', 'sd', 'high', 'high2', 'high3', 'low'), 
+                   model = c(rep('emp', times = 6), rep('UPR', times = 6)))
+
 
 # scatter plot for all bands - mean
 plot = ggplot(corr_data, aes(x = slope, y = sum, col = band, group = band))
@@ -53,34 +58,35 @@ plot +geom_smooth(method="lm") +  geom_point(size = 6) +
 ggsave(paste('sum_bc_corr.png', sep = ''))
 
 # scatter plot for all bands - std
-plot = ggplot(corr_data, aes(x = slope, y = sd, col = band, group = band))
-plot +geom_smooth(method="lm") +  geom_point(size = 6) + 
+plot = ggplot(corr_data, aes(x = slope, y = sd, color = band))
+plot  +  geom_point(aes(color = band), size = 4) + 
   scale_color_manual(values = wes_palette('Royal1',4)) +
+  geom_smooth(method="lm", size = 3, color = "black") +
   labs(x = 'Slope', y = 'Standard Deviation')  + theme_minimal()
-ggsave(paste('sd_bc_corr.pdf', sep = ''))
+ggsave(paste('sd_bc_corr.png', sep = ''))
 
 
 # scatter plot for all bands - individual subgraphs
-plot = ggplot(corr_data, aes(x = slope, y = max, col = band, group = band))
-plot +geom_smooth(method="lm") +  geom_point(size = 6) + 
+plot = ggplot(corr_data, aes(x = slope, y = max, col = band))
+plot +geom_smooth(method="lm", color = 'black',size = 3) +  geom_point(size = 4) + 
   scale_color_manual(values = wes_palette('Royal1',4)) +
   labs(x = 'Slope', y = 'Max BC')  + theme_minimal()
-ggsave(paste('max_bc_corr.pdf', sep = ''))
+ggsave(paste('max_bc_corr.png', sep = ''))
 
 
 # scatter plot for all bands - second highest
-plot = ggplot(corr_data, aes(x = slope, y = max2, col = band, group = band))
-plot +geom_smooth(method="lm") +  geom_point(size = 6) + 
+plot = ggplot(corr_data, aes(x = slope, y = max2, col = band))
+plot +geom_smooth(method="lm", color = "black", size = 3) +  geom_point(size = 4) + 
   scale_color_manual(values = wes_palette('Royal1',4)) +
   labs(x = 'Slope', y = 'Max2 BC')  + theme_minimal()
-ggsave(paste('max_bc_corr2.pdf', sep = ''))
+ggsave(paste('max_bc_corr2.png', sep = ''))
 
 # scatter plot for all bands - third highest
-plot = ggplot(corr_data, aes(x = slope, y = max3, col = band, group = band))
-plot +geom_smooth(method="lm") +  geom_point(size = 6) + 
+plot = ggplot(corr_data, aes(x = slope, y = max3, col = band))
+plot +geom_smooth(method="lm", color = "black", size = 3) +  geom_point(size = 4) + 
   scale_color_manual(values = wes_palette('Royal1',4)) +
   labs(x = 'Slope', y = 'Max3 BC')  + theme_minimal()
-ggsave(paste('max_bc_corr3.pdf', sep = ''))
+ggsave(paste('max_bc_corr3.png', sep = ''))
 
 # scatter plot for all bands - 4th highest
 plot = ggplot(corr_data, aes(x = slope, y = max4, col = band, group = band))
@@ -110,64 +116,49 @@ fit1 = lm(slope ~ sum + band, data=  corr_data)
 summary(fit1)
 Anova(fit1)
 
-fit_perm = lmp(slope ~ sum + band, data=  corr_data)
-summary(fit_perm)
-anova(fit_perm)
+stats$b_val[1] = fit1$coefficients[2]
+stats$p_val[1] = summary(fit1)$coefficients[2,4]
 
 # sd
-fit1 = lm(slope ~ sd + band, data=  corr_data)
-summary(fit1)
+fit2 = lm(slope ~ sd + band, data=  corr_data)
+summary(fit2)
 Anova(fit1)
 
-fit_perm = lmp(slope ~ sd + band, data=  corr_data)
-summary(fit_perm)
-anova(fit_perm)
+stats$b_val[2] = fit2$coefficients[2]
+stats$p_val[2] = summary(fit2)$coefficients[2,4]
 
 # max
-fit1 = lm(slope ~ max + band, data=  corr_data)
-summary(fit1)
-Anova(fit1)
-
-fit_perm = lmp(slope ~ max + band, data=  corr_data)
-summary(fit_perm)
-anova(fit_perm)
-
-# second max
-fit2 = lm(slope ~ max2 + band, data=  corr_data)
-summary(fit2)
-Anova(fit2)
-
-fit2_perm = lmp(slope ~ max2 + band, data=  corr_data)
-summary(fit2_perm)
-anova(fit2_perm)
-
-# third max
-fit3 = lm(slope ~ max3 + band, data=  corr_data)
+fit3 = lm(slope ~ max + band, data=  corr_data)
 summary(fit3)
 Anova(fit3)
 
-fit3_perm = lmp(slope ~ max3 + band, data=  corr_data)
-summary(fit3_perm)
-anova(fit3_perm)
+stats$b_val[3] = fit3$coefficients[2]
+stats$p_val[3] = summary(fit3)$coefficients[2,4]
 
-# 4 max
-fit4 = lm(slope ~ max4 + band, data=  corr_data)
+# second max
+fit4 = lm(slope ~ max2 + band, data=  corr_data)
 summary(fit4)
 Anova(fit4)
 
-fit4_perm = lmp(slope ~ max4 + band, data=  corr_data)
-summary(fit4_perm)
-anova(fit4_perm)
+stats$b_val[4] = fit4$coefficients[2]
+stats$p_val[4] = summary(fit4)$coefficients[2,4]
+
+# third max
+fit5 = lm(slope ~ max3 + band, data=  corr_data)
+summary(fit5)
+Anova(fit5)
+
+stats$b_val[5] = fit5$coefficients[2]
+stats$p_val[5] = summary(fit5)$coefficients[2,4]
+
 
 # min
-fit_min = lm(slope ~ min + band, data=  corr_data)
-summary(fit_min)
-Anova(fit_min)
+fit6 = lm(slope ~ min + band, data=  corr_data)
+summary(fit6)
+Anova(fit6)
 
-fit_min_perm = lmp(slope ~ min + band, data=  corr_data)
-summary(fit_min_perm)
-anova(fit_min_perm)
-
+stats$b_val[6] = fit6$coefficients[2]
+stats$p_val[6] = summary(fit)$coefficients[2,4]
 
 
 
@@ -239,56 +230,118 @@ plot +geom_smooth(method="lm") +  geom_point(size = 6) +
 ggsave(paste('min_bc_corr_pr.pdf', sep = ''))
 
 # stats
-# max
-fit1 = lm(slope ~ max + band, data=  corr_data_pr)
-summary(fit1)
-Anova(fit1)
-
-fit_perm = lmp(slope ~ max + band, data=  corr_data_pr)
-summary(fit_perm)
-anova(fit_perm)
-
-# second max
-fit2 = lm(slope ~ max2 + band, data=  corr_data_pr)
-summary(fit2)
-Anova(fit2)
-
-fit2_perm = lmp(slope ~ max2 + band, data=  corr_data_pr)
-summary(fit2_perm)
-anova(fit2_perm)
-
-# third max
-fit3 = lm(slope ~ max3 + band, data=  corr_data_pr)
-summary(fit3)
-Anova(fit3)
-
-fit3_perm = lmp(slope ~ max3 + band, data=  corr_data_pr)
-summary(fit3_perm)
-anova(fit3_perm)
-
-# min
-fit4 = lm(slope ~ min + band, data=  corr_data_pr)
-summary(fit4)
-Anova(fit4)
-
-fit4_perm = lmp(slope ~ min + band, data=  corr_data_pr)
-summary(fit4_perm)
-anova(fit4_perm)
-
 # mean
-fit1 = lm(slope ~ sum + band, data=  corr_data_pr)
-summary(fit1)
-Anova(fit1)
+fit7 = lm(slope ~ sum + band, data=  corr_data_pr)
+summary(fit7)
+Anova(fit7)
 
-fit_perm = lmp(slope ~ sum + band, data=  corr_data_pr)
-summary(fit_perm)
-anova(fit_perm)
+stats$b_val[7] = fit7$coefficients[2]
+stats$p_val[7] = summary(fit7)$coefficients[2,4]
 
 # sd
-fit1 = lm(slope ~ sd + band, data=  corr_data_pr)
-summary(fit1)
-Anova(fit1)
+fit8 = lm(slope ~ sd + band, data=  corr_data_pr)
+summary(fit8)
+Anova(fit8)
 
-fit_perm = lmp(slope ~ sd + band, data=  corr_data_pr)
-summary(fit_perm)
-anova(fit_perm)
+stats$b_val[8] = fit8$coefficients[2]
+stats$p_val[8] = summary(fit8)$coefficients[2,4]
+
+#  max
+fit9 = lm(slope ~ max + band, data=  corr_data_pr)
+summary(fit9)
+Anova(fit9)
+
+stats$b_val[9] = fit9$coefficients[2]
+stats$p_val[9] = summary(fit9)$coefficients[2,4]
+
+# 2nd max
+fit10 = lm(slope ~ max2 + band, data=  corr_data_pr)
+summary(fit10)
+Anova(fit10)
+
+stats$b_val[10] = fit10$coefficients[2]
+stats$p_val[10] = summary(fit10)$coefficients[2,4]
+
+# third
+fit11 = lm(slope ~ max3 + band, data=  corr_data_pr)
+summary(fit11)
+Anova(fit11)
+
+stats$b_val[11] = fit11$coefficients[2]
+stats$p_val[11] = summary(fit11)$coefficients[2,4]
+
+# min
+fit12 = lm(slope ~ min + band, data=  corr_data_pr)
+summary(fit12)
+Anova(fit12)
+
+stats$b_val[12] = fit12$coefficients[2]
+stats$p_val[12] = summary(fit12)$coefficients[2,4]
+
+
+
+
+
+#####################################
+
+# Combined Data for Plots
+
+####################################
+
+corr_data$band = lapply(corr_data$band, paste, '_emp', sep = '')
+corr_data_pr$band = lapply(corr_data_pr$band, paste, '_upr', sep = '')
+
+data_cmb = data.frame(max3 = c(corr_data$max3, corr_data_pr$max3), max2 = c(corr_data$max2, corr_data_pr$max2), sd = c(corr_data$sd, corr_data_pr$sd), 
+                      slope = c(corr_data$slope, corr_data_pr$slope), band = c(unlist(corr_data$band), unlist(corr_data_pr$band)), 
+                      model = c(rep('emp', times = 60), rep('upr', times = 60)))
+data_cmb$band = as.factor(data_cmb$band)
+levels(data_cmb$band)
+# emp, upr, lines
+#tmp = c(wes_palette('Royal1',3), (brewer.pal(3,'Greys')), 'black', 'white')
+tmp = c(rgb(81/255,184/255,161/255), rgb(81/255,184/255,161/255), rgb(81/255,184/255,161/255), 'grey', 'grey', 'grey', rgb(81/255,184/255,161/255), 'white')
+# alpha & beta band,line_emp, gamma band,  line_upr
+color_vect = c(tmp[1], tmp[4], tmp[2], tmp[5], tmp[7], tmp[3], tmp[7], tmp[8])
+color_vect
+
+plot = ggplot(data_cmb, aes(x = slope, y = max3, color = band, group = model))
+plot  +  geom_point(size = 4) + 
+  scale_color_manual(values = color_vect) +
+  #scale_fill_manual(values = c('blue', 'black')) +
+  geom_smooth(aes(color = model), method="lm", size = 3) +
+  labs(x = 'Slope', y = 'Max3')  + theme_minimal() 
+ggsave(paste('max3_bc_corr_cmb.png', sep = ''))
+
+plot = ggplot(data_cmb, aes(x = slope, y = max2, color = band, group = model))
+plot  +  geom_point(size = 4) + 
+  scale_color_manual(values = color_vect) +
+  #scale_fill_manual(values = c('blue', 'black')) +
+  geom_smooth(aes(color = model), method="lm", size = 3) +
+  labs(x = 'Slope', y = 'Max2')  + theme_minimal() 
+ggsave(paste('max2_bc_corr_cmb.png', sep = ''))
+
+plot = ggplot(data_cmb, aes(x = slope, y = sd, color = band, group = model))
+plot  +  geom_point(size = 4) + 
+  scale_color_manual(values = color_vect) +
+  #scale_fill_manual(values = c('blue', 'black')) +
+  geom_smooth(aes(color = model), method="lm", size = 3) +
+  labs(x = 'Slope', y = 'sd')  + theme_minimal() 
+ggsave(paste('sd_bc_corr_cmb.png', sep = ''))
+
+
+
+
+
+# bar plots
+plot = ggplot(stats, aes(x = pred, y = p_val, fill = model, group = model))
+plot + geom_bar(stat = "identity", position = position_dodge()) +
+  scale_fill_manual(values = c(rgb(81/255,184/255,161/255), 'grey')) +
+  geom_hline(yintercept = 0.05, linetype = "dashed", color = "black") +
+  geom_hline(yintercept = 0.008, linetype = "dashed", color = "red") +
+  labs(x = 'Predictor', y = 'P-value')  + theme_minimal() 
+  ggsave(paste('pred_cmb_p.pdf', sep = ''))
+  
+  plot = ggplot(stats, aes(x = pred, y = b_val, fill = model, group = model))
+  plot + geom_bar(stat = "identity", position = position_dodge()) +
+    scale_fill_manual(values = c(rgb(81/255,184/255,161/255), 'grey')) +
+    labs(x = 'Predictor', y = 'Coefficient')  + theme_minimal() 
+  ggsave(paste('pred_cmb_b.pdf', sep = ''))
