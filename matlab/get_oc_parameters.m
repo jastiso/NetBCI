@@ -176,20 +176,21 @@ for m = 1:numel(rho)
                     zero_mat(:,:,j) = zero_mat(:,:,j)./eigs(zero_mat(:,:,j),1) - eye(nNode).*1.001;
                 end
                 
-                % optim_fun(A, T, B, x0, xf, rho, S)
-                [~, ~, err] = get_opt_energy(high_mat, T(n), diag(B), x0, xT(:,k), rho(m), S(:,:,k));
+                % optim_fun(A, T, B, x0, xf, rho, S, error_tolerance)
+                % set tolerance high so we can get the full range
+                [~, ~, err] = get_opt_energy(high_mat, T(n), diag(B), x0, xT(:,k), rho(m), S(:,:,k), 1000);
                 error(m,n,cnt) = err;
                 cnt = cnt+1;
                 
-                [~, ~, err] = get_opt_energy(high2_mat, T(n), diag(B), x0, xT(:,k), rho(m), S(:,:,k));
+                [~, ~, err] = get_opt_energy(high2_mat, T(n), diag(B), x0, xT(:,k), rho(m), S(:,:,k), 1000);
                 error(m,n,cnt) = err;
                 cnt = cnt+1;
                 
-                [~, ~, err] = get_opt_energy(high3_mat, T(n), diag(B), x0, xT(:,k), rho(m), S(:,:,k));
+                [~, ~, err] = get_opt_energy(high3_mat, T(n), diag(B), x0, xT(:,k), rho(m), S(:,:,k), 1000);
                 error(m,n,cnt) = err;
                 cnt = cnt + 1;
                 
-                [~, ~, err] = get_opt_energy(low_mat, T(n), diag(B), x0, xT(:,k), rho(m), S(:,:,k));
+                [~, ~, err] = get_opt_energy(low_mat, T(n), diag(B), x0, xT(:,k), rho(m), S(:,:,k), 1000);
                 error(m,n,cnt) = err;
                 cnt = cnt + 1;
                 
