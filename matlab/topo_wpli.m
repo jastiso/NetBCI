@@ -52,9 +52,14 @@ for i = subjs
             end
             
             % get subgraph data
-            coeff = readNPY([data_dir, subj,  '/', sens, '/wpli_', f, '_coeff.npy']);
-            subset = readNPY([data_dir, subj,  '/', sens, '/wpli_', f, '_subset.npy']);
-            err = readNPY([data_dir, subj,  '/', sens, '/wpli_', f, '_err.npy']);
+        if strcmp(data_dir(end-5:end-1),'param')
+            subset = readNPY([data_dir, subj, '/', sens, 'wpli_', f, '_subset.npy']);
+            coeff = readNPY([data_dir, subj, '/',sens, 'wpli_', f, '_coeff.npy']);
+        else
+            subset = readNPY([data_dir, subj, '/', sens, '/wpli_', f, '_subset.npy']);
+            coeff = readNPY([data_dir, subj, '/',sens, '/wpli_', f, '_coeff.npy']);
+        end
+            
             % get mag index
             labels = [];
             try
@@ -81,6 +86,10 @@ for i = subjs
             
             
             % get subgraph with highest expresssion in behavior
+             % remove noise SG
+        idx = noise_sg{k,i};
+        coeff = coeff(~idx,:);
+        subset = subset(~idx,:);
             [~,bsg] = max(subset(:,end));
             [~,nbsg] = min(subset(:,end));
             
@@ -151,7 +160,6 @@ if ~exist(['/Users/stiso/Documents/MATLAB/NetBCI/GroupAvg/wpli/images/'], 'dir')
 end
 
 thrs = linspace(0.01, 1, 100);
-nE_thr = zeros(numel(thrs),numel(bands));
 consistent_edges = zeros(numel(thrs), numel(bands));
 for k = 1:numel(thrs)
     thrsh_mats = consensus;
@@ -163,13 +171,12 @@ for k = 1:numel(thrs)
             tmp = curr(curr ~= 0);
             tmp = sort(tmp, 'descend');
             curr(curr < tmp(thresh)) = 0;
-            nE_thr(k,j) = sum(sum(curr ~= 0));
             thrsh_mats(:,:,i,j) = curr;
         end
     end
     for m = 1:numel(bands)
         G = fcn_group_avg4(thrsh_mats(:,:,:,m),nSubj);
-        consistent_edges(k,m) = ((sum(sum(G))/2)./nE_thr(k,m))*100;
+        consistent_edges(k,m) = sum(sum(G))/2;
         if k == numel(thrs)
             avg_consensus = mean(thrsh_mats(:,:,:,m),3);
             avg_consensus(~logical(G)) = 0;

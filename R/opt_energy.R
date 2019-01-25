@@ -18,46 +18,40 @@ sens = 'grad'
 raw_data = readMat(paste('data/wpli/', sens, '/opt_energy.mat', sep = ''))
 dens = readMat(paste('data/wpli/', sens, '/density.mat', sep = ''))
 data = data.frame(band = unlist(raw_data$band.order), subj = unlist(raw_data$subj.order), high = raw_data$u.high[,1], high2 = raw_data$u.high2[,1],
-                  high3 = raw_data$u.high3[,1], low = raw_data$u.low[,1],zero = raw_data$u.zero[,1], slope = raw_data$slope[1,], 
-                   high_a = raw_data$u.high.a[,1], high2_a = raw_data$u.high2.a[,1], high3_a = raw_data$u.high3.a[,1], low_a = raw_data$u.low.a[,1],
-                  high_a2 = raw_data$u.high.a2[,1], high2_a2 = raw_data$u.high2.a2[,1], high3_a2 = raw_data$u.high3.a2[,1], low_a2 = raw_data$u.low.a2[,1])
-data = mutate(data, diff = log10(low)-log10(high2))
+                  high3 = raw_data$u.high3[,1], low = raw_data$u.low[,1], slope = raw_data$slope[1,], 
+                   high_a = raw_data$u.high.a[,1], high2_a = raw_data$u.high2.a[,1], high3_a = raw_data$u.high3.a[,1], low_a = raw_data$u.low.a[,1])
 data = mutate(data, diff3 = log10(low)-log10(high3))
-data = mutate(data, diffa = log10(high3_a)-log10(high2_a))
 data = mutate(data, diffa3 = log10(low_a)-log10(high3_a))
-data = mutate(data, diff2a3 = log10(low_a2)-log10(high3_a2))
+data = mutate(data, diffa23 = log10(high2_a)-log10(high3_a))
+data = mutate(data, diffa13 = log10(high_a)-log10(high3_a))
 
 # add density 
 dens_data = data.frame(band = unlist(dens$band.order), subj = unlist(dens$subj.order), high3 = dens$d.high3[,1], low = dens$d.low[,1])
 dens_data = mutate(data, dens_diff = low-high3)
-# check order is correct
+# check order is correct - want both to be false
 any(dens_data$band != data$band)
 any(dens_data$subj != data$subj)
 
 data$dens_diff = dens_data$dens_diff
 
 # reformat by condition
-data_high = select(data, band, subj, slope, diff, diff3, high)
+data_high = select(data, band, subj, slope, diff3, high)
 data_high$cond = 'high'
 names(data_high)[names(data_high)=='high'] = 'opt_u'
 
-data_high2 = select(data, band, subj, slope, diff, diff3, high2)
+data_high2 = select(data, band, subj, slope, diff3, high2)
 data_high2$cond = 'high2'
 names(data_high2)[names(data_high2)=='high2'] = 'opt_u'
 
-data_high3 = select(data, band, subj, slope, diff, diff3, high3)
+data_high3 = select(data, band, subj, slope, diff3, high3)
 data_high3$cond = 'high3'
 names(data_high3)[names(data_high3)=='high3'] = 'opt_u'
 
-data_low = select(data, band, subj, slope, diff, diff3, low)
+data_low = select(data, band, subj, slope, diff3, low)
 data_low$cond = 'low'
 names(data_low)[names(data_low)=='low'] = 'opt_u'
 
-data_zero = select(data, band, subj, slope, diff, diff3, zero)
-data_zero$cond = 'zero'
-names(data_zero)[names(data_zero)=='zero'] = 'opt_u'
-
-data2 = rbind(data_low, data_high2, data_high3, data_high, data_zero)
+data2 = rbind(data_low, data_high2, data_high3, data_high)
 
 
 data_alpha = filter(data2, band == "alpha")
@@ -91,27 +85,15 @@ ggsave(paste(sens, '_opt_u_gamma', '.png', sep = ''))
 
 
 ## Stats
-beta_low2 = t.test(log(filter(data, band == 'beta')$high2),log(filter(data, band == 'beta')$low), paired=TRUE)
-beta_low2
-
-beta_zero2 = t.test(log(filter(data, band == 'beta')$high2),log(filter(data, band == 'beta')$zero), paired=TRUE)
-beta_zero2
-
-beta_low3 = t.test(filter(data, band == 'beta')$high3,filter(data, band == 'beta')$low, paired=TRUE)
+beta_low3 = t.test(log(filter(data, band == 'beta')$high3),log(filter(data, band == 'beta')$low), paired=TRUE)
 beta_low3
 
-beta_zero3 = t.test(log(filter(data, band == 'beta')$high3),log(filter(data, band == 'beta')$zero), paired=TRUE)
-beta_zero3
+alpha_low3 = t.test(log(filter(data, band == 'alpha')$high3),log(filter(data, band == 'alpha')$low), paired=TRUE)
+alpha_low3
 
-# other bands
-alpha_low2 = t.test(log(filter(data, band == 'alpha')$high2),log(filter(data, band == 'alpha')$low), paired=TRUE)
-alpha_low2
+gamma_low3 = t.test(log(filter(data, band == 'low_gamma')$high3),log(filter(data, band == 'low_gamma')$low), paired=TRUE)
+gamma_low3
 
-gamma_low2 = t.test(log(filter(data, band == 'low_gamma')$high3),log(filter(data, band == 'low_gamma')$low), paired=TRUE)
-gamma_low2
-
-gamma_low2 = t.test(log(filter(data, band == 'low_gamma')$high3_m),log(filter(data, band == 'low_gamma')$low_m), paired=TRUE)
-gamma_low2
 
 
 
@@ -131,24 +113,17 @@ scatterplot+ geom_smooth(method="lm") + geom_point(size = 6) + labs(x = 'opt_u',
   theme_minimal() #+ scale_color_manual(values =  wes_palette("Moonrise1",4))
 ggsave('slope_opt_u_high3.png')
 
-
-corr_beta_high2 = cor.test(log(filter(data, band == 'beta')$high2),filter(data, band == 'beta')$slope)
-corr_beta_high2
-
-corr_beta_high3 = cor.test(log(filter(data, band == 'beta')$high3),filter(data, band == 'beta')$slope)
-corr_beta_high3
-
-corr_beta_low = cor.test(log(filter(data, band == 'beta')$low),filter(data, band == 'beta')$slope)
-corr_beta_low
-
-corr_beta_diff = cor.test(filter(data, band == 'beta')$diff,filter(data, band == 'beta')$slope, method = "pearson")
-corr_beta_diff
+# corr stats
 
 corr_beta_diff = cor.test(filter(data, band == 'beta')$diff3,filter(data, band == 'beta')$slope)
 corr_beta_diff
 
-fit1 = lm(slope ~ diff, filter(data, band == 'beta'))
-summary(fit1)
+corr_alpha_diff = cor.test(filter(data, band == 'alpha')$diff3,filter(data, band == 'alpha')$slope)
+corr_alpha_diff
+
+corr_alpha_diff = cor.test(filter(data, band == 'low_gamma')$diff3,filter(data, band == 'low_gamma')$slope)
+corr_alpha_diff
+
 
 
 ##############################################
@@ -158,19 +133,19 @@ summary(fit1)
 #############################################
 
 # reformat by condition
-data_high_a = select(data, band, subj, slope, diffa, diffa3, diff2a3, high_a)
+data_high_a = select(data, band, subj, slope, diffa23, diffa13, diffa3, high_a)
 data_high_a$cond = 'high'
 names(data_high_a)[names(data_high_a)=='high_a'] = 'opt_u'
 
-data_high2_a = select(data, band, subj, slope, diffa, diffa3, diff2a3, high2_a)
+data_high2_a = select(data, band, subj, slope, diffa23, diffa13, diffa3, high2_a)
 data_high2_a$cond = 'high2'
 names(data_high2_a)[names(data_high2_a)=='high2_a'] = 'opt_u'
 
-data_high3_a = select(data, band, subj, slope, diffa, diffa3, diff2a3, high3_a)
+data_high3_a = select(data, band, subj, slope, diffa23, diffa13, diffa3, high3_a)
 data_high3_a$cond = 'high3'
 names(data_high3_a)[names(data_high3_a)=='high3_a'] = 'opt_u'
 
-data_low_a = select(data, band, subj, slope, diffa, diffa3, diff2a3, low_a)
+data_low_a = select(data, band, subj, slope, diffa23, diffa13, diffa3, low_a)
 data_low_a$cond = 'low'
 names(data_low_a)[names(data_low_a)=='low_a'] = 'opt_u'
 
@@ -231,21 +206,25 @@ scatterplot+ geom_smooth(method="lm", size = 3) + geom_point(size = 4) + labs(x 
   scale_color_manual(values = c(rgb(215/255,190/255,123/255), rgb(33/255,67/255,104/255)))
 ggsave('slope_opt_u_interaction.svg')
 
-corr_beta_high2 = cor.test(log(filter(data, band == 'beta')$high2_a),filter(data, band == 'beta')$slope)
-corr_beta_high2
-
+# individual SGs
 corr_beta_high3 = cor.test(log(filter(data, band == 'beta')$high3_a),filter(data, band == 'beta')$slope)
 corr_beta_high3
 
 corr_beta_low = cor.test(log(filter(data, band == 'beta')$low_a),filter(data, band == 'beta')$slope)
 corr_beta_low
 
+#difference
 corr_beta_diff = cor.test(filter(data, band == 'beta')$diffa3,filter(data, band == 'beta')$slope, method = "pearson")
 corr_beta_diff
 
-corr_beta_diff = cor.test(filter(data, band == 'beta')$diffa,filter(data, band == 'beta')$slope)
-corr_beta_diff
+# other high SG
+corr_beta_diff23 = cor.test(filter(data, band == 'beta')$diffa23,filter(data, band == 'beta')$slope)
+corr_beta_diff23
 
+corr_beta_diff13 = cor.test(filter(data, band == 'beta')$diffa13,filter(data, band == 'beta')$slope)
+corr_beta_diff13
+
+# controlling for density
 fit1 = lm(slope ~ diffa3 + dens_diff, filter(data, band == 'beta'))
 summary(fit1)
 
@@ -260,23 +239,15 @@ summary(fit1)
 
 
 raw_data = readMat(paste('data/wpli/', sens, '/opt_energy_control.mat', sep = ''))
-data_control = data.frame(slope = raw_data$slope[1,], band = unlist(raw_data$band.order.c), subj = unlist(raw_data$subj.order.c), high = raw_data$u.high.c[,1], high2 = raw_data$u.high2.c[,1],
-                  high3 = raw_data$u.high3.c[,1], low = raw_data$u.low.c[,1],zero = raw_data$u.zero.c[,1])
+data_control = data.frame(slope = raw_data$slope[1,], band = unlist(raw_data$band.order.c), subj = unlist(raw_data$subj.order.c),
+                  high3 = raw_data$u.high3.c[,1], low = raw_data$u.low.c[,1])
 data_control = mutate(data_control, diff3 = log10(low)-log10(high3))
 
 
 # reformat by condition
-data_high_control = select(data_control, band, subj, high, slope)
-data_high_control$cond = 'high'
-names(data_high_control)[names(data_high_control)=='high'] = 'opt_u'
-
 data_diff_control = select(data_control, band, subj, diff3, slope)
 data_diff_control$cond = 'diff'
 names(data_diff_control)[names(data_diff_control)=='diff3'] = 'opt_u'
-
-data_high2_control = select(data_control, band, subj, high2, slope)
-data_high2_control$cond = 'high2'
-names(data_high2_control)[names(data_high2_control)=='high2'] = 'opt_u'
 
 data_high3_control = select(data_control, band, subj, high3, slope)
 data_high3_control$cond = 'high3'
@@ -286,11 +257,7 @@ data_low_control = select(data_control, band, subj, low, slope)
 data_low_control$cond = 'low'
 names(data_low_control)[names(data_low_control)=='low'] = 'opt_u'
 
-data_zero_control = select(data_control, band, subj, zero, slope)
-data_zero_control$cond = 'zero'
-names(data_zero_control)[names(data_zero_control)=='zero'] = 'opt_u'
-
-data2_control = rbind(data_high_control, data_low_control, data_high2_control, data_high3_control, data_zero_control, data_diff_control)
+data2_control = rbind(data_low_control, data_high3_control, data_diff_control)
 
 data_alpha_control = filter(data2_control, band == "alpha")
 data_beta_control = filter(data2_control, band == "beta")
@@ -325,19 +292,6 @@ plot + geom_boxplot(notch = FALSE, lwd = 1) +
 ggsave(paste(sens, '_opt_u_gamma_control', '.png', sep = ''))
 
 
-## Stats
-beta_low2_control = t.test(filter(data_control, band == 'beta')$high2,filter(data_control, band == 'beta')$low, paired=TRUE)
-beta_low2_control
-
-beta_zero2_control = t.test(filter(data_control, band == 'beta')$high2,filter(data_control, band == 'beta')$zero, paired=TRUE)
-beta_zero2_control
-
-beta_low3_control = t.test(filter(data_control, band == 'beta')$high3,filter(data_control, band == 'beta')$low, paired=TRUE)
-beta_low3_control
-
-beta_zero3_control = t.test(filter(data_control, band == 'beta')$high3,filter(data_control, band == 'beta')$zero, paired=TRUE)
-beta_zero3_control
-
 ## Relationship to slope
 
 scatterplot = ggplot(data_diff_control, aes(x = opt_u, y = slope, color = band)) 
@@ -345,8 +299,8 @@ scatterplot+ geom_smooth(method="lm") + geom_point(size = 6) + labs(x = 'log(low
   theme_minimal() + scale_color_manual(values =  wes_palette("Royal1",4))
 ggsave('slope_opt_u_cont.png')
 
-corr_beta_high2 = cor.test(filter(data_control, band == 'beta')$diff3,filter(data_control, band == 'beta')$slope)
-corr_beta_high2
+corr_beta_high3 = cor.test(filter(data_control, band == 'beta')$diff3,filter(data_control, band == 'beta')$slope)
+corr_beta_high3
 
 ################################################
 
@@ -354,23 +308,14 @@ corr_beta_high2
 
 ################################################
 
-
+# here, we are only loading data for attentional target states
 
 raw_data = readMat(paste('data/wpli/', sens, '/opt_energy_pr.mat', sep = ''))
-data_pr = data.frame(band = unlist(raw_data$band.order.pr), subj = unlist(raw_data$subj.order.pr), high = raw_data$u.high.pr[,1], high2 = raw_data$u.high2.pr[,1],
-                          high3 = raw_data$u.high3.pr[,1], low = raw_data$u.low.pr[,1],zero = raw_data$u.zero.pr[,1], slope = raw_data$slope[1,])
-data_pr = mutate(data_pr, diff = log10(low)-log10(high2))
+data_pr = data.frame(band = unlist(raw_data$band.order.pr), subj = unlist(raw_data$subj.order.pr),
+                          high3 = raw_data$u.high3.pr[,1], low = raw_data$u.low.pr[,1], slope = raw_data$slope[1,])
 data_pr = mutate(data_pr, diff3 = log10(low)-log10(high3))
 
 # reformat by condition
-data_high_pr = select(data_pr, band, subj, slope, diff3, high)
-data_high_pr$cond = 'high'
-names(data_high_pr)[names(data_high_pr)=='high'] = 'opt_u'
-
-data_high2_pr = select(data_pr, band, subj, slope, diff3, high2)
-data_high2_pr$cond = 'high2'
-names(data_high2_pr)[names(data_high2_pr)=='high2'] = 'opt_u'
-
 data_high3_pr = select(data_pr, band, subj, slope, diff3, high3)
 data_high3_pr$cond = 'high3'
 names(data_high3_pr)[names(data_high3_pr)=='high3'] = 'opt_u'
@@ -379,11 +324,7 @@ data_low_pr = select(data_pr, band, subj, slope, diff3, low)
 data_low_pr$cond = 'low'
 names(data_low_pr)[names(data_low_pr)=='low'] = 'opt_u'
 
-data_zero_pr = select(data_pr, band, subj, slope, diff3, zero)
-data_zero_pr$cond = 'zero'
-names(data_zero_pr)[names(data_zero_pr)=='zero'] = 'opt_u'
-
-data2_pr = rbind(data_high_pr, data_low_pr, data_high2_pr, data_high3_pr, data_zero_pr)
+data2_pr = rbind(data_low_pr, data_high3_pr)
 
 data_alpha_pr = filter(data2_pr, band == "alpha")
 data_beta_pr = filter(data2_pr, band == "beta")
@@ -418,19 +359,6 @@ plot + geom_boxplot(notch = FALSE, lwd = 1) +
 ggsave(paste(sens, '_opt_u_gamma_pr', '.png', sep = ''))
 
 
-## Stats
-beta_low2_pr = t.test(filter(data_pr, band == 'beta')$high2,filter(data_pr, band == 'beta')$low, paired=TRUE)
-beta_low2_pr
-
-beta_zero2_pr = t.test(filter(data_pr, band == 'beta')$high2,filter(data_pr, band == 'beta')$zero, paired=TRUE)
-beta_zero2_pr
-
-beta_low3_pr = t.test(filter(data_pr, band == 'beta')$high3,filter(data_pr, band == 'beta')$low, paired=TRUE)
-beta_low3_pr
-
-beta_zero3_pr = t.test(filter(data_pr, band == 'beta')$high3,filter(data_pr, band == 'beta')$zero, paired=TRUE)
-beta_zero3_pr
-
 ## Relationship to slope
 
 scatterplot = ggplot(data_beta_pr, aes(x = diff3, y = slope)) 
@@ -438,8 +366,8 @@ scatterplot+ geom_smooth(method="lm") + geom_point(size = 6) + labs(x = 'log(low
   theme_minimal() #+ scale_color_manual(values =  wes_palette("Moonrise1",4))
 ggsave('slope_opt_u_pr.png')
 
-corr_beta_high2 = cor.test((filter(data_pr, band == 'beta')$diff3),filter(data_pr, band == 'beta')$slope)
-corr_beta_high2
+corr_beta_high3 = cor.test((filter(data_pr, band == 'beta')$diff3),filter(data_pr, band == 'beta')$slope)
+corr_beta_high3
 
 # combined plot
 data_comb = data_frame(diff = c(data$diffa3, data_pr$diff3, data_control$diff3, data$diff3), slope = c(data$slope, data_pr$slope, data_control$slope, data$slope), model = c(rep('emp', times = 60), rep('upr', times = 60), rep('cont', times = 60), rep('state', times = 60)), band = c(data$band, data_pr$band, data_control$band, data$band) )
@@ -455,4 +383,72 @@ scatterplot+ geom_smooth(method="lm", size=3) + geom_point(size = 4) +
   scale_color_manual(values = c('grey', rgb(81/255,184/255,161/255)))
   #scale_color_manual(values =  rev(wes_palette("GrandBudapest1",4)))
 ggsave('slope_opt_u_comb.svg')
+
+
+
+########################
+
+# State controls
+
+########################
+
+raw_data = readMat(paste('data/wpli/', sens, '/opt_energy_state.mat', sep = ''))
+data_state = data.frame(slope = raw_data$slope[1,], band = unlist(raw_data$band.order), subj = unlist(raw_data$subj.order), high3_mag = raw_data$u.high3.mag[,1], 
+                        low_mag = raw_data$u.low.mag[,1], high3_2 = raw_data$u.high3.2[,1], low_2 = raw_data$u.low.2[,1],high3_cent = raw_data$u.high3.centered[,1], low_cent = raw_data$u.low.centered[,1],
+                        high3_012 = raw_data$u.high3.012[,1], low_012 = raw_data$u.low.012[,1], high3_inv = raw_data$u.high3.inv[,1], low_inv = raw_data$u.low.inv[,1])
+data_state = mutate(data_state, diff_mag = log10(low_mag)-log10(high3_mag))
+data_state = mutate(data_state, diff_2 = log10(low_2)-log10(high3_2))
+data_state = mutate(data_state, diff_cent = log10(low_cent)-log10(high3_cent))
+data_state = mutate(data_state, diff_012 = log10(low_012)-log10(high3_012))
+data_state = mutate(data_state, diff_inv = log10(low_inv)-log10(high3_inv))
+
+## Relationship to slope
+
+scatterplot = ggplot(filter(data_state, band == "beta"), aes(x = diff_cent, y = slope)) 
+scatterplot+ geom_smooth(method="lm") + geom_point(size = 6) + labs(x = 'log(low)-log(high)', y = 'slope') +
+  theme_minimal() + scale_color_manual(values =  wes_palette("Royal1",4))
+ggsave('slope_opt_state_control.png')
+
+corr_beta_mag = cor.test(filter(data_state, band == 'beta')$diff_mag,filter(data_state, band == 'beta')$slope)
+corr_beta_mag
+
+corr_beta_2 = cor.test(filter(data_state, band == 'beta')$diff_2,filter(data_state, band == 'beta')$slope)
+corr_beta_2
+
+corr_beta_cent = cor.test(filter(data_state, band == 'beta')$diff_cent,filter(data_state, band == 'beta')$slope)
+corr_beta_cent
+
+corr_beta_012 = cor.test(filter(data_state, band == 'beta')$diff_012,filter(data_state, band == 'beta')$slope)
+corr_beta_012
+
+corr_beta_inv = cor.test(filter(data_state, band == 'beta')$diff_inv,filter(data_state, band == 'beta')$slope)
+corr_beta_inv
+
+
+########################
+
+# parameters
+
+########################
+
+raw_data = readMat(paste('data/wpli/', sens, '/opt_energy_params.mat', sep = ''))
+data_params = data.frame(slope = raw_data$slope[1,], band = unlist(raw_data$band.order), subj = unlist(raw_data$subj.order), high3_1 = raw_data$u.high3.1[,1], 
+                        low_1 = raw_data$u.low.1[,1], high3_2 = raw_data$u.high3.2[,1], low_2 = raw_data$u.low.2[,1])
+data_params = mutate(data_params, diff_1 = log10(low_1)-log10(high3_1))
+data_params = mutate(data_params, diff_2 = log10(low_2)-log10(high3_2))
+
+## Relationship to slope
+
+scatterplot = ggplot(data_params, aes(x = diff_1, y = slope, color = band)) 
+scatterplot+ geom_smooth(method="lm") + geom_point(size = 6) + labs(x = 'log(low)-log(high)', y = 'slope') +
+  theme_minimal() + scale_color_manual(values =  wes_palette("Royal1",4))
+ggsave('slope_opt_state_params.png')
+
+corr_beta_1 = cor.test(filter(data_params, band == 'beta')$diff_1,filter(data_params, band == 'beta')$slope)
+corr_beta_1
+
+corr_beta_2 = cor.test(filter(data_params, band == 'beta')$diff_2,filter(data_params, band == 'beta')$slope)
+corr_beta_2
+
+
 

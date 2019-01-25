@@ -27,7 +27,7 @@ sens = 'grad'
 beh = readMat(paste('data/wpli/', sens, '/exp_beh_cor.mat', sep = ''))
 
 corr_data = data.frame(band = character(length = 0), n_zero = numeric(0), max = numeric(0), max2 = numeric(0), max3 = numeric(0), max4 = numeric(0), 
-                       min = numeric(0), sd = numeric(0), sum = numeric(0), slope = numeric(0), subj = numeric(0), stringsAsFactors = FALSE)
+                       min = numeric(0), min2 = numeric(0), sd = numeric(0), sum = numeric(0), slope = numeric(0), subj = numeric(0), stringsAsFactors = FALSE)
 for (b in c(1:length(bands))){
 
   corr_data[(nrow(corr_data)+1):(nrow(corr_data)+nSubj),1] = rep(bands[b], times = nSubj)
@@ -37,17 +37,18 @@ for (b in c(1:length(bands))){
   corr_data[(nrow(corr_data)-nSubj+1):nrow(corr_data),5] = beh$max.exp3[,b]
   corr_data[(nrow(corr_data)-nSubj+1):nrow(corr_data),6] = beh$max.exp4[,b]
   corr_data[(nrow(corr_data)-nSubj+1):nrow(corr_data),7] = beh$min.exp[,b]
-  corr_data[(nrow(corr_data)-nSubj+1):nrow(corr_data),8] = beh$sd.exp[,b]
-  corr_data[(nrow(corr_data)-nSubj+1):nrow(corr_data),9] = beh$sum.exp[,b]
-  corr_data[(nrow(corr_data)-nSubj+1):nrow(corr_data),10] = t(beh$betas)
-  corr_data[(nrow(corr_data)-nSubj+1):nrow(corr_data),11] = t(beh$Subj)
+  corr_data[(nrow(corr_data)-nSubj+1):nrow(corr_data),8] = beh$min.exp2[,b]
+  corr_data[(nrow(corr_data)-nSubj+1):nrow(corr_data),9] = beh$sd.exp[,b]
+  corr_data[(nrow(corr_data)-nSubj+1):nrow(corr_data),10] = beh$sum.exp[,b]
+  corr_data[(nrow(corr_data)-nSubj+1):nrow(corr_data),11] = t(beh$betas)
+  corr_data[(nrow(corr_data)-nSubj+1):nrow(corr_data),12] = t(beh$Subj)
 
 }
 corr_data$subj = as.factor(corr_data$subj)
 # save p_values
-stats = data.frame(p_val = rep(0, times = 12), b_val = rep(0, times = 12), pred = c('mean', 'sd', 'high', 'high2', 'high3', 'low', 
-                                                                                    'mean', 'sd', 'high', 'high2', 'high3', 'low'), 
-                   model = c(rep('emp', times = 6), rep('UPR', times = 6)))
+stats = data.frame(p_val = rep(0, times = 16), b_val = rep(0, times = 16), pred = c('mean', 'sd', 'high', 'high2', 'high3', 'high4', 'low', 'low2', 
+                                                                                    'mean', 'sd', 'high', 'high2', 'high3', 'high4', 'low', 'low2'), 
+                   model = c(rep('emp', times = 8), rep('UPR', times = 8)))
 
 
 # scatter plot for all bands - mean
@@ -122,7 +123,7 @@ stats$p_val[1] = summary(fit1)$coefficients[2,4]
 # sd
 fit2 = lm(slope ~ sd + band, data=  corr_data)
 summary(fit2)
-Anova(fit1)
+Anova(fit2)
 
 stats$b_val[2] = fit2$coefficients[2]
 stats$p_val[2] = summary(fit2)$coefficients[2,4]
@@ -151,14 +152,30 @@ Anova(fit5)
 stats$b_val[5] = fit5$coefficients[2]
 stats$p_val[5] = summary(fit5)$coefficients[2,4]
 
-
-# min
-fit6 = lm(slope ~ min + band, data=  corr_data)
+# 4th max
+fit6 = lm(slope ~ max4 + band, data=  corr_data)
 summary(fit6)
 Anova(fit6)
 
 stats$b_val[6] = fit6$coefficients[2]
-stats$p_val[6] = summary(fit)$coefficients[2,4]
+stats$p_val[6] = summary(fit6)$coefficients[2,4]
+
+
+# min
+fit7 = lm(slope ~ min + band, data=  corr_data)
+summary(fit7)
+Anova(fit7)
+
+stats$b_val[7] = fit7$coefficients[2]
+stats$p_val[7] = summary(fit7)$coefficients[2,4]
+
+# 2nd min
+fit8 = lm(slope ~ min2 + band, data=  corr_data)
+summary(fit8)
+Anova(fit8)
+
+stats$b_val[8] = fit8$coefficients[2]
+stats$p_val[8] = summary(fit8)$coefficients[2,4]
 
 
 
@@ -170,7 +187,7 @@ stats$p_val[6] = summary(fit)$coefficients[2,4]
 #############################################################################################
 beh_pr = readMat(paste('data/wpli/', sens, '/exp_beh_cor_pr.mat', sep = ''))
 
-corr_data_pr = data.frame(band = character(length = 0), max = numeric(0), max2 = numeric(0), max3 = numeric(0), min = numeric(0), sd = numeric(0), 
+corr_data_pr = data.frame(band = character(length = 0), max = numeric(0), max2 = numeric(0), max3 = numeric(0), max4 = numeric(0), min = numeric(0), min2 = numeric(0), sd = numeric(0), 
                           sum = numeric(0), slope = numeric(0), subj = numeric(0), stringsAsFactors = FALSE)
 for (b in c(1:length(bands))){
   
@@ -178,11 +195,13 @@ for (b in c(1:length(bands))){
   corr_data_pr[(nrow(corr_data_pr)-nSubj+1):nrow(corr_data_pr),2] = beh_pr$max.exp.null[,b]
   corr_data_pr[(nrow(corr_data_pr)-nSubj+1):nrow(corr_data_pr),3] = beh_pr$max.exp.null2[,b]
   corr_data_pr[(nrow(corr_data_pr)-nSubj+1):nrow(corr_data_pr),4] = beh_pr$max.exp.null3[,b]
-  corr_data_pr[(nrow(corr_data_pr)-nSubj+1):nrow(corr_data_pr),5] = beh_pr$min.exp.null[,b]
-  corr_data_pr[(nrow(corr_data_pr)-nSubj+1):nrow(corr_data_pr),6] = beh_pr$sd.exp.null[,b]
-  corr_data_pr[(nrow(corr_data_pr)-nSubj+1):nrow(corr_data_pr),7] = beh_pr$sum.exp.null[,b]
-  corr_data_pr[(nrow(corr_data_pr)-nSubj+1):nrow(corr_data_pr),8] = t(beh_pr$betas)
-  corr_data_pr[(nrow(corr_data_pr)-nSubj+1):nrow(corr_data_pr),9] = t(beh_pr$Subj)
+  corr_data_pr[(nrow(corr_data_pr)-nSubj+1):nrow(corr_data_pr),5] = beh_pr$max.exp.null4[,b]
+  corr_data_pr[(nrow(corr_data_pr)-nSubj+1):nrow(corr_data_pr),6] = beh_pr$min.exp.null[,b]
+  corr_data_pr[(nrow(corr_data_pr)-nSubj+1):nrow(corr_data_pr),7] = beh_pr$min.exp.null2[,b]
+  corr_data_pr[(nrow(corr_data_pr)-nSubj+1):nrow(corr_data_pr),8] = beh_pr$sd.exp.null[,b]
+  corr_data_pr[(nrow(corr_data_pr)-nSubj+1):nrow(corr_data_pr),9] = beh_pr$sum.exp.null[,b]
+  corr_data_pr[(nrow(corr_data_pr)-nSubj+1):nrow(corr_data_pr),10] = t(beh_pr$betas)
+  corr_data_pr[(nrow(corr_data_pr)-nSubj+1):nrow(corr_data_pr),11] = t(beh_pr$Subj)
   
 }
 corr_data_pr$subj = as.factor(corr_data_pr$subj)
@@ -231,54 +250,68 @@ ggsave(paste('min_bc_corr_pr.pdf', sep = ''))
 
 # stats
 # mean
-fit7 = lm(slope ~ sum + band, data=  corr_data_pr)
-summary(fit7)
-Anova(fit7)
-
-stats$b_val[7] = fit7$coefficients[2]
-stats$p_val[7] = summary(fit7)$coefficients[2,4]
-
-# sd
-fit8 = lm(slope ~ sd + band, data=  corr_data_pr)
-summary(fit8)
-Anova(fit8)
-
-stats$b_val[8] = fit8$coefficients[2]
-stats$p_val[8] = summary(fit8)$coefficients[2,4]
-
-#  max
-fit9 = lm(slope ~ max + band, data=  corr_data_pr)
+fit9 = lm(slope ~ sum + band, data=  corr_data_pr)
 summary(fit9)
 Anova(fit9)
 
 stats$b_val[9] = fit9$coefficients[2]
 stats$p_val[9] = summary(fit9)$coefficients[2,4]
 
-# 2nd max
-fit10 = lm(slope ~ max2 + band, data=  corr_data_pr)
+# sd
+fit10 = lm(slope ~ sd + band, data=  corr_data_pr)
 summary(fit10)
 Anova(fit10)
 
 stats$b_val[10] = fit10$coefficients[2]
 stats$p_val[10] = summary(fit10)$coefficients[2,4]
 
-# third
-fit11 = lm(slope ~ max3 + band, data=  corr_data_pr)
+#  max
+fit11 = lm(slope ~ max + band, data=  corr_data_pr)
 summary(fit11)
 Anova(fit11)
 
 stats$b_val[11] = fit11$coefficients[2]
 stats$p_val[11] = summary(fit11)$coefficients[2,4]
 
-# min
-fit12 = lm(slope ~ min + band, data=  corr_data_pr)
+# 2nd max
+fit12 = lm(slope ~ max2 + band, data=  corr_data_pr)
 summary(fit12)
 Anova(fit12)
 
 stats$b_val[12] = fit12$coefficients[2]
 stats$p_val[12] = summary(fit12)$coefficients[2,4]
 
+# third
+fit13 = lm(slope ~ max3 + band, data=  corr_data_pr)
+summary(fit13)
+Anova(fit13)
 
+stats$b_val[13] = fit13$coefficients[2]
+stats$p_val[13] = summary(fit13)$coefficients[2,4]
+
+# fourth
+fit14 = lm(slope ~ max4 + band, data=  corr_data_pr)
+summary(fit14)
+Anova(fit14)
+
+stats$b_val[14] = fit14$coefficients[2]
+stats$p_val[14] = summary(fit14)$coefficients[2,4]
+
+# min
+fit15 = lm(slope ~ min + band, data=  corr_data_pr)
+summary(fit15)
+Anova(fit15)
+
+stats$b_val[15] = fit15$coefficients[2]
+stats$p_val[15] = summary(fit15)$coefficients[2,4]
+
+# min2
+fit16 = lm(slope ~ min2 + band, data=  corr_data_pr)
+summary(fit16)
+Anova(fit16)
+
+stats$b_val[16] = fit16$coefficients[2]
+stats$p_val[16] = summary(fit16)$coefficients[2,4]
 
 
 
@@ -332,7 +365,27 @@ ggsave(paste('sd_bc_corr_cmb.png', sep = ''))
 
 
 # bar plots
-plot = ggplot(stats, aes(x = pred, y = p_val, fill = model, group = model))
+stats_summ = dplyr::filter(stats, pred == c('mean', 'sd'))
+stats_rank = dplyr::filter(stats, pred != c('mean', 'sd'))
+plot = ggplot(stats_summ, aes(x = pred, y = p_val, fill = model, group = model))
+plot + geom_bar(stat = "identity", position = position_dodge()) +
+  scale_fill_manual(values = c(rgb(81/255,184/255,161/255), 'grey')) +
+  geom_hline(yintercept = 0.05, linetype = "dashed", color = "black") +
+  geom_hline(yintercept = 0.01, linetype = "dashed", color = "red") +
+  labs(x = 'Predictor', y = 'P-value')  + theme_minimal() 
+ggsave(paste('pred_cmb_p_summ.pdf', sep = ''))
+
+plot = ggplot(stats_summ, aes(x = pred, y = b_val, fill = model, group = model))
+plot + geom_bar(stat = "identity", position = position_dodge()) +
+  scale_fill_manual(values = c(rgb(81/255,184/255,161/255), 'grey')) +
+  labs(x = 'Predictor', y = 'Coefficient')  + theme_minimal() 
+ggsave(paste('pred_cmb_b_summ.pdf', sep = ''))
+
+
+
+
+
+plot = ggplot(stats_rank, aes(x = pred, y = p_val, fill = model, group = model))
 plot + geom_bar(stat = "identity", position = position_dodge()) +
   scale_fill_manual(values = c(rgb(81/255,184/255,161/255), 'grey')) +
   geom_hline(yintercept = 0.05, linetype = "dashed", color = "black") +
@@ -340,7 +393,7 @@ plot + geom_bar(stat = "identity", position = position_dodge()) +
   labs(x = 'Predictor', y = 'P-value')  + theme_minimal() 
   ggsave(paste('pred_cmb_p.pdf', sep = ''))
   
-  plot = ggplot(stats, aes(x = pred, y = b_val, fill = model, group = model))
+plot = ggplot(stats_rank, aes(x = pred, y = b_val, fill = model, group = model))
   plot + geom_bar(stat = "identity", position = position_dodge()) +
     scale_fill_manual(values = c(rgb(81/255,184/255,161/255), 'grey')) +
     labs(x = 'Predictor', y = 'Coefficient')  + theme_minimal() 
