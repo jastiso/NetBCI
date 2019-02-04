@@ -154,6 +154,16 @@ for i = 1:numel(bands)
         c_high3_avg(c_high3_avg <= 5) = 0;
         c_low_avg(c_low_avg <= 5) = 0;
         
+        % save stricter thresholding to report later
+        [r,c] = find(c_high_avg > 9);
+        c_high_max{i,j} = [r,c,c_high_avg(r,c)];
+        [r,c] = find(c_high2_avg > 9);
+        c_high2_max{i,j} = [r,c,c_high2_avg(r,c)];
+        [r,c] = find(c_high3_avg > 9);
+        c_high3_max{i,j} = [r,c,c_high3_avg(r,c)];
+        [r,c] = find(c_low_avg > 9);
+        c_low_max{i,j} = [r,c,c_low_avg(r,c)];
+        
         % cluster
         [ci_high,q_high] = community_louvain(c_high_avg,1);
         [~,idx_high] = sort(ci_high);
@@ -197,3 +207,4 @@ for i = 1:numel(bands)
 end
 
 save([save_dir, 'consistent_sums_pr.mat'], 'sum_high', 'sum_high2', 'sum_high3', 'sum_low')
+save([save_dir, 'most_consistent_pr.mat'], 'c_high_max', 'c_high2_max', 'c_high3_max', 'c_low_max')

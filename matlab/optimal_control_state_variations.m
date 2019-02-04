@@ -113,7 +113,7 @@ ro = idx;
 
 % alpha, suppression in left motor
 S(:,:,1) = eye(nNode); 
-xT_attend_mag(:,1) = circshift(-(rp + lp),20);
+xT_attend_mag(:,1) = circshift(-(rp + lp),30);
 xT_attend2(:,1) = -(rp + lp).*2;
 xT_attend_centered(:,1) = -(rp + lp).*2;
 xT_attend_012(:,1) = -(rp + lp) + 1;
@@ -121,7 +121,7 @@ xT_attend_inv(:,1) = (rp + lp) + 1;
 
 % beta - contralateral suppression, and ipsilateral activation
 S(:,:,2) = eye(nNode); 
-xT_attend_mag(:,2) = circshift((-vert),20);
+xT_attend_mag(:,2) = circshift((-vert),30);
 xT_attend2(:,2) = (-vert).*2;
 xT_attend_centered(:,2) = (-vert).*2;
 xT_attend_012(:,2) = (-vert) + 1;
@@ -129,7 +129,7 @@ xT_attend_inv(:,2) = (vert) + 1;
 
 % gamma - contralateral activation
 S(:,:,3) = eye(nNode);
-xT_attend_mag(:,3) = circshift((-B - B_control) + lf + rf + lo + ro,20);
+xT_attend_mag(:,3) = circshift((-B - B_control) + lf + rf + lo + ro,30);
 xT_attend2(:,3) = ((-B - B_control) + lf + rf + lo + ro).*2; 
 xT_attend_centered(:,3) = ((-B - B_control) + lf + rf + lo + ro).*2; 
 xT_attend_012(:,3) = ((-B - B_control) + lf + rf + lo + ro) + 1; 
@@ -137,7 +137,6 @@ xT_attend_inv(:,3) = -((-B - B_control) + lf + rf + lo + ro) + 1;
 
 % change zero to one for centered
 xT_attend_centered(xT_attend_centered == 0) = 1;
-xT_attend_inv = -xT_attend_centered;
 
 % relax B
 B(~B) = 1e-5;

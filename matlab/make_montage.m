@@ -42,3 +42,18 @@ for i = 1:numel(regions)
    idx = tmp_idx(:,1) & tmp_idx(:,2);
    save([mon_dir, regions{i}, '_idx.mat'], 'idx')
 end
+
+%% make border indicies
+
+fronto_parietal = [{'MEG0212+0213'}, {'MEG0222+0223'},  {'MEG0632+0633'}, {'MEG1122+1123'}, {'MEG1312+1313'}, {'MEG1322+1323'}, {'MEG1442+1443'},  {'MEG1422+1423'}];
+parieto_occipital = [{'MEG2042+2043'}, {'MEG2032+2033'}, {'MEG2312+2313'}, {'MEG2342+2343'}];
+midline_frontal = [{'MEG0812+0813'}, {'MEG0912+0913'}];
+
+idx = ismember(cmb_labels, fronto_parietal);
+save([mon_dir, 'Frontoparietal_idx.mat'], 'idx')
+
+idx = ismember(cmb_labels, parieto_occipital);
+save([mon_dir, 'Parietoccipital_idx.mat'], 'idx')
+
+idx = ismember(cmb_labels, midline_frontal);
+save([mon_dir, 'Frontal_idx.mat'], 'idx')

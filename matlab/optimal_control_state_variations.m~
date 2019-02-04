@@ -1,4 +1,4 @@
-%% Optimal control to attention pattern
+%% Optimal control to motor imagery and attention pattern
 
 addpath(genpath('/Users/stiso/Documents/MATLAB/npy-matlab-master/'))
 addpath('/Users/stiso/Documents/MATLAB/fieldtrip-20170830/')
@@ -40,26 +40,34 @@ nEdges = (nNode^2-nNode)/2;
 load([save_dir, 'noise_sg.mat']);
 
 % control parameters
-rho = [.01, 1];
-T = [.2, .07];
+rho = .1;
+T = 0.1;
 x0 = zeros(nNode,1);
-x0_cent = zeros(nNode,1) + 1;
-x0_321 = zeros(nNode,1) + 2;
+x0_ones = zeros(nNode,1) + 1;
 S = zeros(nNode,nNode,numel(bands));
 
 % tolerance for error
 tol = 1e-3;
 
 % initialize
-% first alternate parameter
-u_high3_1 = [];
-u_low_1 = [];
+% switch suppression and activation
+u_high3_mag = [];
+u_low_mag = [];
 band_order = {};
 subj_order = {};
 slope = [];
-% second alternate parameter
+%multiply by 2
 u_high3_2 = [];
 u_low_2 = [];
+% centered at 1
+u_high3_centered = [];
+u_low_centered = [];
+% 012
+u_high3_012 = [];
+u_low_012 = [];
+% inverted
+u_high3_inv = [];
+u_low_inv = [];
 error = [];
 
 
@@ -105,15 +113,31 @@ ro = idx;
 
 % alpha, suppression in left motor
 S(:,:,1) = eye(nNode); 
-xT_attend(:,1) = -(rp + lp);
+xT_attend_mag(:,1) = circshift(-(rp + lp),20);
+xT_attend2(:,1) = -(rp + lp).*2;
+xT_attend_centered(:,1) = -(rp + lp).*2;
+xT_attend_012(:,1) = -(rp + lp) + 2;
+xT_attend_inv(:,1) = (rp + lp) + 1;
 
 % beta - contralateral suppression, and ipsilateral activation
 S(:,:,2) = eye(nNode); 
-xT_attend_mag(:,2) = (-vert);
+xT_attend_mag(:,2) = circshift((-vert),20);
+xT_attend2(:,2) = (-vert).*2;
+xT_attend_centered(:,2) = (-vert).*2;
+xT_attend_012(:,2) = (-vert) + 2;
+xT_attend_inv(:,2) = (vert) + 1;
 
 % gamma - contralateral activation
 S(:,:,3) = eye(nNode);
-xT_attend(:,3) = (-B - B_control) + lf + rf + lo + ro;
+xT_attend_mag(:,3) = circshift((-B - B_control) + lf + rf + lo + ro,30);
+xT_attend2(:,3) = ((-B - B_control) + lf + rf + lo + ro).*2; 
+xT_attend_centered(:,3) = ((-B - B_control) + lf + rf + lo + ro).*2; 
+xT_attend_012(:,3) = ((-B - B_control) + lf + rf + lo + ro) + 2; 
+xT_attend_inv(:,3) = -((-B - B_control) + lf + rf + lo + ro) + 1; 
+
+% change zero to one for centered
+xT_attend_centered(xT_attend_centered == 0) = 1;
+xT_attend_inv = -xT_attend_centered;
 
 % relax B
 B(~B) = 1e-5;
@@ -178,22 +202,39 @@ for i = Subj
         
 
         % optim_fun(A, T, B, x0, xf, rho, S, error_tol)
-        % 3rd
-        [~, U_h3, ~] = get_opt_energy(high3_mat, T(1), diag(B), x0, xT_attend(:,k), rho(1), S(:,:,k), tol);
-        u_high3_1 = [u_high3_1; U_h3];
-        [~, U_h3, err] = get_opt_energy(high3_mat, T(2), diag(B), x0, xT_attend(:,k), rho(2), S(:,:,k), tol);
+        % high3
+        [~, U_h3, ~] = get_opt_energy(high3_mat, T, diag(B), x0, xT_attend_mag(:,k), rho, S(:,:,k), tol);
+        u_high3_mag = [u_high3_mag; U_h3];
+        [~, U_h3, ~] = get_opt_energy(high3_mat, T, diag(B), x0, xT_attend2(:,k), rho, S(:,:,k), tol);
         u_high3_2 = [u_high3_2; U_h3];
-
+        [~, U_h3, ~] = get_opt_energy(high3_mat, T, diag(B), x0_ones, xT_attend_centered(:,k), rho, S(:,:,k), tol);
+        u_high3_centered = [u_high3_centered; U_h3];
+        [~, U_h3, ~] = get_opt_energy(high3_mat, T, diag(B), x0_ones+1, xT_attend_012(:,k), rho, S(:,:,k), tol);
+        u_high3_012 = [u_high3_012; U_h3];
+        [~, U_h3, ~] = get_opt_energy(high3_mat, T, diag(B), x0_ones, xT_attend_inv(:,k), rho, S(:,:,k), tol);
+        u_high3_inv = [u_high3_inv; U_h3];
+        
         % low
-        [~, U_l, ~] = get_opt_energy(low_mat, T(1), diag(B), x0, xT_attend(:,k), rho(1), S(:,:,k), tol);
-        u_low_1 = [u_low_1; U_l];
-        [~, U_l, ~] = get_opt_energy(low_mat, T(2), diag(B), x0, xT_attend(:,k), rho(2), S(:,:,k), tol);
+        [~, U_l, ~] = get_opt_energy(low_mat, T, diag(B), x0, xT_attend_mag(:,k), rho, S(:,:,k), tol);
+        u_low_mag = [u_low_mag; U_l];
+        [~, U_l, ~] = get_opt_energy(low_mat, T, diag(B), x0, xT_attend2(:,k), rho, S(:,:,k), tol);
         u_low_2 = [u_low_2; U_l];
+        [~, U_l, ~] = get_opt_energy(low_mat, T, diag(B), x0_ones, xT_attend_centered(:,k), rho, S(:,:,k), tol);
+        u_low_centered = [u_low_centered; U_l];
+        [~, U_l, ~] = get_opt_energy(low_mat, T, diag(B), x0_ones +1, xT_attend_012(:,k), rho, S(:,:,k), tol);
+        u_low_012 = [u_low_012; U_l];
+        [~, U_l, ~] = get_opt_energy(low_mat, T, diag(B), x0_ones, xT_attend_inv(:,k), rho, S(:,:,k), tol);
+        u_low_inv = [u_low_inv; U_l];
+        
+        
+        % check that you are reaching your target state
+        state_idx = logical(diag(S(:,:,k)));
 
     end
 end
 
-save([R_dir, 'grad/opt_energy_params.mat'], 'band_order', 'subj_order', 'slope', 'u_high3_1', 'u_low_1', 'u_high3_2', 'u_low_2')
-save([save_dir, 'oc_error_params'], 'error');
+save([R_dir, 'grad/opt_energy_state.mat'], 'band_order', 'subj_order', 'slope', 'u_high3_mag', 'u_low_mag', 'u_high3_2', 'u_low_2', 'u_high3_012', 'u_low_012',...
+    'u_high3_centered', 'u_low_centered', 'u_high3_inv', 'u_low_inv')
+
 
 

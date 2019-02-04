@@ -11,6 +11,9 @@ data_dir = '/Users/stiso/Documents/Python/NetBCI/NMF/param/';
 save_dir = [top_dir, 'GroupAvg/wpli/analysis/'];
 img_dir = [top_dir, 'GroupAvg/wpli/images/'];
 
+regions = [{'Left_frontal'}, {'Left_occipital'}, {'Left_parietal'}, {'Left_temporal'}, ...
+    {'Right_frontal'}, {'Right_occipital'}, {'Right_parietal'}, {'Right_temporal'}, {'Vertex'}, {'Left_motor'}, {'Right_motor'}];
+
 subjs = [1:20];
 nSubj = numel(subjs);
 nNode = 102;
