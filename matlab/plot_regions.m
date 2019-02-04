@@ -7,13 +7,16 @@ img_dir = [top_dir, 'GroupAvg/wpli/images/'];
 
 cfg.layout = [top_dir, 'layouts/neuromag306cmb.lay'];
 regions = [{'Left_frontal'}, {'Left_occipital'}, {'Left_parietal'}, {'Left_temporal'}, ...
-    {'Right_frontal'}, {'Right_occipital'}, {'Right_parietal'}, {'Right_temporal'}, {'Vertex'}];
+    {'Right_frontal'}, {'Right_occipital'}, {'Right_parietal'}, {'Right_temporal'}, {'Vertex'}...
+    {'Frontoparietal'}, {'Parietoccipital'}, {'Frontal'}];
 nNode = 102;
+all_idx = zeros(1,nNode);
 
 %% Lobes
 
 for i = 1:numel(regions)
     load([top_dir, 'montages/', regions{i}, '_idx.mat'])
+    all_idx = all_idx + idx;
     plot_data.powspctrm = idx;
     plot_data.label = cmb_labels;
     plot_data.dimord = 'chan_freq';
@@ -89,3 +92,13 @@ plot_data.cfg = [];
 figure(2); clf
 ft_topoplotER(cfg,plot_data); colorbar
 saveas(gca, [img_dir, 'rm.png'], 'png')
+
+plot_data.powspctrm = all_idx;
+cfg.marker = "labels"
+plot_data.label = cmb_labels;
+plot_data.dimord = 'chan_freq';
+plot_data.freq = 1;
+plot_data.cfg = [];
+figure(2); clf
+ft_topoplotER(cfg,plot_data); colorbar
+saveas(gca, [img_dir, 'all_regions.png'], 'png')

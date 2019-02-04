@@ -164,13 +164,13 @@ for i = 1:numel(bands)
         
         % save stricter thresholding to report later
         [r,c] = find(c_high_avg > 9);
-        c_high_max{i,j} = [r,c];
+        c_high_max{i,j} = [r,c,c_high_avg(c_high_avg>9)];
         [r,c] = find(c_high2_avg > 9);
-        c_high2_max{i,j} = [r,c];
+        c_high2_max{i,j} = [r,c,c_high2_avg(c_high2_avg>9)];
         [r,c] = find(c_high3_avg > 9);
-        c_high3_max{i,j} = [r,c];
+        c_high3_max{i,j} = [r,c,c_high3_avg(c_high3_avg>9)];
         [r,c] = find(c_low_avg > 9);
-        c_low_max{i,j} = [r,c];
+        c_low_max{i,j} = [r,c,c_low_avg(c_low_avg>9)];
         
         % cluster
         [ci_high,q_high] = community_louvain(c_high_avg,1);
