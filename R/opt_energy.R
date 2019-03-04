@@ -179,8 +179,8 @@ gamma_a
 
 # corr with slope
 scatterplot = ggplot(data_beta_a, aes(x = diffa3, y = slope)) 
-scatterplot+ geom_smooth(method="lm") + geom_point(size = 6) + labs(x = 'log(low)-log(high)', y = 'slope') +
-  theme_minimal() #+ scale_color_manual(values =  wes_palette("Moonrise1",4))
+scatterplot+ geom_smooth(method="lm", color = rgb(81/255,184/255,161/255)) + geom_point(size = 6, color = rgb(81/255,184/255,161/255)) + labs(x = 'log(low)-log(high)', y = 'slope') +
+  theme_minimal() + scale_color_manual(values =  rgb(81/255,184/255,161/255))
 ggsave('slope_diff_a.png')
 
 scatterplot = ggplot(data_beta_a, aes(x = diff2a3, y = slope)) 
@@ -362,7 +362,7 @@ ggsave(paste(sens, '_opt_u_gamma_pr', '.png', sep = ''))
 ## Relationship to slope
 
 scatterplot = ggplot(data_beta_pr, aes(x = diff3, y = slope)) 
-scatterplot+ geom_smooth(method="lm") + geom_point(size = 6) + labs(x = 'log(low)-log(high)', y = 'slope') +
+scatterplot+ geom_smooth(method="lm", color = "black") + geom_point(size = 6, color ="grey") + labs(x = 'log(low)-log(high)', y = 'slope') +
   theme_minimal() #+ scale_color_manual(values =  wes_palette("Moonrise1",4))
 ggsave('slope_opt_u_pr.png')
 
