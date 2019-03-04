@@ -41,9 +41,9 @@ data$sess_cont[data$session == "Sess3"] = 3
 data$sess_cont[data$session == "Sess4"] = 4
 data$sess_cont = as.numeric(data$sess_cont)
 
-data_avg = summarise(group_by(data,subj,session), mean = mean(score), n = n())
+data_avg = dplyr::summarise(group_by(data,subj,session), mean = mean(score), n = n())
 
-plot = ggplot(data, aes(x = session, y = score, fill = test) )
+plot = ggplot(data, aes(x = session, y = score, fill = session, color = test) )
 plot + 
   geom_violin(, trim = TRUE, position = position_dodge(0.75)) + 
   geom_boxplot(width = 0.15,
@@ -53,37 +53,32 @@ plot +
   geom_dotplot(binaxis='y', stackdir='center', dotsize=.2, width = 0.15,
                position = position_dodge(0.75)) +
   #scale_fill_manual(values = wes_palette("Royal2",4)) + 
-  scale_fill_manual(values = brewer.pal(6, "Pastel1")) + 
+  scale_fill_manual(values = brewer.pal(4, "Greys")) + 
   #scale_fill_manual(values = c(rgb(137/255,157/255,164/255), rgb(247/255,251/255,254/255), rgb(149/255,192/255,76/255), rgb(63/255,67/255,71/255) )) +
   #scale_fill_viridis(alpha = .5) +
-  #scale_color_manual(values = rep("black", times = 6)) + 
+  scale_color_manual(values = rep("black", times = 6)) + 
   labs(x = 'Time', y = 'BCI Score')  + theme_minimal()
-ggsave('behavior2.pdf')
+ggsave('behavior.pdf')
 
-
-plot = ggplot(data, aes(x = session, y = avg_score, fill = as.factor(sess_cont)) )
+avg_data = filter(data, test == 1)
+plot = ggplot(avg_data, aes(x = session, y = avg_score, fill = as.factor(sess_cont)) )
 plot + 
-  geom_violin(, trim = TRUE, position = position_dodge(0.75)) + 
+  geom_violin( trim = TRUE, position = position_dodge(0.75)) + 
   geom_boxplot(width = 0.15,
                position = position_dodge(0.75)
   ) +
   geom_line(aes(group = subj), alpha = 0.2) +
-  geom_dotplot(binaxis='y', stackdir='center', dotsize=.2, width = 0.15,
+  geom_dotplot(binaxis='y', stackdir='center', dotsize=.5, width = 0.15,
                position = position_dodge(0.75)) +
   #scale_fill_manual(values = wes_palette("Royal2",4)) + 
-  #scale_fill_manual(values = brewer.pal(4, "Pastel1")) + 
-  scale_fill_manual(values = c(rgb(149/255,192/255,76/255), rgb(247/255,251/255,254/255), rgb(137/255,157/255,164/255), rgb(53/255,57/255,61/255) )) +
+  scale_fill_manual(values = brewer.pal(4, "Greys")) + 
+  #scale_fill_manual(values = c(rgb(149/255,192/255,76/255), rgb(247/255,251/255,254/255), rgb(137/255,157/255,164/255), rgb(53/255,57/255,61/255) )) +
   #scale_fill_viridis(alpha=1/2) +
   scale_color_manual(values = rep("grey", times = 6)) + 
   labs(x = 'Time', y = 'BCI Score')  + theme_minimal()
 ggsave('behavior_avg.pdf')
 
 # Stats
-fit = with(data, aov(score ~ session * test + Error(subj)))
-anova(fit)
+fit = with(data_avg, aov(mean ~ session + Error(as.factor(subj))))
 summary(fit)
-
-fit_avg = lm(mean ~ session, data_avg)
-anova(fit_avg)
-summary(fit_avg)
 

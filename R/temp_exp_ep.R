@@ -66,6 +66,16 @@ plot + geom_violin(aes(fill = band), trim = FALSE, position = position_dodge(0.7
   labs(x = 'Loading', y = 'Peak')  + theme_minimal()
 ggsave(paste(sens, '_peak.pdf', sep = ''))
 
+data2 = mutate(data2, label = paste(data2$band,data2$cond))
+plot = ggplot(data2, aes(x = p, y = label, color = band) )
+plot + geom_point( color = "black",size=6) + 
+  geom_point(size=5) + 
+  #geom_dotplot(binaxis='y', stackdir=, 'center', dotsize=.5)
+  scale_color_manual(values = wes_palette("Royal1",3)) + 
+  #scale_fill_manual(values = "black") + 
+  labs(x = 'Loading', y = 'Peak')  + theme_minimal()
+ggsave(paste(sens, '_peak3.svg', sep = ''))
+
 
 
 
@@ -100,9 +110,18 @@ anova(fit_p)
 fit_e = lm(e~cond+band, data2)
 anova(fit_e)
 
+# corr with slope
+beta_corr = cor.test((filter(data, band == 'beta')$high3_p),(filter(data, band == 'beta')$slope))
+beta_corr
+
+alpha_corr = cor.test((filter(data, band == 'alpha')$high3_p),(filter(data, band == 'alpha')$slope))
+alpha_corr
+
+gamma_corr = cor.test((filter(data, band == 'low_gamma')$high3_p),(filter(data, band == 'low_gamma')$slope))
+gamma_corr
 
 # ttest
-beta_peak = t.test(log(filter(data, band == 'beta')$high2_p),log(filter(data, band == 'beta')$high3_p), paired=TRUE)
+beta_peak = t.test((filter(data, band == 'beta')$high2_p),log(filter(data, band == 'beta')$high3_p), paired=TRUE)
 beta_peak
 
 alpha_peak = t.test(log(filter(data, band == 'alpha')$high2_p),log(filter(data, band == 'alpha')$high3_p), paired=TRUE)
