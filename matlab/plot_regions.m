@@ -8,9 +8,11 @@ img_dir = [top_dir, 'GroupAvg/wpli/images/'];
 cfg.layout = [top_dir, 'layouts/neuromag306cmb.lay'];
 regions = [{'Left_frontal'}, {'Left_occipital'}, {'Left_parietal'}, {'Left_temporal'}, ...
     {'Right_frontal'}, {'Right_occipital'}, {'Right_parietal'}, {'Right_temporal'}, {'Vertex'}...
-    {'Frontoparietal'}, {'Parietoccipital'}, {'Frontal'}];
+    {'Frontoparietal'}, {'Parietoccipital'}, {'Frontal'},{'Left_motor'}, {'Right_motor'}];
 nNode = 102;
 all_idx = zeros(1,nNode);
+bands = [{'alpha'}, {'beta'}, {'low_gamma'}];
+
 
 %% Lobes
 
@@ -94,7 +96,7 @@ ft_topoplotER(cfg,plot_data); colorbar
 saveas(gca, [img_dir, 'rm.png'], 'png')
 
 plot_data.powspctrm = all_idx;
-cfg.marker = "labels"
+%cfg.marker = "labels"
 plot_data.label = cmb_labels;
 plot_data.dimord = 'chan_freq';
 plot_data.freq = 1;
@@ -102,3 +104,64 @@ plot_data.cfg = [];
 figure(2); clf
 ft_topoplotER(cfg,plot_data); colorbar
 saveas(gca, [img_dir, 'all_regions.png'], 'png')
+
+%% Plot target states
+
+load([top_dir, 'montages/Left_motor_idx.mat'])
+B = idx;
+
+% right motor seems like a stricter control
+load([top_dir, 'montages/Right_motor_idx.mat'])
+B_control = idx;
+
+% Make target states
+% make sure these are in the order of bands
+load([top_dir, 'montages/Left_parietal_idx.mat'])
+lp = idx;
+load([top_dir, 'montages/Right_parietal_idx.mat'])
+rp = idx;
+load([top_dir, 'montages/Vertex_idx.mat'])
+vert = idx;
+load([top_dir, 'montages/Left_frontal_idx.mat'])
+lf = idx;
+load([top_dir, 'montages/Right_frontal_idx.mat'])
+rf = idx;
+load([top_dir, 'montages/Left_occipital_idx.mat'])
+lo = idx;
+load([top_dir, 'montages/Right_occipital_idx.mat'])
+ro = idx;
+
+% alpha, suppression in left motor
+xT(:,1) = -B;
+S(:,:,1) = eye(nNode); %diag((xT(:,1) ~= 0));
+xT_attend(:,1) = -(rp + lp); % suppression in parietal
+xT_attend2(:,1) = -(rp + lp).*2 + 1;
+
+% beta - contralateral suppression, and ipsilateral activation
+xT(:,2) = -B + B_control;
+S(:,:,2) = eye(nNode); %diag((xT(:,2) ~= 0));
+xT_attend(:,2) = -vert; % suppression in midline
+xT_attend2(:,2) = (-vert).*2 + 1;
+
+% gamma - contralateral activation
+xT(:,3) = B;
+S(:,:,3) = eye(nNode); %diag((xT(:,2) ~= 0));
+xT_attend(:,3) = (-B - B_control) + lf + rf + lo + ro;
+
+for i = 1:numel(bands)
+    plot_data.powspctrm = xT(:,i);
+    plot_data.label = cmb_labels;
+    plot_data.dimord = 'chan_freq';
+    plot_data.freq = 1;
+    plot_data.cfg = [];
+    figure(2); clf
+    ft_topoplotER(cfg,plot_data); colorbar
+    caxis([-1,1])
+    saveas(gca, [img_dir, bands{i}, '_motor.png'], 'png')
+    
+    plot_data.powspctrm = xT_attend(:,i);
+    figure(1); clf
+    ft_topoplotER(cfg,plot_data); colorbar
+    caxis([-1,1])
+    saveas(gca, [img_dir, bands{i}, '_attend.png'], 'png')
+end

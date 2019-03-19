@@ -49,3 +49,4 @@ band = categorical(band'); model = categorical(model'); cond = categorical(cond'
 X = table(data',band,model,cond);
 fit = fitlm(X, 'Var1~band+model+cond')
 anova(fit)
+

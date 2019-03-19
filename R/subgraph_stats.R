@@ -218,7 +218,7 @@ ggsave(paste(sens, '_gamma_str_sub', '.png', sep = ''))
 
 
 
-# Relationship between regional expression and BC
+# Relationship between regional expression and learning
 scatterplot = ggplot(data, aes(x = lf, y = slope, color = band, group = band))
 scatterplot + geom_point(size = 6) + labs(x = 'Strength', y = 'Slope') + 
   geom_smooth(method="lm") + theme_minimal() + scale_color_manual(values =  wes_palette("Royal1",4))
@@ -248,6 +248,17 @@ scatterplot = ggplot(data, aes(x = rm, y = slope, color = band, group = band))
 scatterplot + geom_point(size = 6) + labs(x = 'Strength', y = 'Slope') + 
   geom_smooth(method="lm") + theme_minimal() + scale_color_manual(values =  wes_palette("Royal1",4))
 ggsave('lf_bc.png')
+
+## corr
+
+corr_beta = cor.test((filter(data, band == 'beta', cond == "high3")$lf),filter(data, band == 'beta', cond == "high3")$slope)
+corr_beta
+
+corr_alpha = cor.test((filter(data, band == 'alpha', cond == "high3")$lf),filter(data, band == 'alpha', cond == "high3")$slope)
+corr_alpha
+
+corr_gamma = cor.test((filter(data, band == 'low_gamma', cond == "high3")$lf),filter(data, band == 'low_gamma', cond == "high3")$slope)
+corr_gamma
 
 
 #scatterplot = ggplot(filter(data, cond == 'high'), aes(x = lf_bw, y = slope, color = band))
