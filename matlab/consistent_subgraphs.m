@@ -156,6 +156,11 @@ for i = 1:numel(bands)
         max_high3(j,i) = max(max(c_high3_avg)); 
         max_low(j,i) = max(max(c_low_avg)); 
         
+        % save consistent mats for strictest thresh
+        if j == 3
+            save([save_dir, 'consistent_mats_', bands{i}, '.mat'], 'c_high_avg', 'c_high2_avg', 'c_high3_avg', 'c_low_avg')
+        end
+        
         % add some additional thresholding
         c_high_avg(c_high_avg <= 5) = 0;
         c_high2_avg(c_high2_avg <= 5) = 0;

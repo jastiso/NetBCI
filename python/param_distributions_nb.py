@@ -1,3 +1,11 @@
+#!/usr/bin/env python2
+# -*- coding: utf-8 -*-
+"""
+Created on Fri Jul 20 10:15:12 2018
+
+@author: stiso
+"""
+
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 """
@@ -31,9 +39,9 @@ for e in sens:
     for s in subjs:
         for b in bands: 
             # Load
-            my_file = Path("".join([top_dir, s, '/', e, '/gc_', b ,'_params.npy']))
+            my_file = Path("".join([top_dir, s, '/', e, '/nb_gc_', b ,'_params.npy']))
             if my_file.is_file():
-                params = np.load("".join([top_dir, s, '/', e, '/gc_', b ,'_params.npy'])).item()
+                params = np.load("".join([top_dir, s, '/', e, '/nb_gc_', b ,'_params.npy'])).item()
                 print(params['alpha']) 
                 alphas.append(params["alpha"])
                 print(params['beta'])
@@ -66,7 +74,7 @@ for e in sens:
     n, bins, patches = plt.hist(alphas, num_bins, normed=1, facecolor='green', alpha=0.5)
     plt.xlabel('alpha')
     plt.ylabel('Frequency')
-    fig.savefig("".join(['/Users/stiso/Documents/Python/NetBCI/NMF/gc/', e, 'alpha_hist.png']))
+    fig.savefig("".join(['/Users/stiso/Documents/Python/NetBCI/NMF/gc/', e, 'alpha_hist_nb.png']))
 
     fig = plt.figure()
 
@@ -75,7 +83,7 @@ for e in sens:
     n, bins, patches = plt.hist(betas, num_bins, normed=1, facecolor='blue', alpha=0.5)
     plt.xlabel('beta')
     plt.ylabel('Frequency')
-    fig.savefig("".join(['/Users/stiso/Documents/Python/NetBCI/NMF/gc/', e, 'beta_hist.png']))
+    fig.savefig("".join(['/Users/stiso/Documents/Python/NetBCI/NMF/gc/', e, 'beta_hist_nb.png']))
 
     fig = plt.figure()
 
@@ -84,7 +92,7 @@ for e in sens:
     n, bins, patches = plt.hist(ranks, num_bins, normed=1, facecolor='purple', alpha=0.5)
     plt.xlabel('rank')
     plt.ylabel('Frequency')
-    fig.savefig("".join(['/Users/stiso/Documents/Python/NetBCI/NMF/gc/', e, 'rank_hist.png']))
+    fig.savefig("".join(['/Users/stiso/Documents/Python/NetBCI/NMF/gc/', e, 'rank_hist_nb.png']))
 
     # Plot baseline
                     
