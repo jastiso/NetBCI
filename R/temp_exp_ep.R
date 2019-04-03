@@ -66,14 +66,13 @@ plot + geom_violin(aes(fill = band), trim = FALSE, position = position_dodge(0.7
   labs(x = 'Loading', y = 'Peak')  + theme_minimal()
 ggsave(paste(sens, '_peak.pdf', sep = ''))
 
-data2 = mutate(data2, label = paste(data2$band,data2$cond))
-plot = ggplot(data2, aes(x = p, y = label, color = band) )
-plot + geom_point( color = "black",size=6) + 
-  geom_point(size=5) + 
+data2 = mutate(data2, label = paste(data2$cond, data2$band))
+plot = ggplot(data2, aes(x = label, y = p, fill = band) )
+plot + geom_violin(alpha = 1, draw_quantiles = 0.5) + geom_point(size=2) + 
   #geom_dotplot(binaxis='y', stackdir=, 'center', dotsize=.5)
-  scale_color_manual(values = wes_palette("Royal1",3)) + 
+  scale_fill_manual(values = wes_palette("Royal1",3)) + 
   #scale_fill_manual(values = "black") + 
-  labs(x = 'Loading', y = 'Peak')  + theme_minimal()
+  labs(x = 'Loading', y = 'Peak')  + theme_minimal() + coord_flip()
 ggsave(paste(sens, '_peak3.svg', sep = ''))
 
 
