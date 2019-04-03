@@ -110,6 +110,10 @@ load([top_dir, 'montages/Left_occipital_idx.mat'])
 lo = idx;
 load([top_dir, 'montages/Right_occipital_idx.mat'])
 ro = idx;
+load([top_dir, 'montages/Left_temporal_idx.mat'])
+lt = idx;
+load([top_dir, 'montages/Right_temporal_idx.mat'])
+rt = idx;
 
 % alpha, suppression in left motor
 S(:,:,1) = eye(nNode); 
@@ -121,7 +125,11 @@ xT_attend_inv(:,1) = (rp + lp) + 1;
 
 % beta - contralateral suppression, and ipsilateral activation
 S(:,:,2) = eye(nNode); 
-xT_attend_mag(:,2) = circshift((-vert),30);
+%xT_attend_mag(:,2) = circshift((-vert),30);
+tmp = find(-rt == -1);
+tmp = tmp(1);
+xT_attend_mag(:,2) = -rt;%circshift((-vert),15);
+xT_attend_mag(tmp,2) = 0;
 xT_attend2(:,2) = (-vert).*2;
 xT_attend_centered(:,2) = (-vert).*2;
 xT_attend_012(:,2) = (-vert) + 1;

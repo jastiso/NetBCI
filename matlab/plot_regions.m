@@ -165,3 +165,49 @@ for i = 1:numel(bands)
     caxis([-1,1])
     saveas(gca, [img_dir, bands{i}, '_attend.png'], 'png')
 end
+
+
+%% Shifted state
+% make sure these are in the order of bands
+load([top_dir, 'montages/Left_parietal_idx.mat'])
+lp = idx;
+load([top_dir, 'montages/Right_parietal_idx.mat'])
+rp = idx;
+load([top_dir, 'montages/Vertex_idx.mat'])
+vert = idx;
+load([top_dir, 'montages/Left_frontal_idx.mat'])
+lf = idx;
+load([top_dir, 'montages/Right_frontal_idx.mat'])
+rf = idx;
+load([top_dir, 'montages/Left_occipital_idx.mat'])
+lo = idx;
+load([top_dir, 'montages/Right_occipital_idx.mat'])
+ro = idx;
+load([top_dir, 'montages/Left_temporal_idx.mat'])
+lt = idx;
+load([top_dir, 'montages/Right_temporal_idx.mat'])
+rt = idx;
+
+% alpha, suppression in left motor
+xT_attend_mag(:,1) = circshift(-(rp + lp),30);
+
+% beta - contralateral suppression, and ipsilateral activation
+% get to be same size - 8
+tmp = find(-rt == -1);
+tmp = tmp(1);
+xT_attend_mag(:,2) = -rt;%circshift((-vert),15);
+xT_attend_mag(tmp,2) = 0;
+
+% gamma - contralateral activation
+%xT_attend_mag(:,3) = circshift((-B - B_control) + lf + rf + lo + ro,30);
+
+plot_data.powspctrm = xT_attend_mag(:,2); % only need beta
+plot_data.label = cmb_labels;
+plot_data.dimord = 'chan_freq';
+plot_data.freq = 1;
+plot_data.cfg = [];
+figure(1); clf
+ft_topoplotER(cfg,plot_data); colorbar
+caxis([-1,1])
+saveas(gca, [img_dir, 'beta_mag.png'], 'png')
+
