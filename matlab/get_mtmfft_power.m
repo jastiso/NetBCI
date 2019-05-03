@@ -1,4 +1,4 @@
-function [ pow ] = get_wavelet_power( data, srate, st, en, freqs,t)
+function [ pow ] = get_mtmfft_power( data, srate, st, en, freqs,t)
 %% Get power
 
 % getting power, using mtmfft
@@ -26,8 +26,8 @@ cfg.pad        = 'nextpow2';
 cfg.trials     = t;
 wave = ft_freqanalysis(cfg, data);
 
-% avg
-pow = squeeze(mean(wave.powspctrm,2));
+% avg, and log transform
+pow = squeeze(mean(log(wave.powspctrm),2));
 
 end
 

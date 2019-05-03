@@ -149,13 +149,12 @@ for k = subjs
     
     for f = 1:numel(bands)
         for i = 1:numel(sessions)
-            states{f}(:,(sess_order == i)) = zscore(states{f}(:,(sess_order == i)),0,2);
+            states{f}((:,(sess_order == i) = zscore(states{f(:,(sess_order == i))},0,2);
         end
         figure(f+1); clf
         imagesc(states{f}); colorbar;
-        %caxis([-3,5]); 
-        title(bands{f});
+        %caxis([-3,5]); title(bands{f});
         saveas(gca, [img_dir, bands{f}, '_wpli_pow.png'], 'png')
     end
-    save([save_dir, ext, '_states.mat'], 'states')
+    save([save_dir, 'states.mat'], 'states')
 end
