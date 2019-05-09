@@ -452,3 +452,34 @@ corr_beta_2
 
 
 
+
+###################
+# Normality Tests
+####################
+
+par(mfrow=c(1,3))
+qqPlot(unique(filter(data, band == 'alpha')$diff3))
+qqPlot(unique(filter(data, band == 'beta')$diff3))
+qqPlot(unique(filter(data, band == 'low_gamma')$diff3))
+
+par(mfrow=c(1,3))
+qqPlot(unique(filter(data, band == 'alpha')$diffa3))
+qqPlot(unique(filter(data, band == 'beta')$diffa3))
+qqPlot(unique(filter(data, band == 'low_gamma')$diffa3))
+
+par(mfrow=c(2,2))
+qqPlot(unique(filter(data, band == 'alpha')$diffa23))
+qqPlot(unique(filter(data, band == 'beta')$diffa13))
+qqPlot(unique(filter(data, band == 'low_gamma')$high3_a))
+qqPlot(unique(filter(data, band == 'low_gamma')$low_a))
+
+
+par(mfrow=c(2,3))
+qqPlot(unique(filter(data_state, band == 'alpha')$diff_mag))
+qqPlot(unique(filter(data_state, band == 'alpha')$diff_2))
+qqPlot(unique(filter(data_state, band == 'alpha')$diff_cent))
+qqPlot(unique(filter(data_state, band == 'alpha')$diff_012))
+qqPlot(unique(filter(data_state, band == 'alpha')$diff_inv))
+
+
+

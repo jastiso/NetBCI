@@ -44,9 +44,13 @@ cond = [repmat({'high'},1,3), repmat({'high2'},1,3), repmat({'high3'},1,3), repm
 band = repmat([{'alpha'}, {'beta'}, {'low_gamma'}], 1,8);
 model = [repmat({'emp'}, 1,12), repmat({'upr'}, 1,12)];
 
+save('/Users/stiso/Documents/R/NetBCI/data/wpli/consistency.mat', 'data', 'cond', 'band', 'model');
+
+
 clear X
 band = categorical(band'); model = categorical(model'); cond = categorical(cond');
 X = table(data',band,model,cond);
 fit = fitlm(X, 'Var1~band+model+cond')
 anova(fit)
+
 

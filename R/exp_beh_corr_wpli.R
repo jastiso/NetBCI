@@ -107,69 +107,69 @@ ggsave(paste('min_bc_corr.pdf', sep = ''))
 
 # stats
 # mean
-fit1 = lm(slope ~ sum + band, data=  corr_data)
+fit1 = lmp(slope ~ sum + band, data=  corr_data)
 summary(fit1)
 Anova(fit1)
 
 stats$b_val[1] = fit1$coefficients[2]
-stats$p_val[1] = summary(fit1)$coefficients[2,4]
+stats$p_val[1] = summary(fit1)$coefficients[2,3]
 
 # sd
-fit2 = lm(slope ~ sd + band, data=  corr_data)
+fit2 = lmp(slope ~ sd + band, data=  corr_data)
 summary(fit2)
 Anova(fit2)
 
 stats$b_val[2] = fit2$coefficients[2]
-stats$p_val[2] = summary(fit2)$coefficients[2,4]
+stats$p_val[2] = summary(fit2)$coefficients[2,3]
 
 # max
-fit3 = lm(slope ~ max + band, data=  corr_data)
+fit3 = lmp(slope ~ max + band, data=  corr_data)
 summary(fit3)
 Anova(fit3)
 
 stats$b_val[3] = fit3$coefficients[2]
-stats$p_val[3] = summary(fit3)$coefficients[2,4]
+stats$p_val[3] = summary(fit3)$coefficients[2,3]
 
 # second max
-fit4 = lm(slope ~ max2 + band, data=  corr_data)
+fit4 = lmp(slope ~ max2 + band, data=  corr_data)
 summary(fit4)
 Anova(fit4)
 
 stats$b_val[4] = fit4$coefficients[2]
-stats$p_val[4] = summary(fit4)$coefficients[2,4]
+stats$p_val[4] = summary(fit4)$coefficients[2,3]
 
 # third max
-fit5 = lm(slope ~ max3 + band, data=  corr_data)
+fit5 = lmp(slope ~ max3 + band, data=  corr_data)
 summary(fit5)
 Anova(fit5)
 
 stats$b_val[5] = fit5$coefficients[2]
-stats$p_val[5] = summary(fit5)$coefficients[2,4]
+stats$p_val[5] = summary(fit5)$coefficients[2,3]
 
 # 4th max
-fit6 = lm(slope ~ max4 + band, data=  corr_data)
+fit6 = lmp(slope ~ max4 + band, data=  corr_data)
 summary(fit6)
 Anova(fit6)
 
 stats$b_val[6] = fit6$coefficients[2]
-stats$p_val[6] = summary(fit6)$coefficients[2,4]
+stats$p_val[6] = summary(fit6)$coefficients[2,3]
 
 
 # min
-fit7 = lm(slope ~ min + band, data=  corr_data)
+fit7 = lmp(slope ~ min + band, data=  corr_data)
 summary(fit7)
 Anova(fit7)
 
 stats$b_val[7] = fit7$coefficients[2]
-stats$p_val[7] = summary(fit7)$coefficients[2,4]
+stats$p_val[7] = summary(fit7)$coefficients[2,3]
 
 # 2nd min
-fit8 = lm(slope ~ min2 + band, data=  corr_data)
+fit8 = lmp(slope ~ min2 + band, data=  corr_data)
 summary(fit8)
 Anova(fit8)
 
 stats$b_val[8] = fit8$coefficients[2]
-stats$p_val[8] = summary(fit8)$coefficients[2,4]
+stats$p_val[8] = summary(fit8)$coefficients[2,3]
 
 
 
@@ -246,68 +246,68 @@ ggsave(paste('min_bc_corr_pr.pdf', sep = ''))
 
 # stats
 # mean
-fit9 = lm(slope ~ sum + band, data=  corr_data_pr)
+fit9 = lmp(slope ~ sum + band, data=  corr_data_pr)
 summary(fit9)
 Anova(fit9)
 
 stats$b_val[9] = fit9$coefficients[2]
-stats$p_val[9] = summary(fit9)$coefficients[2,4]
+stats$p_val[9] = summary(fit9)$coefficients[2,3]
 
 # sd
-fit10 = lm(slope ~ sd + band, data=  corr_data_pr)
+fit10 = lmp(slope ~ sd + band, data=  corr_data_pr)
 summary(fit10)
 Anova(fit10)
 
 stats$b_val[10] = fit10$coefficients[2]
-stats$p_val[10] = summary(fit10)$coefficients[2,4]
+stats$p_val[10] = summary(fit10)$coefficients[2,3]
 
 #  max
-fit11 = lm(slope ~ max + band, data=  corr_data_pr)
+fit11 = lmp(slope ~ max + band, data=  corr_data_pr)
 summary(fit11)
 Anova(fit11)
 
 stats$b_val[11] = fit11$coefficients[2]
-stats$p_val[11] = summary(fit11)$coefficients[2,4]
+stats$p_val[11] = summary(fit11)$coefficients[2,3]
 
 # 2nd max
-fit12 = lm(slope ~ max2 + band, data=  corr_data_pr)
+fit12 = lmp(slope ~ max2 + band, data=  corr_data_pr)
 summary(fit12)
 Anova(fit12)
 
 stats$b_val[12] = fit12$coefficients[2]
-stats$p_val[12] = summary(fit12)$coefficients[2,4]
+stats$p_val[12] = summary(fit12)$coefficients[2,3]
 
 # third
-fit13 = lm(slope ~ max3 + band, data=  corr_data_pr)
+fit13 = lmp(slope ~ max3 + band, data=  corr_data_pr)
 summary(fit13)
 Anova(fit13)
 
 stats$b_val[13] = fit13$coefficients[2]
-stats$p_val[13] = summary(fit13)$coefficients[2,4]
+stats$p_val[13] = summary(fit13)$coefficients[2,3]
 
 # fourth
-fit14 = lm(slope ~ max4 + band, data=  corr_data_pr)
+fit14 = lmp(slope ~ max4 + band, data=  corr_data_pr)
 summary(fit14)
 Anova(fit14)
 
 stats$b_val[14] = fit14$coefficients[2]
-stats$p_val[14] = summary(fit14)$coefficients[2,4]
+stats$p_val[14] = summary(fit14)$coefficients[2,3]
 
 # min
-fit15 = lm(slope ~ min + band, data=  corr_data_pr)
+fit15 = lmp(slope ~ min + band, data=  corr_data_pr)
 summary(fit15)
 Anova(fit15)
 
 stats$b_val[15] = fit15$coefficients[2]
-stats$p_val[15] = summary(fit15)$coefficients[2,4]
+stats$p_val[15] = summary(fit15)$coefficients[2,3]
 
 # min2
-fit16 = lm(slope ~ min2 + band, data=  corr_data_pr)
+fit16 = lmp(slope ~ min2 + band, data=  corr_data_pr)
 summary(fit16)
 Anova(fit16)
 
 stats$b_val[16] = fit16$coefficients[2]
-stats$p_val[16] = summary(fit16)$coefficients[2,4]
+stats$p_val[16] = summary(fit16)$coefficients[2,3]
 
 
 
@@ -352,101 +352,101 @@ boot_stats = data.frame(p_val = rep(0, times = 16*nBoot), b_val = rep(0, times =
 cnt = 1
 for (i in 1:nBoot){
   #mean
-  curr_mean = lm(slope ~ sum + band, data=  bootdata[[i]])
+  curr_mean = lmp(slope ~ sum + band, data=  bootdata[[i]])
   boot_stats$b_val[cnt] = summary(curr_mean)$coefficients[2]
-  boot_stats$p_val[cnt] = summary(curr_mean)$coefficients[2,4]
+  boot_stats$p_val[cnt] = summary(curr_mean)$coefficients[2,3]
   cnt = cnt + 1
   
   #sd
-  curr_sd = lm(slope ~ sd + band, data=  bootdata[[i]])
+  curr_sd = lmp(slope ~ sd + band, data=  bootdata[[i]])
   boot_stats$b_val[cnt] = (curr_sd)$coefficients[2]
-  boot_stats$p_val[cnt] = summary(curr_sd)$coefficients[2,4]
+  boot_stats$p_val[cnt] = summary(curr_sd)$coefficients[2,3]
   cnt = cnt + 1
   
   #1
-  curr_1 = lm(slope ~ max + band, data=  bootdata[[i]])
+  curr_1 = lmp(slope ~ max + band, data=  bootdata[[i]])
   boot_stats$b_val[cnt] = (curr_1)$coefficients[2]
-  boot_stats$p_val[cnt] = summary(curr_1)$coefficients[2,4]
+  boot_stats$p_val[cnt] = summary(curr_1)$coefficients[2,3]
   cnt = cnt + 1
   
   #2
-  curr_2 = lm(slope ~ max2 + band, data=  bootdata[[i]])
+  curr_2 = lmp(slope ~ max2 + band, data=  bootdata[[i]])
   boot_stats$b_val[cnt] = (curr_2)$coefficients[2]
-  boot_stats$p_val[cnt] = summary(curr_2)$coefficients[2,4]
+  boot_stats$p_val[cnt] = summary(curr_2)$coefficients[2,3]
   cnt = cnt + 1
   
   #3
-  curr_3 = lm(slope ~ max3 + band, data=  bootdata[[i]])
+  curr_3 = lmp(slope ~ max3 + band, data=  bootdata[[i]])
   boot_stats$b_val[cnt] = (curr_3)$coefficients[2]
-  boot_stats$p_val[cnt] = summary(curr_3)$coefficients[2,4]
+  boot_stats$p_val[cnt] = summary(curr_3)$coefficients[2,3]
   cnt = cnt + 1
   
   #4
-  curr_4 = lm(slope ~ max4 + band, data=  bootdata[[i]])
+  curr_4 = lmp(slope ~ max4 + band, data=  bootdata[[i]])
   boot_stats$b_val[cnt] = (curr_4)$coefficients[2]
-  boot_stats$p_val[cnt] = summary(curr_4)$coefficients[2,4]
+  boot_stats$p_val[cnt] = summary(curr_4)$coefficients[2,3]
   cnt = cnt + 1
   
   #low
-  curr_min = lm(slope ~ min + band, data=  bootdata[[i]])
+  curr_min = lmp(slope ~ min + band, data=  bootdata[[i]])
   boot_stats$b_val[cnt] = (curr_min)$coefficients[2]
-  boot_stats$p_val[cnt] = summary(curr_min)$coefficients[2,4]
+  boot_stats$p_val[cnt] = summary(curr_min)$coefficients[2,3]
   cnt = cnt + 1
   
   #l2
-  curr_min2 = lm(slope ~ min2 + band, data=  bootdata[[i]])
+  curr_min2 = lmp(slope ~ min2 + band, data=  bootdata[[i]])
   boot_stats$b_val[cnt] = (curr_min2)$coefficients[2]
-  boot_stats$p_val[cnt] = summary(curr_min2)$coefficients[2,4]
+  boot_stats$p_val[cnt] = summary(curr_min2)$coefficients[2,3]
   cnt = cnt + 1
 }
 # for for null data
 for (i in 1:nBoot){
   #mean
-  curr_mean = lm(slope ~ sum + band, data=  bootdata_upr[[i]])
+  curr_mean = lmp(slope ~ sum + band, data=  bootdata_upr[[i]])
   boot_stats$b_val[cnt] = (curr_mean)$coefficients[2]
-  boot_stats$p_val[cnt] = summary(curr_mean)$coefficients[2,4]
+  boot_stats$p_val[cnt] = summary(curr_mean)$coefficients[2,3]
   cnt = cnt + 1
   
   #sd
-  curr_sd = lm(slope ~ sd + band, data=  bootdata_upr[[i]])
+  curr_sd = lmp(slope ~ sd + band, data=  bootdata_upr[[i]])
   boot_stats$b_val[cnt] = (curr_sd)$coefficients[2]
-  boot_stats$p_val[cnt] = summary(curr_sd)$coefficients[2,4]
+  boot_stats$p_val[cnt] = summary(curr_sd)$coefficients[2,3]
   cnt = cnt + 1
   
   #1
-  curr_1 = lm(slope ~ max + band, data=  bootdata_upr[[i]])
+  curr_1 = lmp(slope ~ max + band, data=  bootdata_upr[[i]])
   boot_stats$b_val[cnt] = (curr_1)$coefficients[2]
-  boot_stats$p_val[cnt] = summary(curr_1)$coefficients[2,4]
+  boot_stats$p_val[cnt] = summary(curr_1)$coefficients[2,3]
   cnt = cnt + 1
   
   #2
-  curr_2 = lm(slope ~ max2 + band, data=  bootdata_upr[[i]])
+  curr_2 = lmp(slope ~ max2 + band, data=  bootdata_upr[[i]])
   boot_stats$b_val[cnt] = (curr_2)$coefficients[2]
-  boot_stats$p_val[cnt] = summary(curr_2)$coefficients[2,4]
+  boot_stats$p_val[cnt] = summary(curr_2)$coefficients[2,3]
   cnt = cnt + 1
   
   #3
-  curr_3 = lm(slope ~ max3 + band, data=  bootdata_upr[[i]])
+  curr_3 = lmp(slope ~ max3 + band, data=  bootdata_upr[[i]])
   boot_stats$b_val[cnt] = (curr_3)$coefficients[2]
-  boot_stats$p_val[cnt] = summary(curr_3)$coefficients[2,4]
+  boot_stats$p_val[cnt] = summary(curr_3)$coefficients[2,3]
   cnt = cnt + 1
   
   #4
-  curr_4 = lm(slope ~ max4 + band, data=  bootdata_upr[[i]])
+  curr_4 = lmp(slope ~ max4 + band, data=  bootdata_upr[[i]])
   boot_stats$b_val[cnt] = (curr_4)$coefficients[2]
-  boot_stats$p_val[cnt] = summary(curr_4)$coefficients[2,4]
+  boot_stats$p_val[cnt] = summary(curr_4)$coefficients[2,3]
   cnt = cnt + 1
   
   #min
-  curr_min = lm(slope ~ min + band, data=  bootdata_upr[[i]])
+  curr_min = lmp(slope ~ min + band, data=  bootdata_upr[[i]])
   boot_stats$b_val[cnt] = (curr_min)$coefficients[2]
-  boot_stats$p_val[cnt] = summary(curr_min)$coefficients[2,4]
+  boot_stats$p_val[cnt] = summary(curr_min)$coefficients[2,3]
   cnt = cnt + 1
   
   #l2
-  curr_min2 = lm(slope ~ min2 + band, data=  bootdata_upr[[i]])
+  curr_min2 = lmp(slope ~ min2 + band, data=  bootdata_upr[[i]])
   boot_stats$b_val[cnt] = (curr_min2)$coefficients[2]
-  boot_stats$p_val[cnt] = summary(curr_min2)$coefficients[2,4]
+  boot_stats$p_val[cnt] = summary(curr_min2)$coefficients[2,3]
   cnt = cnt + 1
 }
 
@@ -549,3 +549,31 @@ plot = ggplot(stats_rank, aes(x = pred, y = b_val, fill = model, group = model))
     geom_errorbar(aes(ymin = mean_b - sd_b, ymax = mean_b + sd_b), width=0.2, position=position_dodge(.9)) +
     labs(x = 'Predictor', y = 'Coefficient')  + theme_minimal() 
   ggsave(paste('pred_cmb_b.pdf', sep = ''))
+
+  
+  
+##################
+  # Normality test
+##################
+
+
+qqPlot(unique(corr_data$slope))
+
+par(mfrow=c(3,2))
+qqPlot(unique(corr_data$max))
+qqPlot(unique(corr_data$max2))
+qqPlot(unique(corr_data$max3))
+qqPlot(unique(corr_data$max4))
+qqPlot(unique(corr_data$min))
+qqPlot(unique(corr_data$min2))
+
+par(mfrow=c(3,2))
+qqPlot(unique(corr_data_pr$max))
+qqPlot(unique(corr_data_pr$max2))
+qqPlot(unique(corr_data_pr$max3))
+qqPlot(unique(corr_data_pr$max4))
+qqPlot(unique(corr_data_pr$min))
+qqPlot(unique(corr_data_pr$min2))
+  
+  
+  

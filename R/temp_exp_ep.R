@@ -80,34 +80,13 @@ ggsave(paste(sens, '_peak3.svg', sep = ''))
 
 
 ## Stats
-fitp = lm(p ~ cond + band, data2)
+fitp = with(data2, aov(p ~ cond + band + Error(as.factor(subj))))
 summary(fitp)
-anova(fitp)
 
-fite = lm(e ~ cond + band, data2)
+fite = with(data2, aov(log(e) ~ cond + band + Error(as.factor(subj))))
 summary(fite)
-anova(fite)
 
-fit_beta_e = lm(e~cond, data_beta)
-anova(fit_beta_e)
-fit_beta_p = lm(p~cond, data_beta)
-anova(fit_beta_p)
-fit_beta_m = lm(m~cond, data_beta)
-anova(fit_beta_m)
 
-fit_alpha_e = lm(e~cond, data_alpha)
-anova(fit_alpha_e)
-fit_alpha_p = lm(p~cond, data_alpha)
-anova(fit_alpha_p)
-
-fit_gamma_e = lm(e~cond, data_gamma)
-anova(fit_gamma_e)
-fit_gamma_p = lm(p~cond, data_gamma)
-
-fit_p = lm(p~cond+band, data2)
-anova(fit_p)
-fit_e = lm(e~cond+band, data2)
-anova(fit_e)
 
 # corr with slope
 beta_corr = cor.test((filter(data, band == 'beta')$high3_p),(filter(data, band == 'beta')$slope))
@@ -120,14 +99,26 @@ gamma_corr = cor.test((filter(data, band == 'low_gamma')$high3_p),(filter(data, 
 gamma_corr
 
 # ttest
-beta_peak = t.test((filter(data, band == 'beta')$high2_p),log(filter(data, band == 'beta')$high3_p), paired=TRUE)
+beta_peak = t.test((filter(data, band == 'beta')$high_p),log(filter(data, band == 'beta')$high3_p), paired=TRUE)
 beta_peak
+beta_peak2 = t.test((filter(data, band == 'beta')$high_p),log(filter(data, band == 'beta')$high2_p), paired=TRUE)
+beta_peak2
+beta_peakl = t.test((filter(data, band == 'beta')$high_p),log(filter(data, band == 'beta')$low_p), paired=TRUE)
+beta_peakl
 
-alpha_peak = t.test(log(filter(data, band == 'alpha')$high2_p),log(filter(data, band == 'alpha')$high3_p), paired=TRUE)
+alpha_peak = t.test(log(filter(data, band == 'alpha')$high_p),log(filter(data, band == 'alpha')$high3_p), paired=TRUE)
 alpha_peak
+alpha_peak2 = t.test(log(filter(data, band == 'alpha')$high_p),log(filter(data, band == 'alpha')$high2_p), paired=TRUE)
+alpha_peak2
+beta_peakl = t.test((filter(data, band == 'beta')$high_p),log(filter(data, band == 'beta')$low_p), paired=TRUE)
+beta_peakl
 
-gamma_peak = t.test(log(filter(data, band == 'low_gamma')$high2_p),log(filter(data, band == 'low_gamma')$high3_p), paired=TRUE)
+gamma_peak = t.test(log(filter(data, band == 'low_gamma')$high_p),log(filter(data, band == 'low_gamma')$high3_p), paired=TRUE)
 gamma_peak
+gamma_peak2 = t.test(log(filter(data, band == 'low_gamma')$high_p),log(filter(data, band == 'low_gamma')$high2_p), paired=TRUE)
+gamma_peak2
+beta_peakl = t.test((filter(data, band == 'beta')$high_p),log(filter(data, band == 'beta')$low_p), paired=TRUE)
+beta_peakl
 
 
 
@@ -170,9 +161,8 @@ data_pr_gamma = filter(data_pr2, band == "low_gamma")
 
 
 # stats
-fit_pr = lm(p ~ cond + band, data_pr2)
+fit_pr = with(data_pr2, aov(p ~ cond + band + Error(as.factor(subj))))
 summary(fit_pr)
-anova(fit_pr)
 
 plot = ggplot(data_pr2, aes(x = cond, y = p) )
 plot + geom_violin(aes(fill = band), trim = FALSE, position = position_dodge(0.75)) + 
@@ -184,4 +174,17 @@ plot + geom_violin(aes(fill = band), trim = FALSE, position = position_dodge(0.7
   #scale_fill_manual(values = wes_palette("Set2")) + 
   labs(x = 'Loading', y = 'Peak')  + theme_minimal()
 ggsave(paste(sens, '_peak_upr.pdf', sep = ''))
+
+
+
+
+##################
+# Normality test
+##################
+
+par(mfrow=c(1,2))
+qqPlot(unique(data2$p))
+qqPlot(unique(data_pr2$p))
+
+
 
