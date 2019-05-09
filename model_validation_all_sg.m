@@ -205,20 +205,7 @@ end
 imagesc(cell2mat(pred_temp_exp))
 
 empirical = [pred_temp_exp{:,2}];
-[h,p] = ttest([pred_temp_exp{:,2}]);
-p
-
-null = [pred_temp_exp_null{:,2}];
-[h,p] = ttest([pred_temp_exp{:,2}], [pred_temp_exp_null{:,2}]);
-p
-
-[h,p] = ttest([pred_temp_exp_low_only{:,2}]);
-p
-
-low = [pred_temp_exp_low_only{:,2}];
-high3 = [pred_temp_exp_3_only{:,2}];
-[h,p] = ttest([pred_temp_exp_3_only{:,2}]);
-p
+p = mult_comp_perm_t1(empirical')
 
 save([R_dir, 'model_validation.mat'], 'empirical', 'null', 'low', 'high3')
 
