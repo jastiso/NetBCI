@@ -9,6 +9,7 @@
 addpath(genpath('/Users/stiso/Documents/MATLAB/npy-matlab-master/'))
 addpath('/Users/stiso/Documents/MATLAB/fieldtrip-20170830/')
 addpath('/Users/stiso/Documents/MATLAB/control_example/')
+addpath('/Users/stiso/Documents/MATLAB/BCT/')
 R_dir = '/Users/stiso/Documents/R/NetBCI/data/wpli/';
 
 top_dir = '/Users/stiso/Documents/MATLAB/NetBCI/';
@@ -45,6 +46,8 @@ load([save_dir, 'noise_sg.mat']);
 % initialize
 high_corr = cell(nSubj, numel(bands));
 low_corr = cell(nSubj, numel(bands));
+high_corr_null = cell(nSubj, numel(bands));
+low_corr_null = cell(nSubj, numel(bands));
 
 %% Make control set
 
@@ -111,9 +114,11 @@ for i = Subj
         %3rd
         high3_mat = get_sg_matrix(nNode, subset(bSG3,:));
         high3_mat = high3_mat./eigs(high3_mat,1) - eye(nNode).*1.001;
+        high_null = randmio_und(high3_mat,1000);
         %lowest
         low_mat = get_sg_matrix(nNode, subset(nzSG,:));
         low_mat = low_mat./eigs(low_mat,1) - eye(nNode).*1.001;
+        low_null = randmio_und(low_mat,1000);
         
         % load states
         load([top_dir, 'states/' subj, '_states.mat'])
@@ -122,6 +127,8 @@ for i = Subj
         nTrial = size(states{k},2);
         high_ts = zeros(1, nTrial - 1);
         low_ts = zeros(1, nTrial - 1);
+        high_ts_null = zeros(1, nTrial - 1);
+        low_ts_null = zeros(1, nTrial - 1);
         
         for t = 2:nTrial
             curr = states{k}(:,(t-1));
@@ -131,205 +138,29 @@ for i = Subj
             % get t+1 prediction
             pred_high = openLoopControl(high3_mat, diag(B), curr, u);
             pred_low = openLoopControl(low_mat, diag(B), curr, u);
+            pred_high_null = openLoopControl(high_null, diag(B), curr, u);
+            pred_low_null = openLoopControl(low_null, diag(B), curr, u);
+            
             %get correlation
-            high_ts(t-1) = max(corr(pred_high, states{k}(:,(t)), "type", "spearman"));
-            low_ts(t-1) = max(corr(pred_low, states{k}(:,(t)), "type",  "spearman"));
+            high_ts(t-1) = max(corr(pred_high, states{k}(:,(t)), "type", "pearson"));
+            low_ts(t-1) = max(corr(pred_low, states{k}(:,(t)), "type",  "pearson"));
+            high_ts_null(t-1) = max(corr(pred_high_null, states{k}(:,(t)), "type", "pearson"));
+            low_ts_null(t-1) = max(corr(pred_low_null, states{k}(:,(t)), "type",  "pearson"));
         end
         high_corr{i,k} = high_ts;
         low_corr{i,k} = low_ts;
+        high_corr_null{i,k} = high_ts_null;
+        low_corr_null{i,k} = low_ts_null;
     end
 end
 
-[h,p] = ttest(cellfun(high_corr(:,2)));
+[h,p] = ttest(cellfun(@(x) median(x), high_corr(:,2)));
 p
-[h,p] = ttest(low_corr{:,2});
+[h,p] = ttest(cellfun(@(x) median(x), low_corr(:,2)));
 p
 %save([R_dir, 'grad/corrs.mat'], 'band_order', 'subj_order')
 
-%% Correlate with expression
-
-high_exp_corr = zeros(nSubj,numel(bands));
-low_exp_corr = zeros(nSubj, numel(bands));
-high_max = zeros(nSubj,numel(bands));
-low_max = zeros(nSubj, numel(bands));
-high_min = zeros(nSubj,numel(bands));
-low_min = zeros(nSubj, numel(bands));
-
-sens = 'grad';
-
-cnt = 1; % for order
-for i = Subj
-    s_idx = find(i == Subj);
-    subj = sprintf('%03d', i);
-    
-    for k = 1:numel(bands)
-        f = bands{k};
-        fprintf('\nSubj %03d... band %s...', i, f)
-
-        % get labels
-        band_order{cnt} = f;
-        subj_order{cnt} = subj;
-        cnt = cnt + 1;
-
-        % get subgraph data
-        if strcmp(data_dir(end-5:end-1),'param')
-            subset = readNPY([data_dir, subj, '/', sens, 'wpli_', f, '_subset.npy']);
-            coeff = readNPY([data_dir, subj, '/',sens, 'wpli_', f, '_coeff.npy']);
-        else
-            subset = readNPY([data_dir, subj, '/', sens, '/wpli_', f, '_subset.npy']);
-            coeff = readNPY([data_dir, subj, '/',sens, '/wpli_', f, '_coeff.npy']);
-        end
-        
-        % remove noise SG
-        idx = noise_sg{k,i};
-        coeff = coeff(~idx,:);
-        subset = subset(~idx,:);
-
-        [tmp,tmp_idx] = sort(b_exp,'descend');
-        bSG3 = tmp_idx(3); % third biggest element
-        [~, nzSG] = min(nonzeros((b_exp))); % smallest nonzero - this is how we will opporationalize "low"
-        
-        high_exp = coeff(bSG3,2:end);
-        low_exp = coeff(nzSG,2:end);
-        
-        high_exp_corr(i,k) = corr(high_exp', high_corr{i,k}');
-        low_exp_corr(i,k) = corr(low_exp', low_corr{i,k}');
-        
-        % max and min
-        [~,maxI_high] = max(high_exp);
-        [~,minI_high] = min(high_exp);
-        [~,maxI_low] = max(high_exp);
-        [~,minI_low] = min(high_exp);
-        
-        high_max(i,k) = high_corr{i,k}(maxI_high);
-        low_max(i,k) = low_corr{i,k}(maxI_low);
-        high_min(i,k) = high_corr{i,k}(minI_high);
-        low_min(i,k) = low_corr{i,k}(minI_low);
-    end
-end
-
-figure(1); clf;
-imagesc(high_exp_corr); colorbar
-saveas(gca, [img_dir, 'high_te_corr.png'], 'png')
-
-figure(2); clf;
-imagesc(low_exp_corr); colorbar
-saveas(gca, [img_dir, 'low_te_corr.png'], 'png')
-
-[h,p] = ttest(high_exp_corr(:,2));
+[h,p] = ttest(cellfun(@(x) median(x), high_corr(:,2)));
 p
-[h,p] = ttest(low_exp_corr(:,2));
-p
-
-diff_high = high_max - high_min;
-diff_low = low_max - low_min;
-
-figure(3); clf;
-imagesc(diff_high); colorbar
-saveas(gca, [img_dir, 'high_max_min_corr.png'], 'png')
-
-figure(4); clf;
-imagesc(diff_low); colorbar
-saveas(gca, [img_dir, 'low_max_min_corr.png'], 'png')
-
-[h,p] = ttest(high_max(:,2), high_min(:,2));
-p
-[h,p] = ttest(low_max(:,2), low_min(:,2));
-p
-
-%% Repeat for switched expression
-
-high_exp_corr_switch = zeros(nSubj,numel(bands));
-low_exp_corr_switch = zeros(nSubj, numel(bands));
-high_max = zeros(nSubj,numel(bands));
-low_max = zeros(nSubj, numel(bands));
-high_min = zeros(nSubj,numel(bands));
-low_min = zeros(nSubj, numel(bands));
-
-sens = 'grad';
-
-cnt = 1; % for order
-for i = Subj
-    s_idx = find(i == Subj);
-    subj = sprintf('%03d', i);
-    
-    for k = 1:numel(bands)
-        f = bands{k};
-        fprintf('\nSubj %03d... band %s...', i, f)
-
-        % get labels
-        band_order{cnt} = f;
-        subj_order{cnt} = subj;
-        cnt = cnt + 1;
-
-        % get subgraph data
-        if strcmp(data_dir(end-5:end-1),'param')
-            subset = readNPY([data_dir, subj, '/', sens, 'wpli_', f, '_subset.npy']);
-            coeff = readNPY([data_dir, subj, '/',sens, 'wpli_', f, '_coeff.npy']);
-        else
-            subset = readNPY([data_dir, subj, '/', sens, '/wpli_', f, '_subset.npy']);
-            coeff = readNPY([data_dir, subj, '/',sens, '/wpli_', f, '_coeff.npy']);
-        end
-        
-        % remove noise SG
-        idx = noise_sg{k,i};
-        coeff = coeff(~idx,:);
-        subset = subset(~idx,:);
-
-        [tmp,tmp_idx] = sort(b_exp,'descend');
-        bSG3 = tmp_idx(3); % third biggest element
-        [~, nzSG] = min(nonzeros((b_exp))); % smallest nonzero - this is how we will opporationalize "low"
-        
-        high_exp = coeff(bSG3,2:end);
-        low_exp = coeff(nzSG,2:end);
-        
-        % switched exp
-        high_exp_corr_switch(i,k) = corr(low_exp', high_corr{i,k}');
-        low_exp_corr_switch(i,k) = corr(high_exp', low_corr{i,k}');
-        
-        % max and min
-        [~,maxI_high] = max(high_exp);
-        [~,minI_high] = min(high_exp);
-        [~,maxI_low] = max(high_exp);
-        [~,minI_low] = min(high_exp);
-        
-        high_max(i,k) = high_corr{i,k}(maxI_high);
-        low_max(i,k) = low_corr{i,k}(maxI_low);
-        high_min(i,k) = high_corr{i,k}(minI_high);
-        low_min(i,k) = low_corr{i,k}(minI_low);
-    end
-end
-
-figure(1); clf;
-imagesc(high_exp_corr_switch); colorbar
-saveas(gca, [img_dir, 'high_te_corr_switch.png'], 'png')
-
-figure(2); clf;
-imagesc(low_exp_corr_switch); colorbar
-saveas(gca, [img_dir, 'low_te_corr_switch.png'], 'png')
-
-[h,p] = ttest(high_exp_corr_switch(:,2));
-p
-[h,p] = ttest(low_exp_corr_switch(:,2));
-p
-
-[h,p] = ttest2(high_exp_corr_switch(:,2), high_exp_corr(:,2));
-p
-[h,p] = ttest2(low_exp_corr_switch(:,2), low_exp_corr(:,2));
-p
-
-diff_high = high_max - high_min;
-diff_low = low_max - low_min;
-
-figure(3); clf;
-imagesc(diff_high); colorbar
-saveas(gca, [img_dir, 'high_max_min_corr.png'], 'png')
-
-figure(4); clf;
-imagesc(diff_low); colorbar
-saveas(gca, [img_dir, 'low_max_min_corr.png'], 'png')
-
-[h,p] = ttest(high_max(:,2), high_min(:,2));
-p
-[h,p] = ttest(low_max(:,2), low_min(:,2));
+[h,p] = ttest(cellfun(@(x) median(x), low_corr(:,2)));
 p

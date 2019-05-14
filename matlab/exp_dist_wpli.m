@@ -5,7 +5,7 @@ addpath('/Users/stiso/Documents/MATLAB/fieldtrip-20170830/')
 
 R_dir_o = '/Users/stiso/Documents/R/NetBCI/data/wpli/';
 top_dir = '/Users/stiso/Documents/MATLAB/NetBCI/';
-data_dir = '/Users/stiso/Documents/Python/NetBCI/NMF/';
+data_dir = '/Users/stiso/Documents/Python/NetBCI/NMF/param/';
 save_dir = [top_dir, 'GroupAvg/wpli/analysis/'];
 
 % make directories
@@ -53,8 +53,13 @@ for j = 1:numel(sensors)
                 mkdir(img_dir)
             end
             % get subgraph data
-            subset = readNPY([data_dir, subj, '/', sens, '/wpli_', f, '_subset.npy']);
-            coeff = readNPY([data_dir, subj, '/', sens, '/wpli_', f, '_coeff.npy']);
+            if strcmp(data_dir(end-5:end-1),'param')
+                subset = readNPY([data_dir, subj, '/', sens, 'wpli_', f, '_subset.npy']);
+                coeff = readNPY([data_dir, subj, '/',sens, 'wpli_', f, '_coeff.npy']);
+            else
+                subset = readNPY([data_dir, subj, '/', sens, '/wpli_', f, '_subset.npy']);
+                coeff = readNPY([data_dir, subj, '/',sens, '/wpli_', f, '_coeff.npy']);
+            end
             nSG = size(subset,1);
             color_sf = 1/(nSG);
             
