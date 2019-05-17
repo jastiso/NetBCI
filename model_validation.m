@@ -145,10 +145,10 @@ for i = Subj
             pred_low_null = openLoopControl(low_null, diag(B), curr, u);
             
             %get correlation
-            high_ts(t-1) = max(corr(pred_high, states{k}(:,(t)), "type", "pearson"));
-            low_ts(t-1) = max(corr(pred_low, states{k}(:,(t)), "type",  "pearson"));
-            high_ts_null(t-1) = max(corr(pred_high_null, states{k}(:,(t)), "type", "pearson"));
-            low_ts_null(t-1) = max(corr(pred_low_null, states{k}(:,(t)), "type",  "pearson"));
+            high_ts(t-1) = max(corr(pred_high(:,2:end), states{k}(:,(t)), "type", "pearson"));
+            low_ts(t-1) = max(corr(pred_low(:,2:end), states{k}(:,(t)), "type",  "pearson"));
+            high_ts_null(t-1) = max(corr(pred_high_null(:,2:end), states{k}(:,(t)), "type", "pearson"));
+            low_ts_null(t-1) = max(corr(pred_low_null(:,2:end), states{k}(:,(t)), "type",  "pearson"));
         end
         high_corr{i,k} = high_ts;
         low_corr{i,k} = low_ts;

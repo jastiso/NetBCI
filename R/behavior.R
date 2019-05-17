@@ -82,3 +82,18 @@ ggsave('behavior_avg.pdf')
 fit = with(data_avg, aov(mean ~ session + Error(as.factor(subj))))
 summary(fit)
 
+
+
+##################
+# Normality test
+##################
+
+
+qqPlot(unique(corr_data$slope))
+
+par(mfrow=c(2,2))
+qqPlot(filter(avg_data, session == "Sess1")$score)
+qqPlot(filter(avg_data, session == "Sess2")$score)
+qqPlot(filter(avg_data, session == "Sess3")$score)
+qqPlot(filter(avg_data, session == "Sess4")$score)
+
