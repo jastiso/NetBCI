@@ -330,9 +330,9 @@ alpha = [0/255,89/255,115/255];
 beta = [151/255, 0/255,0/255];
 
 figure(1); clf
-plot(sp_high(:,1), 'color', alpha, "linewidth", 3); hold on
-plot(sp_high(:,2), 'color', beta, "linewidth", 3)
-plot(sp_high(:,3), 'color', gamma, "linewidth", 3)
+plot(sum_high(:,1) - sum_high_pr(:,1), 'color', alpha, "linewidth", 3); hold on
+plot(sum_high(:,2) - sum_high_pr(:,2), 'color', beta, "linewidth", 3)
+plot(sum_high(:,3) - sum_high_pr(:,3), 'color', gamma, "linewidth", 3)
 % plot(sp_high_pr(:,1), 'color', alpha, "linewidth", 3, 'linestyle', '--')
 % plot(sp_high_pr(:,2), 'color', beta, "linewidth", 3, 'linestyle', '--')
 % plot(sp_high_pr(:,3), 'color', gamma, "linewidth", 3, 'linestyle', '--')
@@ -340,9 +340,9 @@ title('high')
 saveas(gca, [img_dir, 'cinstistency_sp_high.png'], 'png')
 
 figure(2); clf
-plot(sp_high2(:,1), 'color', alpha, "linewidth", 3); hold on
-plot(sp_high2(:,2), 'color', beta, "linewidth", 3)
-plot(sp_high2(:,3), 'color', gamma, "linewidth", 3)
+plot(sum_high2(:,1) - sum_high2_pr(:,1), 'color', alpha, "linewidth", 3); hold on
+plot(sum_high2(:,2) - sum_high2_pr(:,2), 'color', beta, "linewidth", 3)
+plot(sum_high2(:,3) - sum_high2_pr(:,3), 'color', gamma, "linewidth", 3)
 % plot(sp_high2_pr(:,1), 'color', alpha, "linewidth", 3, 'linestyle', '--')
 % plot(sp_high2_pr(:,2), 'color', beta, "linewidth", 3, 'linestyle', '--')
 % plot(sp_high2_pr(:,3), 'color', gamma, "linewidth", 3, 'linestyle', '--')
@@ -350,9 +350,9 @@ title('high2')
 saveas(gca, [img_dir, 'cinstistency_sp_high2.png'], 'png')
 
 figure(3); clf
-plot(sp_high3(:,1), 'color', alpha, "linewidth", 3); hold on
-plot(sp_high3(:,2), 'color', beta, "linewidth", 3)
-plot(sp_high3(:,3), 'color', gamma, "linewidth", 3)
+plot(sum_high3(:,1) - sum_high3_pr(:,1), 'color', alpha, "linewidth", 3); hold on
+plot(sum_high3(:,2) - sum_high3_pr(:,2), 'color', beta, "linewidth", 3)
+plot(sum_high3(:,3) - sum_high3_pr(:,3), 'color', gamma, "linewidth", 3)
 % plot(sp_high3_pr(:,1), 'color', alpha, "linewidth", 3, 'linestyle', '--')
 % plot(sp_high3_pr(:,2), 'color', beta, "linewidth", 3, 'linestyle', '--')
 % plot(sp_high3_pr(:,3), 'color', gamma, "linewidth", 3, 'linestyle', '--')
@@ -360,9 +360,9 @@ title('high3')
 saveas(gca, [img_dir, 'cinstistency_sp_high3.png'], 'png')
 
 figure(4); clf
-plot(sp_low(:,1), 'color', alpha, "linewidth", 3); hold on
-plot(sp_low(:,2), 'color', beta, "linewidth", 3)
-%plot(sp_low(:,3), 'color', gamma, "linewidth", 3)
+plot(sum_low(:,1)  - sum_low_pr(:,1), 'color', alpha, "linewidth", 3); hold on
+plot(sum_low(:,2) - sum_low_pr(:,2), 'color', beta, "linewidth", 3)
+plot(sum_low(:,3) - sum_low_pr(:,3), 'color', gamma, "linewidth", 3)
 %plot(sp_low_pr(:,2), 'color', beta, "linewidth", 3, 'linestyle', '--')
 %plot(sp_low_pr(:,3), 'color', gamma, "linewidth", 3, 'linestyle', '--')
 title('low')

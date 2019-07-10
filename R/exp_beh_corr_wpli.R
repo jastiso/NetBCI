@@ -13,6 +13,7 @@ library(wesanderson)
 library(coin)
 library(perm)
 library(lme4)
+library(lm.beta)
 setwd("/Users/stiso/Documents/R/NetBCI/")
 bands = c( 'alpha', 'beta', 'low_gamma')
 nSubj = 20
@@ -27,7 +28,7 @@ sens = 'grad'
 beh = readMat(paste('data/wpli/', sens, '/exp_beh_cor.mat', sep = ''))
 
 corr_data = data.frame(band = character(length = 0), max = numeric(0), max2 = numeric(0), max3 = numeric(0), max4 = numeric(0), 
-                       min = numeric(0), min2 = numeric(0), sd = numeric(0), sum = numeric(0), slope = numeric(0), subj = numeric(0), stringsAsFactors = FALSE)
+                       min = numeric(0), min2 = numeric(0), slope = numeric(0), subj = numeric(0), stringsAsFactors = FALSE)
 for (b in c(1:length(bands))){
 
   corr_data[(nrow(corr_data)+1):(nrow(corr_data)+nSubj),1] = rep(bands[b], times = nSubj)
@@ -37,33 +38,16 @@ for (b in c(1:length(bands))){
   corr_data[(nrow(corr_data)-nSubj+1):nrow(corr_data),5] = beh$max.exp4[,b]
   corr_data[(nrow(corr_data)-nSubj+1):nrow(corr_data),6] = beh$min.exp[,b]
   corr_data[(nrow(corr_data)-nSubj+1):nrow(corr_data),7] = beh$min.exp2[,b]
-  corr_data[(nrow(corr_data)-nSubj+1):nrow(corr_data),8] = beh$sd.exp[,b]
-  corr_data[(nrow(corr_data)-nSubj+1):nrow(corr_data),9] = beh$sum.exp[,b]
-  corr_data[(nrow(corr_data)-nSubj+1):nrow(corr_data),10] = t(beh$betas)
-  corr_data[(nrow(corr_data)-nSubj+1):nrow(corr_data),11] = t(beh$Subj)
+  corr_data[(nrow(corr_data)-nSubj+1):nrow(corr_data),8] = t(beh$betas)
+  corr_data[(nrow(corr_data)-nSubj+1):nrow(corr_data),9] = t(beh$Subj)
 
 }
 corr_data$subj = as.factor(corr_data$subj)
 # save p_values
-stats = data.frame(p_val = rep(0, times = 16), b_val = rep(0, times = 16), pred = c('mean', 'sd', 'high', 'high2', 'high3', 'high4', 'low', 'low2', 
-                                                                                    'mean', 'sd', 'high', 'high2', 'high3', 'high4', 'low', 'low2'), 
-                   model = c(rep('emp', times = 8), rep('UPR', times = 8)))
+stats = data.frame(p_val = rep(0, times = 12), b_val = rep(0, times = 12), pred = c('high', 'high2', 'high3', 'high4', 'low', 'low2', 
+                                                                                    'high', 'high2', 'high3', 'high4', 'low', 'low2'), 
+                   model = c(rep('emp', times = 6), rep('UPR', times = 6)))
 
-
-# scatter plot for all bands - mean
-plot = ggplot(corr_data, aes(x = slope, y = sum, col = band, group = band))
-plot +geom_smooth(method="lm") +  geom_point(size = 6) + 
-  scale_color_manual(values = wes_palette('Royal1',4)) +
-  labs(x = 'Slope', y = 'Mean')  + theme_minimal()
-ggsave(paste('sum_bc_corr.png', sep = ''))
-
-# scatter plot for all bands - std
-plot = ggplot(corr_data, aes(x = slope, y = sd, color = band))
-plot  +  geom_point(aes(color = band), size = 4) + 
-  scale_color_manual(values = wes_palette('Royal1',4)) +
-  geom_smooth(method="lm", size = 3, color = "black") +
-  labs(x = 'Slope', y = 'Standard Deviation')  + theme_minimal()
-ggsave(paste('sd_bc_corr.png', sep = ''))
 
 
 # scatter plot for all bands - individual subgraphs
@@ -106,70 +90,49 @@ ggsave(paste('min_bc_corr.pdf', sep = ''))
 
 
 # stats
-# mean
-fit1 = lmp(slope ~ sum + band, data=  corr_data)
+
+# max
+fit1 = lmp(slope ~ max + band, data=  corr_data)
 summary(fit1)
-Anova(fit1)
 
 stats$b_val[1] = fit1$coefficients[2]
 stats$p_val[1] = summary(fit1)$coefficients[2,3]
 
-# sd
-fit2 = lmp(slope ~ sd + band, data=  corr_data)
+# second max
+fit2 = lmp(slope ~ max2 + band, data=  corr_data)
 summary(fit2)
-Anova(fit2)
 
 stats$b_val[2] = fit2$coefficients[2]
 stats$p_val[2] = summary(fit2)$coefficients[2,3]
 
-# max
-fit3 = lmp(slope ~ max + band, data=  corr_data)
+# third max
+fit3 = lmp(slope ~ max3 + band, data=  corr_data)
 summary(fit3)
-Anova(fit3)
 
 stats$b_val[3] = fit3$coefficients[2]
 stats$p_val[3] = summary(fit3)$coefficients[2,3]
 
-# second max
-fit4 = lmp(slope ~ max2 + band, data=  corr_data)
+# 4th max
+fit4 = lmp(slope ~ max4 + band, data=  corr_data)
 summary(fit4)
-Anova(fit4)
 
 stats$b_val[4] = fit4$coefficients[2]
 stats$p_val[4] = summary(fit4)$coefficients[2,3]
 
-# third max
-fit5 = lmp(slope ~ max3 + band, data=  corr_data)
+
+# min
+fit5 = lmp(slope ~ min + band, data=  corr_data)
 summary(fit5)
-Anova(fit5)
 
 stats$b_val[5] = fit5$coefficients[2]
 stats$p_val[5] = summary(fit5)$coefficients[2,3]
 
-# 4th max
-fit6 = lmp(slope ~ max4 + band, data=  corr_data)
+# 2nd min
+fit6 = lmp(slope ~ min2 + band, data=  corr_data)
 summary(fit6)
-Anova(fit6)
 
 stats$b_val[6] = fit6$coefficients[2]
 stats$p_val[6] = summary(fit6)$coefficients[2,3]
-
-
-# min
-fit7 = lmp(slope ~ min + band, data=  corr_data)
-summary(fit7)
-Anova(fit7)
-
-stats$b_val[7] = fit7$coefficients[2]
-stats$p_val[7] = summary(fit7)$coefficients[2,3]
-
-# 2nd min
-fit8 = lmp(slope ~ min2 + band, data=  corr_data)
-summary(fit8)
-Anova(fit8)
-
-stats$b_val[8] = fit8$coefficients[2]
-stats$p_val[8] = summary(fit8)$coefficients[2,3]
 
 
 
@@ -183,8 +146,8 @@ stats$p_val[8] = summary(fit8)$coefficients[2,3]
 #############################################################################################
 beh_pr = readMat(paste('data/wpli/', sens, '/exp_beh_cor_pr.mat', sep = ''))
 
-corr_data_pr = data.frame(band = character(length = 0), max = numeric(0), max2 = numeric(0), max3 = numeric(0), max4 = numeric(0), min = numeric(0), min2 = numeric(0), sd = numeric(0), 
-                          sum = numeric(0), slope = numeric(0), subj = numeric(0), stringsAsFactors = FALSE)
+corr_data_pr = data.frame(band = character(length = 0), max = numeric(0), max2 = numeric(0), max3 = numeric(0), max4 = numeric(0), min = numeric(0), min2 = numeric(0), 
+                          slope = numeric(0), subj = numeric(0), stringsAsFactors = FALSE)
 for (b in c(1:length(bands))){
   
   corr_data_pr[(nrow(corr_data_pr)+1):(nrow(corr_data_pr)+nSubj),1] = rep(bands[b], times = nSubj)
@@ -194,27 +157,13 @@ for (b in c(1:length(bands))){
   corr_data_pr[(nrow(corr_data_pr)-nSubj+1):nrow(corr_data_pr),5] = beh_pr$max.exp.null4[,b]
   corr_data_pr[(nrow(corr_data_pr)-nSubj+1):nrow(corr_data_pr),6] = beh_pr$min.exp.null[,b]
   corr_data_pr[(nrow(corr_data_pr)-nSubj+1):nrow(corr_data_pr),7] = beh_pr$min.exp.null2[,b]
-  corr_data_pr[(nrow(corr_data_pr)-nSubj+1):nrow(corr_data_pr),8] = beh_pr$sd.exp.null[,b]
-  corr_data_pr[(nrow(corr_data_pr)-nSubj+1):nrow(corr_data_pr),9] = beh_pr$sum.exp.null[,b]
-  corr_data_pr[(nrow(corr_data_pr)-nSubj+1):nrow(corr_data_pr),10] = t(beh_pr$betas)
-  corr_data_pr[(nrow(corr_data_pr)-nSubj+1):nrow(corr_data_pr),11] = t(beh_pr$Subj)
+  corr_data_pr[(nrow(corr_data_pr)-nSubj+1):nrow(corr_data_pr),8] = t(beh_pr$betas)
+  corr_data_pr[(nrow(corr_data_pr)-nSubj+1):nrow(corr_data_pr),9] = t(beh_pr$Subj)
   
 }
 corr_data_pr$subj = as.factor(corr_data_pr$subj)
 
-# scatter plot for all bands - mean
-plot = ggplot(corr_data_pr, aes(x = slope, y = sum, col = band, group = band))
-plot +geom_smooth(method="lm") +  geom_point(size = 6) + 
-  scale_color_manual(values = rev(brewer.pal(4,'Greys'))) +
-  labs(x = 'Slope', y = 'Mean BC')  + theme_minimal()
-ggsave(paste('mean_bc_corr3_pr.png', sep = ''))
 
-# scatter plot for all bands - std
-plot = ggplot(corr_data_pr, aes(x = slope, y = sd, col = band, group = band))
-plot +geom_smooth(method="lm") +  geom_point(size = 6) + 
-  scale_color_manual(values = rev(brewer.pal(4,'Greys'))) +
-  labs(x = 'Slope', y = 'SD BC')  + theme_minimal()
-ggsave(paste('std_bc_corr_pr.pdf', sep = ''))
 
 # scatter plot for all bands - max
 plot = ggplot(corr_data_pr, aes(x = slope, y = max, col = band, group = band))
@@ -245,69 +194,47 @@ plot +geom_smooth(method="lm") +  geom_point(size = 6) +
 ggsave(paste('min_bc_corr_pr.pdf', sep = ''))
 
 # stats
-# mean
-fit9 = lmp(slope ~ sum + band, data=  corr_data_pr)
+#  max
+fit7 = lmp(slope ~ max + band, data=  corr_data_pr)
+summary(fit7)
+
+stats$b_val[7] = fit7$coefficients[2]
+stats$p_val[7] = summary(fit7)$coefficients[2,3]
+
+# 2nd max
+fit8 = lmp(slope ~ max2 + band, data=  corr_data_pr)
+summary(fit8)
+
+stats$b_val[8] = fit8$coefficients[2]
+stats$p_val[8] = summary(fit8)$coefficients[2,3]
+
+# third
+fit9 = lmp(slope ~ max3 + band, data=  corr_data_pr)
 summary(fit9)
-Anova(fit9)
 
 stats$b_val[9] = fit9$coefficients[2]
 stats$p_val[9] = summary(fit9)$coefficients[2,3]
 
-# sd
-fit10 = lmp(slope ~ sd + band, data=  corr_data_pr)
+# fourth
+fit10 = lmp(slope ~ max4 + band, data=  corr_data_pr)
 summary(fit10)
-Anova(fit10)
 
 stats$b_val[10] = fit10$coefficients[2]
 stats$p_val[10] = summary(fit10)$coefficients[2,3]
 
-#  max
-fit11 = lmp(slope ~ max + band, data=  corr_data_pr)
+# min
+fit11 = lmp(slope ~ min + band, data=  corr_data_pr)
 summary(fit11)
-Anova(fit11)
 
 stats$b_val[11] = fit11$coefficients[2]
 stats$p_val[11] = summary(fit11)$coefficients[2,3]
 
-# 2nd max
-fit12 = lmp(slope ~ max2 + band, data=  corr_data_pr)
+# min2
+fit12 = lmp(slope ~ min2 + band, data=  corr_data_pr)
 summary(fit12)
-Anova(fit12)
 
 stats$b_val[12] = fit12$coefficients[2]
 stats$p_val[12] = summary(fit12)$coefficients[2,3]
-
-# third
-fit13 = lmp(slope ~ max3 + band, data=  corr_data_pr)
-summary(fit13)
-Anova(fit13)
-
-stats$b_val[13] = fit13$coefficients[2]
-stats$p_val[13] = summary(fit13)$coefficients[2,3]
-
-# fourth
-fit14 = lmp(slope ~ max4 + band, data=  corr_data_pr)
-summary(fit14)
-Anova(fit14)
-
-stats$b_val[14] = fit14$coefficients[2]
-stats$p_val[14] = summary(fit14)$coefficients[2,3]
-
-# min
-fit15 = lmp(slope ~ min + band, data=  corr_data_pr)
-summary(fit15)
-Anova(fit15)
-
-stats$b_val[15] = fit15$coefficients[2]
-stats$p_val[15] = summary(fit15)$coefficients[2,3]
-
-# min2
-fit16 = lmp(slope ~ min2 + band, data=  corr_data_pr)
-summary(fit16)
-Anova(fit16)
-
-stats$b_val[16] = fit16$coefficients[2]
-stats$p_val[16] = summary(fit16)$coefficients[2,3]
 
 
 
@@ -346,22 +273,12 @@ for (i in 1:nBoot) {
 }
 
 # get betas and pvals
-boot_stats = data.frame(p_val = rep(0, times = 16*nBoot), b_val = rep(0, times = 16*nBoot), 
-                        pred = rep(c('mean', 'sd', 'high', 'high2', 'high3', 'high4', 'low', 'low2','mean', 'sd', 'high', 'high2', 'high3', 'high4', 'low', 'low2'), times = nBoot), 
-                        model = c(rep('emp', times = 8*nBoot), rep('UPR', times = 8*nBoot)))
+boot_stats = data.frame(p_val = rep(0, times = 12*nBoot), b_val = rep(0, times = 12*nBoot), 
+                        pred = rep(c('high', 'high2', 'high3', 'high4', 'low', 'low2', 'high', 'high2', 'high3', 'high4', 'low', 'low2'), times = nBoot), 
+                        model = c(rep('emp', times = 6*nBoot), rep('UPR', times = 6*nBoot)))
 cnt = 1
 for (i in 1:nBoot){
-  #mean
-  curr_mean = lmp(slope ~ sum + band, data=  bootdata[[i]])
-  boot_stats$b_val[cnt] = summary(curr_mean)$coefficients[2]
-  boot_stats$p_val[cnt] = summary(curr_mean)$coefficients[2,3]
-  cnt = cnt + 1
-  
-  #sd
-  curr_sd = lmp(slope ~ sd + band, data=  bootdata[[i]])
-  boot_stats$b_val[cnt] = (curr_sd)$coefficients[2]
-  boot_stats$p_val[cnt] = summary(curr_sd)$coefficients[2,3]
-  cnt = cnt + 1
+ 
   
   #1
   curr_1 = lmp(slope ~ max + band, data=  bootdata[[i]])
@@ -401,18 +318,7 @@ for (i in 1:nBoot){
 }
 # for for null data
 for (i in 1:nBoot){
-  #mean
-  curr_mean = lmp(slope ~ sum + band, data=  bootdata_upr[[i]])
-  boot_stats$b_val[cnt] = (curr_mean)$coefficients[2]
-  boot_stats$p_val[cnt] = summary(curr_mean)$coefficients[2,3]
-  cnt = cnt + 1
-  
-  #sd
-  curr_sd = lmp(slope ~ sd + band, data=  bootdata_upr[[i]])
-  boot_stats$b_val[cnt] = (curr_sd)$coefficients[2]
-  boot_stats$p_val[cnt] = summary(curr_sd)$coefficients[2,3]
-  cnt = cnt + 1
-  
+
   #1
   curr_1 = lmp(slope ~ max + band, data=  bootdata_upr[[i]])
   boot_stats$b_val[cnt] = (curr_1)$coefficients[2]
@@ -452,6 +358,8 @@ for (i in 1:nBoot){
 
 # summarize
 
+boot_stats$p_val = log10(boot_stats$p_val)
+boot_stats$p_val[boot_stats$p_val == -Inf] = -16
 bootstrap_summary = boot_stats %>%
   group_by(pred, model) %>%
   dplyr::summarise(mean_p = median(p_val), sd_p = sd(p_val)/sqrt(nBoot), mean_b = mean(b_val), sd_b = sd(b_val)/sqrt(nBoot))
@@ -469,77 +377,18 @@ p
 
 ####################################
 
-corr_data$band = lapply(corr_data$band, paste, '_emp', sep = '')
-corr_data_pr$band = lapply(corr_data_pr$band, paste, '_upr', sep = '')
-
-data_cmb = data.frame(max3 = c(corr_data$max3, corr_data_pr$max3), max2 = c(corr_data$max2, corr_data_pr$max2), sd = c(corr_data$sd, corr_data_pr$sd), 
-                      slope = c(corr_data$slope, corr_data_pr$slope), band = c(unlist(corr_data$band), unlist(corr_data_pr$band)), 
-                      model = c(rep('emp', times = 60), rep('upr', times = 60)))
-data_cmb$band = as.factor(data_cmb$band)
-levels(data_cmb$band)
-# emp, upr, lines
-#tmp = c(wes_palette('Royal1',3), (brewer.pal(3,'Greys')), 'black', 'white')
-tmp = c(rgb(81/255,184/255,161/255), rgb(81/255,184/255,161/255), rgb(81/255,184/255,161/255), 'grey', 'grey', 'grey', rgb(81/255,184/255,161/255), 'white')
-# alpha & beta band,line_emp, gamma band,  line_upr
-color_vect = c(tmp[1], tmp[4], tmp[2], tmp[5], tmp[7], tmp[3], tmp[7], tmp[8])
-color_vect
-
-plot = ggplot(data_cmb, aes(x = slope, y = max3, color = band, group = model))
-plot  +  geom_point(size = 4) + 
-  scale_color_manual(values = color_vect) +
-  #scale_fill_manual(values = c('blue', 'black')) +
-  geom_smooth(aes(color = model), method="lm", size = 3) +
-  labs(x = 'Slope', y = 'Max3')  + theme_minimal() 
-ggsave(paste('max3_bc_corr_cmb.png', sep = ''))
-
-plot = ggplot(data_cmb, aes(x = slope, y = max2, color = band, group = model))
-plot  +  geom_point(size = 4) + 
-  scale_color_manual(values = color_vect) +
-  #scale_fill_manual(values = c('blue', 'black')) +
-  geom_smooth(aes(color = model), method="lm", size = 3) +
-  labs(x = 'Slope', y = 'Max2')  + theme_minimal() 
-ggsave(paste('max2_bc_corr_cmb.png', sep = ''))
-
-plot = ggplot(data_cmb, aes(x = slope, y = sd, color = band, group = model))
-plot  +  geom_point(size = 4) + 
-  scale_color_manual(values = color_vect) +
-  #scale_fill_manual(values = c('blue', 'black')) +
-  geom_smooth(aes(color = model), method="lm", size = 3) +
-  labs(x = 'Slope', y = 'sd')  + theme_minimal() 
-ggsave(paste('sd_bc_corr_cmb.png', sep = ''))
-
-
-
-
 
 # bar plots
-stats_all = merge(stats,bootstrap_summary)
-stats_summ = dplyr::filter(stats_all, pred == c('mean', 'sd'))
-stats_rank = dplyr::filter(stats_all, pred != c('mean', 'sd'))
+stats_rank = merge(stats,bootstrap_summary)
 
-plot = ggplot(stats_summ, aes(x = pred, y = p_val, fill = model, group = model))
+
+
+plot = ggplot(stats_rank, aes(x = pred, y = log10(p_val), fill = model, group = model))
 plot + geom_bar(stat = "identity", position = position_dodge()) +
   scale_fill_manual(values = c(rgb(81/255,184/255,161/255), 'grey')) +
-  geom_hline(yintercept = 0.05, linetype = "dashed", color = "black") +
-  geom_hline(yintercept = 0.01, linetype = "dashed", color = "red") +
-  labs(x = 'Predictor', y = 'P-value')  + theme_minimal() 
-ggsave(paste('pred_cmb_p_summ.pdf', sep = ''))
-
-plot = ggplot(stats_summ, aes(x = pred, y = b_val, fill = model, group = model))
-plot + geom_bar(stat = "identity", position = position_dodge()) +
-  scale_fill_manual(values = c(rgb(81/255,184/255,161/255), 'grey')) +
-  labs(x = 'Predictor', y = 'Coefficient')  + theme_minimal() 
-ggsave(paste('pred_cmb_b_summ.pdf', sep = ''))
-
-
-
-
-plot = ggplot(stats_rank, aes(x = pred, y = p_val, fill = model, group = model))
-plot + geom_bar(stat = "identity", position = position_dodge()) +
-  scale_fill_manual(values = c(rgb(81/255,184/255,161/255), 'grey')) +
-  geom_hline(yintercept = 0.05, linetype = "dashed", color = "black") +
-  geom_hline(yintercept = 0.008, linetype = "dashed", color = "red") +
-  geom_errorbar(aes(ymin = mean_p - sd_p, ymax = mean_p + sd_p), width=0.2, position=position_dodge(.9)) +
+  geom_hline(yintercept = log10(0.05), linetype = "dashed", color = "black") +
+  geom_hline(yintercept = log10(0.008), linetype = "dashed", color = "red") +
+  geom_errorbar(aes(ymin = mean_p - sd_p, ymax = (mean_p) + (sd_p)), width=0.2, position=position_dodge(.9)) +
   labs(x = 'Predictor', y = 'P-value')  + theme_minimal() 
   ggsave(paste('pred_cmb_p.pdf', sep = ''))
   
