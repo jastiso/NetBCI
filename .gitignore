@@ -1,5 +1,7 @@
 # Don't track the content of these folders
-netbci_old/
+netbci_old/*
+*publice_key*
+*public_key.pub*
 #
 #also don't track data
 *.mat
