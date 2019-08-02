@@ -1,6 +1,6 @@
 # Don't track the content of these folders
 netbci_old/*
-*public_key*
+public_key
 *public_key.pub*
 #
 #also don't track data
