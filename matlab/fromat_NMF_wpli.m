@@ -37,15 +37,9 @@ for e = 1:numel(elecs)
                         cond = condition{k};
                         % next time you run this, change from pc to wpli. pc
                         % was a typo in the preproc script
-<<<<<<< HEAD:NMF/fromat_NMF_wpli.m
                         load([top_dir, sess, '/', cond, '/', subj, '/FCmatrices/NMF_', freq, '_', eType, '_wpli.mat']);
                         eval(['A = [A, wpli_', num2str(eType), '];']);
                         eval(['nTrial(j,k) = size(wpli_', num2str(eType), ',2);'])
-=======
-                        load([top_dir, sess, '/', cond, '/', subj, '/FCmatrices/NMF_', freq, '_', eType, '_gc.mat']);
-                        eval(['A = [A, gc_', num2str(eType), '];']);
-                        eval(['nTrial(j,k) = size(gc_', num2str(eType), ',2);'])
->>>>>>> 2e5f5ecde46e3698f45d37e417ab95aa2767b1bf:matlab/format_NMF_gc.m
                     end
                 end
                 if any(any(isnan(A)))
@@ -95,19 +89,11 @@ for e = 1:numel(elecs)
                     sess = sessions{j};
                     for k = 1:numel(condition)
                         cond = condition{k};
-<<<<<<< HEAD:NMF/fromat_NMF_wpli.m
                         load([top_dir, sess, '/', cond, '/', subj, '/FCmatrices/NMF_', freq, '_', eType, '_wpli_pr.mat']);
                         
                         eval(['A = [A, wpli_', num2str(eType), '];']);
                         eval(['nTrial(j,k) = size(wpli_', num2str(eType), ',2);'])
                         
-=======
-                        load([top_dir, sess, '/', cond, '/', subj, '/FCmatrices/NMF_', freq, '_', eType, '_pr.mat']);
-                        
-                        eval(['A = [A, gc_', num2str(eType), '];']);
-                        eval(['nTrial(j,k) = size(gc_', num2str(eType), ',2);'])
-                        
->>>>>>> 2e5f5ecde46e3698f45d37e417ab95aa2767b1bf:matlab/format_NMF_gc.m
                     end
                     
                 end
@@ -127,17 +113,10 @@ for e = 1:numel(elecs)
                 behavior = behavior./mean(behavior);
                 behavior = behavior.*sf;
                 A = [A; behavior];
-<<<<<<< HEAD:NMF/fromat_NMF_wpli.m
                 save([save_dir, 'pr_wpli_', freq, '_', eType, '_', subj], 'A')
             catch
                 cnte = cnte + 1;
                 errors_pr{cnte} = [top_dir, sess, '/', cond, '/', subj, '/FCmatrices/NMF_', freq, '_', eType, 'pr_wpli.mat'];
-=======
-                save([save_dir, 'pr_gc_', freq, '_', eType, '_', subj], 'A')
-            catch
-                cnte = cnte + 1;
-                errors_pr{cnte} = [top_dir, sess, '/', cond, '/', subj, '/FCmatrices/NMF_', freq, '_', eType, 'pr_gc.mat'];
->>>>>>> 2e5f5ecde46e3698f45d37e417ab95aa2767b1bf:matlab/format_NMF_gc.m
             end
         end
     end
@@ -145,54 +124,3 @@ end
 
 
 
-%% Repeat for independent phase randomiztion
-
-cnte = 0;
-errors_ind = [];
-nTrial = 0;
-
-for e = 1:numel(elecs)
-    eType = elecs{e};
-    for f  = 1:numel(bands)
-        freq = bands{f};
-        for i = subjs
-            try
-                A = [];
-                subj = sprintf('%03d', i);
-                for j = 1:numel(sessions)
-                    sess = sessions{j};
-                    for k = 1:numel(condition)
-                        cond = condition{k};
-                        load([top_dir, sess, '/', cond, '/', subj, '/FCmatrices/NMF_', freq, '_', eType, '_ind.mat']);
-                        
-                        eval(['A = [A, gc_', num2str(eType), '];']);
-                        eval(['nTrial(j,k) = size(gc_', num2str(eType), ',2);'])
-                        
-                    end
-                    
-                end
-                if any(any(isnan(A)))
-                    display([num2str(i), ' ', num2str(f)])
-                    warning('This matrix has NaNs')
-                end
-                if any(any(~isreal(A)))
-                    display([num2str(i), ' ', num2str(f)])
-                    warning('This matrix has complex numbers')
-                end
-                %scale perf
-                sf = mean(mean((nonzeros(triu(A,1)))));  
-                
-                
-                behavior = interp_perf(behavior_updated, i, 6, nTrial);
-                behavior_all{i} = behavior;
-                behavior = behavior./mean(behavior);
-                behavior = behavior.*sf;
-                A = [A; behavior];
-                save([save_dir, 'ind_gc_', freq, '_', eType, '_', subj], 'A')
-            catch
-                cnte = cnte + 1;
-                errors_ind{cnte} = [top_dir, sess, '/', cond, '/', subj, '/FCmatrices/NMF_', freq, '_', eType, 'ind_gc.mat'];
-            end
-        end
-    end
-end

@@ -1,4 +1,5 @@
-
+#!/usr/bin/env python3
+# -*- coding: utf-8 -*-
 """
 Created on Fri Feb  2 11:34:50 2018
 
@@ -33,10 +34,10 @@ def pipe(subj, band, eType):
     save_dir = ''.join(['/data/jag/bassett-lab/jstiso/Python/NetBCI/NMF/', subj, '/', eType, '/'])
 # make directory
     if not os.path.exists(save_dir):
-        os.makedirs(save_dir, exist_ok=Truea)
+        os.makedirs(save_dir, exist_ok=True)
 #%% Load data 
 
-    data = io.loadmat(''.join([data_dir, 'wpli_', band, '_', eType, '_', subj, '.mat']))
+    data = io.loadmat(''.join([data_dir, 'nb_pr_gc_', band, '_', eType, '_', subj, '.mat']))
     val = np.transpose(np.array(data['A']))
     nWin = val.shape[0]
 
@@ -72,7 +73,7 @@ def pipe(subj, band, eType):
 #%% Use the best parameters
 
     [opt_dict, opt_param] = optimize_nmf.find_optimum_xval_paramset(params, qual_meas)
-    np.save("".join([save_dir,'wpli_', band, '_params']), opt_param)
+    np.save("".join([save_dir,'nb_pr_gc_', band, '_params']), opt_param)
     
 #%% Consensus clustering for best parameters
 
@@ -82,9 +83,9 @@ def pipe(subj, band, eType):
     opt_rank= opt_param.get('rank')
     n_seed = 100;
     [subset, coeff, err] = optimize_nmf.consensus_nmf(val, opt_alpha, opt_beta, opt_rank, n_seed, n_proc)
-    np.save("".join([save_dir, 'wpli_',band, '_subset']), subset)
-    np.save("".join([save_dir,'wpli_', band, '_coeff']), coeff)
-    np.save("".join([save_dir, 'wpli_',band, '_err']), err)
+    np.save("".join([save_dir, 'nb_pr_gc_',band, '_subset']), subset)
+    np.save("".join([save_dir,'nb_pr_gc_', band, '_coeff']), coeff)
+    np.save("".join([save_dir, 'nb_pr_gc_',band, '_err']), err)
 
 #%% work with command line
 

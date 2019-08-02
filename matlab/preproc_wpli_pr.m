@@ -25,20 +25,6 @@ freqs = [7,14;15,30;31,45;55,70];
 bands = [{'alpha'},{'beta'},{'low_gamma'}, {'gamma'}];
 st = 3;
 en = 6; % in seconds, the feedback period: 3-6s
-<<<<<<< HEAD:preprocessing/preproc_wpli_pr.m
-=======
-bl_st = 0.2; % baseline
-bl_en = 0.8;
-num_neg_grad = [];
-num_neg_mag = [];
-cnte = 1;
-% GC params
-dt = 100;
-lag = 10;
-t0 = dt+lag;
-
-%% Start Loop
->>>>>>> 2e5f5ecde46e3698f45d37e417ab95aa2767b1bf:matlab/preproc_gc.m
 
 
 
@@ -50,4 +36,7 @@ parfor i = subjs
     subj = i;
    [ errors{i} ] = wrapper_pr_wpli( sessions, condition, subj, data_dir, raw_dir, top_dir, bands, freqs, st, en, nNode );
 end
+
+
+
 

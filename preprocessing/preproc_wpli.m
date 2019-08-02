@@ -3,9 +3,18 @@
 % preprocess MEG data, and get into connectivity matrix
 % @author JStiso jeni.stio@gmail.com Nov 2017
 
+<<<<<<< HEAD:preprocessing/preproc_wpli.m
 % CHange Log
 % August 27, 2018 - updated to do wpli, which does not include a baseline
 % correction
+=======
+% CHange log
+% June 20, 2018 - changed to baseline correct from intertrial interval and
+% added wraper function; switched from time shifted to phase randomized
+% null model
+% July 1- - changed baseline to be 0-1s
+
+>>>>>>> 2e5f5ecde46e3698f45d37e417ab95aa2767b1bf:matlab/preproc_gc_pr.m
 
 %% Define Global Variables
 
@@ -28,7 +37,19 @@ bands = [{'mu'}];
 
 st = 3;
 en = 6; % in seconds, the feedback period: 3-6s
+<<<<<<< HEAD:preprocessing/preproc_wpli.m
 
+=======
+bl_st = 0.2; % 0-1 is baseline
+bl_en = 0.8;
+num_neg_grad = [];
+num_neg_mag = [];
+cnte = 1;
+% GC params
+dt = 100;
+lag = 10;
+t0 = dt+lag;
+>>>>>>> 2e5f5ecde46e3698f45d37e417ab95aa2767b1bf:matlab/preproc_gc_pr.m
 
 %% Start Loop
 
