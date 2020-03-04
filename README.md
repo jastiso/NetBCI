@@ -3,7 +3,7 @@ Dynamic functional connectivity during brain computer interface control
 ## Preprocessing
 ### Functional Connectivity and Behavior
 Data is very clean, so minimal preprocessing is needed
-* Run preproc_perf.m to get summary statistics for each subjects performance and learning rate (slope)
+* Run preproc_behav.m to get summary statistics for each subjects performance and learning rate (slope)
 * Run preproc_wpli and preproc_wpli_pr.m to make FC data and phase randomized FC data. 
   * This will call the function wrapper_wpli.m and wrapper_pr_wpli.m. This script will combine planar gradiometers using a helper function from fieldtrip, calculate the wPLI using custom helper function get_window_wpli.m for each trial, and save a matrix for each session. The function outputs any errors in the pipeline
 ### NMF
