@@ -37,15 +37,9 @@ for e = 1:numel(elecs)
                         cond = condition{k};
                         % next time you run this, change from pc to wpli. pc
                         % was a typo in the preproc script
-<<<<<<< HEAD:NMF/fromat_NMF_wpli.m
                         load([top_dir, sess, '/', cond, '/', subj, '/FCmatrices/NMF_', freq, '_', eType, '_wpli.mat']);
                         eval(['A = [A, wpli_', num2str(eType), '];']);
                         eval(['nTrial(j,k) = size(wpli_', num2str(eType), ',2);'])
-=======
-                        load([top_dir, sess, '/', cond, '/', subj, '/FCmatrices/NMF_', freq, '_', eType, '_gc.mat']);
-                        eval(['A = [A, gc_', num2str(eType), '];']);
-                        eval(['nTrial(j,k) = size(gc_', num2str(eType), ',2);'])
->>>>>>> 2e5f5ecde46e3698f45d37e417ab95aa2767b1bf:matlab/format_NMF_gc.m
                     end
                 end
                 if any(any(isnan(A)))
@@ -95,19 +89,10 @@ for e = 1:numel(elecs)
                     sess = sessions{j};
                     for k = 1:numel(condition)
                         cond = condition{k};
-<<<<<<< HEAD:NMF/fromat_NMF_wpli.m
                         load([top_dir, sess, '/', cond, '/', subj, '/FCmatrices/NMF_', freq, '_', eType, '_wpli_pr.mat']);
                         
                         eval(['A = [A, wpli_', num2str(eType), '];']);
                         eval(['nTrial(j,k) = size(wpli_', num2str(eType), ',2);'])
-                        
-=======
-                        load([top_dir, sess, '/', cond, '/', subj, '/FCmatrices/NMF_', freq, '_', eType, '_pr.mat']);
-                        
-                        eval(['A = [A, gc_', num2str(eType), '];']);
-                        eval(['nTrial(j,k) = size(gc_', num2str(eType), ',2);'])
-                        
->>>>>>> 2e5f5ecde46e3698f45d37e417ab95aa2767b1bf:matlab/format_NMF_gc.m
                     end
                     
                 end
@@ -127,17 +112,10 @@ for e = 1:numel(elecs)
                 behavior = behavior./mean(behavior);
                 behavior = behavior.*sf;
                 A = [A; behavior];
-<<<<<<< HEAD:NMF/fromat_NMF_wpli.m
                 save([save_dir, 'pr_wpli_', freq, '_', eType, '_', subj], 'A')
             catch
                 cnte = cnte + 1;
                 errors_pr{cnte} = [top_dir, sess, '/', cond, '/', subj, '/FCmatrices/NMF_', freq, '_', eType, 'pr_wpli.mat'];
-=======
-                save([save_dir, 'pr_gc_', freq, '_', eType, '_', subj], 'A')
-            catch
-                cnte = cnte + 1;
-                errors_pr{cnte} = [top_dir, sess, '/', cond, '/', subj, '/FCmatrices/NMF_', freq, '_', eType, 'pr_gc.mat'];
->>>>>>> 2e5f5ecde46e3698f45d37e417ab95aa2767b1bf:matlab/format_NMF_gc.m
             end
         end
     end
