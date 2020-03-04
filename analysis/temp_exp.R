@@ -84,6 +84,7 @@ plot + geom_point(size = 4) +
   #geom_dotplot(binaxis='y', stackdir='center', dotsize=.5)
   scale_fill_manual(values = wes_palette("Royal1",4)) + 
   labs(x = 'dens', y = 'peak')  + theme_minimal()
+ggsave(paste(sens, '_dens.png', sep = ''))
 
 ## Stats
 fit = lmp(p ~ cond + band + dens, data2)
