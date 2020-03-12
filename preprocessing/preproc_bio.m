@@ -23,21 +23,11 @@ condition = [{'test01'}, {'test02'}, {'test03'}, {'test04'}, {'test05'}, {'test0
 subjs = [1:20];
 nNode = 102;
 
-freqs = [7,14;15,30;31,45;55,70];
-bands = [{'alpha'},{'beta'},{'low_gamma'}, {'gamma'}];
+freqs = [7,14;15,30;31,45];
+bands = [{'alpha'},{'beta'},{'low_gamma'}];
 
 st = 3;
 en = 6; % in seconds, the feedback period: 3-6s
-
-bl_st = 0.2; % 0-1 is baseline
-bl_en = 0.8;
-num_neg_grad = [];
-num_neg_mag = [];
-cnte = 1;
-% GC params
-dt = 100;
-lag = 10;
-t0 = dt+lag;
 
 % bio channel order: ECG, Left EMG, right EMG, Vertical EOG and Horizontal EOG
 
@@ -46,7 +36,7 @@ t0 = dt+lag;
 
 errors = cell(1,4);
 
-for i = subjs
+parfor i = subjs
     subj = i;
    [ errors{i} ] = wrapper_bio( sessions, condition, subj, bio_dir, data_dir, raw_dir, top_dir, bands, freqs, st, en, nNode );
 end

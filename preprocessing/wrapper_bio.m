@@ -102,7 +102,6 @@ for i = 1:numel(sessions)
                     wpli = get_window_wpli( data_grad, srate, st, en, f_range, t);
                     
                     % plot
-                    figure(5); clf
                     plot_data.powspctrm = wpli(5, logical(sens_idx))';
                     plot_data.label = data_grad.label(sens_idx);
                     plot_data.dimord = 'chan_freq';
