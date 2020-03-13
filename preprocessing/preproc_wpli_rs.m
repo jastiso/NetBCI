@@ -14,7 +14,7 @@ addpath(genpath('/Users/stiso/Documents/Code/netBCI/matlab/'))
 top_dir = '/Users/stiso/Documents/MATLAB/NetBCI/';
 data_dir = '/Users/stiso/Resilio Sync/NETBCI.RAW/DataBase/1_Signals/1_PreProcessing/2_MEG/';
 raw_dir = '/Users/stiso/Resilio Sync/NETBCI.RAW/DataBase/1_Signals/0_RawData/2_MEG/';
-cnte = 0;
+cnte = 1;
 
 sessions = [{'Session4'}];
 condition = [{'RS2_END'}]; % not including rest
@@ -34,14 +34,21 @@ for s = subjs
             % load data
             d = dir([data_dir, session, '/*', cond, '*', '/PreProc_MEG_Subj', ext, '_Ses', session(end), '_RS2.mat']);
             d_raw = dir([raw_dir, session, '/*', cond, '*', '/RawData_MEG_Subj', ext, '_Ses', session(end), '_RS2.mat']);
-            try
+            %try
                 load([d.folder, '/', d.name]);
                 img_dir = [top_dir, session, '/', cond, '/', ext, '/diagnostics/'];
                 save_dir = [top_dir, session, '/', cond, '/', ext, '/FCmatrices/'];
+                if ~exist(img_dir, 'dir')
+                    mkdir(img_dir);
+                end
+                if ~exist(save_dir, 'dir')
+                    mkdir(save_dir);
+                end
+                
                 try
                     load([d_raw.folder, '/', d_raw.name]);
                 catch
-                    d_raw = dir([raw_dir, 'Session1/*', cond, '*', '/RawData_MEG_Subj', ext, '_Ses1_RS1.mat']);
+                    d_raw = dir([raw_dir, 'Session1/*', cond, '*', '/RawData_MEG_Subj', ext, '_Ses4_RS2.mat']);
                     load([d_raw.folder, '/', d_raw.name]);
                 end
                 try
@@ -49,8 +56,8 @@ for s = subjs
                     eval(['clear ', d.name(1:end-4), ';']);
                     
                 catch
-                    eval(['data = ', d.name(1:13), '16', d.name(16:(end-4)), ';']);
-                    eval(['clear ', d.name(1:13), '16', d.name(16:(end-4))]);
+                    eval(['data = ', d.name(1:17), '16', d.name(20:(end-4)), ';']);
+                    eval(['clear ', d.name(1:17), '16', d.name(20:(end-4))]);
                 end
                 try
                     eval(['data_raw = ', d_raw.name(1:end-4), ';']);
@@ -112,7 +119,7 @@ for s = subjs
                     
                     % housekeeping for formatting things later (basically to move between matrix and vector representations). There might be a better way to
                     % do this
-                    nEdge = (nSens^2 - nSens)/2;
+                    nEdge = (nNode^2 - nNode)/2;
                     cnt = 0;
                     label = zeros(nEdge,2);
                     for n = 1:nNode
@@ -129,9 +136,9 @@ for s = subjs
                     wpli_v = abs(mean(wpli_v,2));
                     
                     % put back into matrix
-                    wpli = zeros(nSens);
-                    for n = 1:nSens
-                        for m = (n+1):nSens
+                    wpli = zeros(nNode);
+                    for n = 1:nNode
+                        for m = (n+1):nNode
                             row_idx = find(label(:,1)==n);
                             col_idx = find(label(:,2)==m);
                             idx = intersect(row_idx,col_idx);
@@ -150,10 +157,10 @@ for s = subjs
                     end
                     save([save_dir, curr_band, '_rs_wpli.mat'], 'wpli')
                 end
-            catch
-                errors{cnte,1} = [d.folder, '/', d.name];
-                cnte = cnte + 1;
-            end
+%             catch
+%                 errors{cnte,1} = [d.folder, '/', d.name];
+%                 cnte = cnte + 1;
+%             end
         end
     end
 end

@@ -12,7 +12,7 @@ for i = 1:numel(sessions)
         d = dir([data_dir, session, '/*', cond, '*', '/Seg_MEG_Subj', ext, '_Ses', session(end), '_', cond, '.mat']);
         d_raw = dir([raw_dir, session, '/*', cond, '*', '/RawData_MEG_Subj', ext, '_Ses', session(end), '_', cond, '.mat']);
         d_bio = dir([bio_dir, session, '/*', cond, '*', '/Seg_BIO_Subj', ext, '_Ses', session(end), '_', cond, '.mat']);
-        try
+        %try
             load([d.folder, '/', d.name]);
             load([d_bio.folder, '/', d_bio.name]);
             img_dir = [top_dir, session, '/', cond, '/', ext, '/diagnostics/'];
@@ -123,10 +123,10 @@ for i = 1:numel(sessions)
                 end
                 save([save_dir, curr_band, '_bio_wpli.mat'], 'wpli_bio')
             end
-         catch
-             errors{cnte,1} = [d.folder, '/', d.name];
-             cnte = cnte + 1;
-         end
+%         catch
+%             errors{cnte,1} = [d.folder, '/', d.name];
+%             cnte = cnte + 1;
+%         end
     end
 end
 end
