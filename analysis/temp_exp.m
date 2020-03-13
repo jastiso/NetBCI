@@ -28,7 +28,7 @@ grad3 = ['MEG0243';'MEG0233';'MEG0443';'MEG0433';'MEG0713';'MEG0743';'MEG1843';'
 
 Subj = [1:20];
 nSubj = numel(Subj);
-freqs = [7,14;15,30;31,45;55,70];
+freqs = [7,14;15,30;31,45];
 bands = [{'alpha'}, {'beta'}, {'low_gamma'}];
 sensors = [{'grad'}];
 

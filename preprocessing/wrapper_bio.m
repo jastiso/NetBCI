@@ -12,7 +12,7 @@ for i = 1:numel(sessions)
         d = dir([data_dir, session, '/*', cond, '*', '/Seg_MEG_Subj', ext, '_Ses', session(end), '_', cond, '.mat']);
         d_raw = dir([raw_dir, session, '/*', cond, '*', '/RawData_MEG_Subj', ext, '_Ses', session(end), '_', cond, '.mat']);
         d_bio = dir([bio_dir, session, '/*', cond, '*', '/Seg_BIO_Subj', ext, '_Ses', session(end), '_', cond, '.mat']);
-        try
+        %try
             load([d.folder, '/', d.name]);
             load([d_bio.folder, '/', d_bio.name]);
             img_dir = [top_dir, session, '/', cond, '/', ext, '/diagnostics/'];
@@ -28,8 +28,8 @@ for i = 1:numel(sessions)
                 eval(['clear ', d.name(1:end-4)]);
                 
             catch
-                eval(['data = ', d.name(1:17), '16', d.name(20:(end-4)), '.MI;']);
-                eval(['clear ', d.name(1:17), '16', d.name(20:(end-4))]);
+                eval(['data = ', d.name(1:13), '16', d.name(16:(end-4)), '.MI;']);
+                eval(['clear ', d.name(1:13), '16', d.name(16:(end-4))]);
             end
             try
                 eval(['data_raw = ', d_raw.name(1:end-4), ';']);
@@ -42,8 +42,8 @@ for i = 1:numel(sessions)
                 eval(['data_bio = ', d_bio.name(1:end-4), ';']);
                 eval(['clear ', d_bio.name(1:end-4)]);
             catch
-                eval(['data_bio = ', d_bio.name(1:17), '16', d_bio.name(20:(end-4)), ';']);
-                eval(['clear ', d_bio.name(1:17), '16', d_bio.name(20:(end-4))]);
+                eval(['data_bio = ', d_bio.name(1:13), '16', d_bio.name(16:(end-4)), ';']);
+                eval(['clear ', d_bio.name(1:13), '16', d_bio.name(16:(end-4))]);
             end
             bio = data_bio.MI;   
             
@@ -123,10 +123,10 @@ for i = 1:numel(sessions)
                 end
                 save([save_dir, curr_band, '_bio_wpli.mat'], 'wpli_bio')
             end
-         catch
-             errors{cnte,1} = [d.folder, '/', d.name];
-             cnte = cnte + 1;
-         end
+%          catch
+%              errors{cnte,1} = [d.folder, '/', d.name];
+%              cnte = cnte + 1;
+%          end
     end
 end
 end

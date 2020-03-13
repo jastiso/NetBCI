@@ -6,7 +6,7 @@ addpath('/Users/stiso/Documents/MATLAB/fieldtrip-20170830/')
 R_dir = '/Users/stiso/Documents/R/NetBCI/data/wpli/';
 
 top_dir = '/Users/stiso/Documents/MATLAB/NetBCI/';
-data_dir = '/Users/stiso/Documents/Python/NetBCI/NMF/param/';
+data_dir = '/Users/stiso/Documents/Python/NetBCI/NMF/';
 save_dir = [top_dir, 'GroupAvg/wpli/analysis/'];
 img_dir = [top_dir, 'GroupAvg/wpli/images/'];
 % make directories
@@ -24,7 +24,7 @@ end
 
 Subj = [1:20];
 nSubj = numel(Subj);
-freqs = [7,14;15,30;31,45;55,70];
+freqs = [7,14;15,30;31,45];
 bands = [{'alpha'}, {'beta'}, {'low_gamma'}];
 sensors = [{'grad'}];
 
