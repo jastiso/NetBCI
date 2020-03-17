@@ -20,7 +20,7 @@ bio_dir = '/Users/stiso/Resilio Sync/NETBCI.RAW/DataBase/1_Signals/2_Segmentatio
 
 sessions = [{'Session1'}, {'Session2'}, {'Session3'}, {'Session4'}];
 condition = [{'test01'}, {'test02'}, {'test03'}, {'test04'}, {'test05'}, {'test06'}]; % not including rest
-subjs = [17:20];
+subjs = [15:16];
 nNode = 102;
 
 freqs = [7,14;15,30;31,45];

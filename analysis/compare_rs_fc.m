@@ -97,10 +97,10 @@ for i = Subj
         wpli = wpli(logical(triu(ones(nNode),1)));
         
         % cosine similarity with rs
-        high_sim = 1 - pdist([high_mat; wpli'],'cosine');
-        high2_sim = 1 - pdist([high2_mat; wpli'],'cosine');
-        high3_sim = 1 - pdist([high3_mat; wpli'],'cosine');
-        low_sim = 1 - pdist([low_mat; wpli'],'cosine');
+        high_sim = 1 - pdist([high_mat(high_mat ~= 0); wpli(high_mat ~= 0)'],'cosine');
+        high2_sim = 1 - pdist([high2_mat(high2_mat ~= 0); wpli(high2_mat ~= 0)'],'cosine');
+        high3_sim = 1 - pdist([high3_mat(high3_mat ~= 0); wpli(high3_mat ~= 0)'],'cosine');
+        low_sim = 1 - pdist([low_mat(low_mat ~= 0); wpli(low_mat ~= 0)'],'cosine');
         
         % add to table
         rs_sim = [rs_sim; table([high_sim; high2_sim; high3_sim; low_sim], repmat(subj,4,1),...

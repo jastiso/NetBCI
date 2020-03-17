@@ -102,18 +102,11 @@ for i = 1:numel(sessions)
                     wpli = get_window_wpli( data_grad, srate, st, en, f_range, t);
                     
                     % plot
-                    plot_data.powspctrm = wpli(5, logical(sens_idx))';
-                    plot_data.label = data_grad.label(sens_idx);
-                    plot_data.dimord = 'chan_freq';
-                    plot_data.freq = mean(f_range);
-                    plot_data.cfg = [];
-                    cfg = [];
-                    cfg.layout = [top_dir, 'layouts/neuromag306cmb.lay'];
-                    figure(1); clf
-                    ft_topoplotER(cfg,plot_data); colorbar;
-                    if t == nTrial
-                        saveas(gca, [img_dir, bands{f}, '_wpli_bio.png'], 'png')
-                    end
+%                     plot_data.powspctrm = wpli(5, logical(sens_idx))';
+%                     plot_data.label = data_grad.label(sens_idx);
+%                     if t == nTrial
+%                         saveas(gca, [img_dir, bands{f}, '_wpli_bio.png'], 'png')
+%                     end
                     % save
                     v_wpli = reshape(wpli(logical(bio_idx), logical(sens_idx)), [], 1);
                     wpli_bio(:,t) = v_wpli;
