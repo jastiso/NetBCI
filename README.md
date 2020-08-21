@@ -1,6 +1,6 @@
 # Learning in brain-computer interface control evidenced by joint decomposition of brain and behavior
 This repository contains all the code necessary to reproduce the analyses in [this paper](https://iopscience.iop.org/article/10.1088/1741-2552/ab9064). In this paper, we explore the mesoscale organization of functional networks supporting brain computer interface learning.
-![schematic](/img/schematic.png)
+![schematic](schematic_v1.png)
 
 #### Required Package
 * Required matlab toolboxes: eeglab, fieldtrip
