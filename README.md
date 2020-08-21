@@ -1,5 +1,13 @@
-# NetBCI
-Dynamic functional connectivity during brain computer interface control
+# Learning in brain-computer interface control evidenced by joint decomposition of brain and behavior
+This repository contains all the code necessary to reproduce the analyses in [this paper](https://iopscience.iop.org/article/10.1088/1741-2552/ab9064). In this paper, we explore the mesoscale organization of functional networks supporting brain computer interface learning.
+![schematic](/img/schematic.png)
+
+#### Required Package
+* Required matlab toolboxes: eeglab, fieldtrip
+* Required python toolboxes: os, numpy, scipy, sys, (NMF from https://github.com/akhambhati/Echobase/tree/master/Echobase/Network/Partitioning/Subgraph)
+* Required R toolboxes: R.matlab, ggplot2, dplyr, coin, lmPer, car, aplpack, RColorBrewer, wesanderson, ez, plyr
+
+# Instructions
 ## Preprocessing
 ### Functional Connectivity and Behavior
 Data is very clean, so minimal preprocessing is needed
@@ -49,6 +57,8 @@ Data is very clean, so minimal preprocessing is needed
   * Run model_validation_all_sg.m
   * Run model_validation_stats.R
 
-## Assorted troubleshooting Notes
-* Required matlab toolboxes: eeglab, fieldtrip
+#### Assorted troubleshooting Notes
 * Singular matrix: there are a couple sources for this. (1) your original data is not full rank (2) you data is transposed, make sure what you submit is nWin x nCon, the code does not check (3) Subgraph partitioning creates rank deficient matrices, lowering the max rank will help with this
+
+## Contributors to Code
+* Jennifer Stiso
